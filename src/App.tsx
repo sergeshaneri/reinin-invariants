@@ -11,6 +11,7 @@ const App: React.FC = () => {
   const [hoveredAspect, setHoveredAspect] = useState<AspectId | null>(null);
   const [hoveredFunction, setHoveredFunction] = useState<number | null>(null);
   const [showHelpModal, setShowHelpModal] = useState<number | null>(null);
+  const [showMaterials, setShowMaterials] = useState(false);
 
   const currentTrait = REININ_TRAITS[selectedTraitIndex];
   const currentPole = currentTrait.poles[selectedPoleIndex];
@@ -143,12 +144,55 @@ const App: React.FC = () => {
           <span className="text-xs font-bold uppercase tracking-widest text-slate-500">Соционика & Алгебра</span>
         </motion.div>
         <h1 className="text-5xl font-black tracking-tight text-slate-900 mb-4">
-          Инварианты <span className="text-blue-600">АРП</span>
+          Инварианты <span className="text-blue-600">Признаков Рейнина</span>
         </h1>
         <p className="text-slate-500 text-lg max-w-2xl mx-auto leading-relaxed">
-          Интерактивная визуализация дихотомических инвариантов признаков Рейнина 
-          в структуре модели А по теории Чурюмова.
+          Визуализация связи Признаков Рейнина и Модели А. У каждого Признака Рейнина есть что-то неизменное (инвариант) в модели А. Это приложение визуализирует эти инварианты. Они строятся на основе Признаков Аспектов и Признаков Функций.
         </p>
+
+        <div className="mt-6 max-w-2xl mx-auto w-full">
+          <button
+            onClick={() => setShowMaterials(v => !v)}
+            className="w-full flex items-center justify-between px-5 py-3 bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md transition-all text-slate-600 font-bold text-sm"
+          >
+            <span>Дополнительные материалы</span>
+            <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${showMaterials ? 'rotate-90' : ''}`} />
+          </button>
+          <AnimatePresence>
+            {showMaterials && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.25 }}
+                className="overflow-hidden"
+              >
+                <div className="mt-2 bg-white border border-slate-200 rounded-2xl shadow-sm p-6 text-left space-y-5">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Короткое видео</p>
+                    <div className="flex gap-3">
+                      <a href="https://youtu.be/dXDux60OmZA" target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-colors">YT</a>
+                      <a href="https://vkvideo.ru/video-113543027_456239035" target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-colors">VK</a>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Видео доклад</p>
+                    <div className="flex gap-3">
+                      <span className="px-4 py-2 bg-slate-100 text-slate-400 text-xs font-bold rounded-xl cursor-default">VK — скоро</span>
+                      <a href="https://youtu.be/oNWFrTR41I8" target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-colors">YT</a>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Подробная статья</p>
+                    <a href="https://docs.google.com/document/d/1CC0iXXkO6AgrfVJJ3F8R9J50OInLMnpntEvCC-czMrs/edit?tab=t.0" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-colors">
+                      Google Docs
+                    </a>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </header>
 
       <main className="relative max-w-7xl mx-auto px-6 pb-24 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -415,35 +459,6 @@ const App: React.FC = () => {
               </div>
             </div>
 
-            {/* Info Cards */}
-            <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6">
-               <div className="group p-6 bg-slate-50 rounded-[32px] border border-slate-100 transition-all hover:bg-white hover:shadow-xl hover:shadow-slate-200/50">
-                 <div className="flex items-center gap-4 mb-4">
-                   <div className="p-3 bg-blue-500 text-white rounded-2xl shadow-lg shadow-blue-100">
-                     <Info className="w-5 h-5" />
-                   </div>
-                   <h4 className="font-bold text-slate-800">Инвариант</h4>
-                 </div>
-                 <p className="text-sm text-slate-500 leading-relaxed">
-                   Признак Рейнина — это не просто ярлык, а <strong>алгебраический инвариант</strong>. 
-                   Он определяет неизменные свойства отображения аспектов в функции для половины социона.
-                 </p>
-               </div>
-               <div className="group p-6 bg-slate-50 rounded-[32px] border border-slate-100 transition-all hover:bg-white hover:shadow-xl hover:shadow-slate-200/50">
-                 <div className="flex items-center gap-4 mb-4">
-                   <div className="p-3 bg-emerald-500 text-white rounded-2xl shadow-lg shadow-emerald-100">
-                     <Grid className="w-5 h-5" />
-                   </div>
-                   <h4 className="font-bold text-slate-800">Структура</h4>
-                 </div>
-                 <p className="text-sm text-slate-500 leading-relaxed">
-                   Этот признак относится к <strong>классу {currentTrait.class}</strong>. 
-                   {currentTrait.class === 1 && " Он распределяет тетрады аспектов по кольцам функций 4х4."}
-                   {currentTrait.class === 2 && " Он распределяет диады апектов по кольцам функций 2х4."}
-                   {currentTrait.class === 3 && " Это сложный инвариант, требующий учета эквивалентностей и циклического порядка."}
-                 </p>
-               </div>
-            </div>
           </div>
 
           {/* Formula Display */}
@@ -519,12 +534,30 @@ const App: React.FC = () => {
         </div>
       </main>
 
-      <footer className="max-w-7xl mx-auto px-6 py-12 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-6 text-slate-400 text-xs font-bold uppercase tracking-widest">
-        <div className="flex items-center gap-2">
+      <footer className="max-w-7xl mx-auto px-6 py-12 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase tracking-widest">
           <Hexagon className="w-4 h-4 text-blue-500" />
-          <span>Socionics Invariants Engine v1.0</span>
+          <span>Автор: Сергей Шанэри</span>
         </div>
-        <p>© 2026 Теория Чурюмова • Матрицы Адамара • Модель А</p>
+        <div className="flex items-center gap-3">
+          <span className="text-slate-400 text-xs font-bold uppercase tracking-widest">Написать автору:</span>
+          <a
+            href="https://vk.ru/shaneri"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-colors"
+          >
+            VK
+          </a>
+          <a
+            href="https://t.me/SergeyShaneri"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold rounded-xl transition-colors"
+          >
+            TG
+          </a>
+        </div>
       </footer>
 
       <style dangerouslySetInnerHTML={{ __html: `

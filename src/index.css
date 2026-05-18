@@ -1,1 +1,54 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'JetBrains Mono', Menlo, monospace;
+
+  /* Радиус-токены: переиспользуем как rounded-r-sm/-md/-lg */
+  --radius-r-sm: 12px;
+  --radius-r-md: 20px;
+  --radius-r-lg: 32px;
+}
+
+/* Универсальный focus-visible: видно с клавиатуры, не мешает мыши */
+:where(:focus-visible) {
+  outline: 2px solid color-mix(in oklch, currentColor 50%, transparent);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* Уважаем prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Marching ants для циклических декораторов (Процесс/Результат).
+   dasharray = "8 6" (период 14), смещение на 28 = ровно 2 пары → бесшовный цикл.
+   Скорость спокойная: ~2.4s. */
+@keyframes march-cw  { to { stroke-dashoffset: -28; } }
+@keyframes march-ccw { to { stroke-dashoffset:  28; } }
+
+.marching-ants-cw  { animation: march-cw  2.4s linear infinite; }
+.marching-ants-ccw { animation: march-ccw 2.4s linear infinite; }
+.marching-ants-cw.paused,
+.marching-ants-ccw.paused { animation-play-state: paused; }
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #cbd5e1;
+}

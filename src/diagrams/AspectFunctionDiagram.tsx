@@ -32,11 +32,16 @@ const PULSE_INTERVAL_MS = 1800;
 
 export const AspectFunctionDiagram: DiagramComponent = ({
   trait, pole, view,
-  hoveredAspect, setHoveredAspect,
-  hoveredFunction, setHoveredFunction,
+  activeCell,
+  onAspectHover,
+  onFunctionHover,
+  onAspectClick,
+  onFunctionClick,
 }) => {
   const mappings = view.mappings;
   const isBlock = view.isBlockPermutation === true;
+  const activeAspect = activeCell?.kind === 'aspect' ? activeCell.id : null;
+  const activeFunction = activeCell?.kind === 'function' ? activeCell.id : null;
 
   const { aspectToIdx, functionToIdx, aspectGroupLabels, functionGroupLabels } = useMemo(() => {
     const a = new Map<AspectId, number>();
@@ -62,14 +67,14 @@ export const AspectFunctionDiagram: DiagramComponent = ({
   const [pulseIdx, setPulseIdx] = useState<number | null>(null);
   useEffect(() => {
     if (!isBlock) { setPulseIdx(null); return; }
-    const hasHover = hoveredAspect !== null || hoveredFunction !== null;
+    const hasHover = activeCell !== null;
     if (!hasHover) { setPulseIdx(null); return; }
     setPulseIdx(0);
     const id = setInterval(() => {
       setPulseIdx(prev => (prev === null ? 0 : (prev + 1) % mappings.length));
     }, PULSE_INTERVAL_MS);
     return () => clearInterval(id);
-  }, [isBlock, hoveredAspect, hoveredFunction, mappings.length]);
+  }, [isBlock, activeCell, mappings.length]);
 
   // Подсветка плитки аспекта.
   const aspectHighlight = (id: AspectId): Highlight => {
@@ -77,11 +82,11 @@ export const AspectFunctionDiagram: DiagramComponent = ({
     if (mIdx === undefined) return 'hidden';
 
     if (isBlock) {
-      if (hoveredAspect !== null) {
-        const hoverMIdx = aspectToIdx.get(hoveredAspect);
+      if (activeAspect !== null) {
+        const hoverMIdx = aspectToIdx.get(activeAspect);
         return mIdx === hoverMIdx ? 'full' : 'dim';
       }
-      if (hoveredFunction !== null) {
+      if (activeFunction !== null) {
         // Перебор: pulse-блок аспектов "примеряется" к hover-функции.
         return mIdx === pulseIdx ? 'full' : 'dim';
       }
@@ -89,8 +94,8 @@ export const AspectFunctionDiagram: DiagramComponent = ({
     }
 
     // Класс 1/2: жёсткая пара.
-    if (hoveredFunction !== null) {
-      const hoverMIdx = functionToIdx.get(hoveredFunction);
+    if (activeFunction !== null) {
+      const hoverMIdx = functionToIdx.get(activeFunction);
       return mIdx === hoverMIdx ? 'full' : 'dim';
     }
     return 'full';
@@ -102,18 +107,18 @@ export const AspectFunctionDiagram: DiagramComponent = ({
     if (mIdx === undefined) return 'hidden';
 
     if (isBlock) {
-      if (hoveredFunction !== null) {
-        const hoverMIdx = functionToIdx.get(hoveredFunction);
+      if (activeFunction !== null) {
+        const hoverMIdx = functionToIdx.get(activeFunction);
         return mIdx === hoverMIdx ? 'full' : 'dim';
       }
-      if (hoveredAspect !== null) {
+      if (activeAspect !== null) {
         return mIdx === pulseIdx ? 'full' : 'dim';
       }
       return 'full';
     }
 
-    if (hoveredAspect !== null) {
-      const hoverMIdx = aspectToIdx.get(hoveredAspect);
+    if (activeAspect !== null) {
+      const hoverMIdx = aspectToIdx.get(activeAspect);
       return mIdx === hoverMIdx ? 'full' : 'dim';
     }
     return 'full';
@@ -130,9 +135,6 @@ export const AspectFunctionDiagram: DiagramComponent = ({
       scale: highlight === 'dim' ? 'scale-95' : 'scale-100',
     };
   };
-
-  const pinAspect = (id: AspectId) => setHoveredAspect(hoveredAspect === id ? null : id);
-  const pinFunction = (id: number) => setHoveredFunction(hoveredFunction === id ? null : id);
 
   const decoratorIds = view.decoratorIds ?? [];
   // Декораторы, которым нужен расширенный зазор между ментальным и витальным кольцами
@@ -172,14 +174,14 @@ export const AspectFunctionDiagram: DiagramComponent = ({
                   type="button"
                   title={`${aspect.name} — ${aspect.fullName}\n${formatAspectFeatures(aspect)}`}
                   aria-label={`${aspect.fullName} (${aspect.name}). ${formatAspectFeatures(aspect)}`}
-                  onMouseEnter={() => setHoveredAspect(aspect.id)}
-                  onMouseLeave={() => setHoveredAspect(null)}
-                  onClick={() => pinAspect(aspect.id)}
+                  onMouseEnter={() => onAspectHover(aspect.id)}
+                  onMouseLeave={() => onAspectHover(null)}
+                  onClick={() => onAspectClick(aspect.id)}
                   className={`
                     relative h-20 rounded-xl border-2 flex items-center justify-center cursor-pointer
                     transition-[opacity,transform,background-color,border-color] duration-200
                     ${s.color} ${s.opacity} ${s.scale}
-                    ${hoveredAspect === aspect.id ? 'ring-4 ring-indigo-500/20 z-10' : ''}
+                    ${activeAspect === aspect.id ? 'ring-4 ring-indigo-500/20 z-10' : ''}
                   `}
                 >
                   <span className="text-xl font-bold">{aspect.name}</span>
@@ -223,14 +225,14 @@ export const AspectFunctionDiagram: DiagramComponent = ({
                     type="button"
                     title={`${func.id} — ${func.name}\n${formatFunctionFeatures(func)}`}
                     aria-label={`${func.id} ${func.name}. ${formatFunctionFeatures(func)}`}
-                    onMouseEnter={() => setHoveredFunction(func.id)}
-                    onMouseLeave={() => setHoveredFunction(null)}
-                    onClick={() => pinFunction(func.id)}
+                    onMouseEnter={() => onFunctionHover(func.id)}
+                    onMouseLeave={() => onFunctionHover(null)}
+                    onClick={() => onFunctionClick(func.id)}
                     className={`
                       relative h-16 rounded-xl border-2 flex flex-col items-center justify-center cursor-pointer
                       transition-[opacity,transform,background-color,border-color] duration-200
                       ${s.color} ${s.opacity} ${s.scale}
-                      ${hoveredFunction === func.id ? 'ring-4 ring-indigo-500/20 z-10' : ''}
+                      ${activeFunction === func.id ? 'ring-4 ring-indigo-500/20 z-10' : ''}
                     `}
                   >
                     <span className="text-xl font-bold leading-none font-mono">{func.id}</span>

@@ -8,6 +8,12 @@ import { PoleSelector } from './components/PoleSelector';
 import { ViewSelector } from './components/ViewSelector';
 import { FormulaPanel } from './components/FormulaPanel';
 import { Footer } from './components/Footer';
+import {
+  clearActiveCell,
+  resolveActiveCell,
+  togglePinnedCell,
+  type ActiveCell,
+} from './diagrams/interaction';
 
 // Чтение начального стейта из URL: ?trait=democracy&pole=1&view=2
 const readInitialState = () => {
@@ -28,8 +34,8 @@ const App: React.FC = () => {
   const [selectedTraitIndex, setSelectedTraitIndex] = useState(initial.traitIdx);
   const [selectedPoleIndex, setSelectedPoleIndex] = useState(initial.poleIdx);
   const [activeViewIndex, setActiveViewIndex] = useState(initial.viewIdx);
-  const [hoveredAspect, setHoveredAspect] = useState<AspectId | null>(null);
-  const [hoveredFunction, setHoveredFunction] = useState<number | null>(null);
+  const [hoveredCell, setHoveredCell] = useState<ActiveCell>(null);
+  const [pinnedCell, setPinnedCell] = useState<ActiveCell>(null);
   const [helpClassId, setHelpClassId] = useState<TraitClass | null>(null);
 
   const currentTrait = REININ_TRAITS[selectedTraitIndex];
@@ -66,11 +72,12 @@ const App: React.FC = () => {
 
   // При смене признака/полюса — сбрасываем "пин" клеток.
   useEffect(() => {
-    setHoveredAspect(null);
-    setHoveredFunction(null);
+    setHoveredCell(clearActiveCell());
+    setPinnedCell(clearActiveCell());
   }, [selectedTraitIndex, selectedPoleIndex, activeViewIndex]);
 
   const Diagram = DIAGRAMS[currentTrait.diagramId ?? DEFAULT_DIAGRAM_ID];
+  const activeCell = resolveActiveCell(hoveredCell, pinnedCell);
 
   return (
     <div className="min-h-[100dvh] bg-[#f8fafc] text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-900">
@@ -110,10 +117,11 @@ const App: React.FC = () => {
             trait={currentTrait}
             pole={currentPole}
             view={currentView}
-            hoveredAspect={hoveredAspect}
-            setHoveredAspect={setHoveredAspect}
-            hoveredFunction={hoveredFunction}
-            setHoveredFunction={setHoveredFunction}
+            activeCell={activeCell}
+            onAspectHover={(id) => setHoveredCell(id === null ? null : { kind: 'aspect', id })}
+            onFunctionHover={(id) => setHoveredCell(id === null ? null : { kind: 'function', id })}
+            onAspectClick={(id) => setPinnedCell(current => togglePinnedCell(current, { kind: 'aspect', id }))}
+            onFunctionClick={(id) => setPinnedCell(current => togglePinnedCell(current, { kind: 'function', id }))}
           />
 
           <FormulaPanel trait={currentTrait} view={currentView} />

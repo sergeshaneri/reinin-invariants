@@ -1,20 +1,41 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Инварианты Признаков Рейнина
 
-# Run and deploy your AI Studio app
+Интерактивная визуализация связи Признаков Рейнина и Модели А. Приложение показывает, какие группы аспектов соотносятся с какими группами функций, и отдельно выделяет блочные инварианты.
 
-This contains everything you need to run your app locally.
+## Что внутри
 
-View your app in AI Studio: https://ai.studio/apps/16f760b9-a134-47f5-8df9-ba729e535a6a
+- React 19 + Vite.
+- Tailwind CSS 4 для стилей.
+- `motion` для анимаций.
+- `lucide-react` для иконок.
+- Предметные данные и вычисления находятся в `src/data/socionics.ts`.
+- Основная диаграмма находится в `src/diagrams/AspectFunctionDiagram.tsx`.
 
-## Run Locally
+## Запуск
 
-**Prerequisites:**  Node.js
+Требуется Node.js.
 
+```bash
+npm install
+npm run dev
+```
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+По умолчанию dev-сервер запускается на `http://localhost:3000`.
+
+## Проверка и сборка
+
+```bash
+npm run lint
+npm run build
+npm run preview
+```
+
+`npm run lint` запускает TypeScript-проверку без генерации файлов. `npm run build` собирает статическую версию приложения в папку `dist`.
+
+## Структура
+
+- `src/App.tsx` - состояние выбранного признака, полюса и вида, синхронизация с URL.
+- `src/components/` - интерфейсные блоки: навигация, переключатели, модальное окно, панель формул.
+- `src/data/socionics.ts` - аспекты, функции, признаки, группы и вспомогательные вычисления.
+- `src/decorators/` - дополнительные визуальные слои для диаграмм.
+- `src/diagrams/` - реестр и компоненты визуализаций.

@@ -10,7 +10,7 @@ Baseline note: this repository currently has an unborn `master` branch with no c
 |------|-------|----------|--------|------------|--------|
 | 001 | Add characterization tests for domain data and app invariants | P1 | M | - | DONE |
 | 002 | Fix hover and pin interaction state | P1 | M | 001 | DONE |
-| 003 | Remediate Vite and PostCSS audit findings | P1 | S | 001 | TODO |
+| 003 | Remediate Vite and PostCSS audit findings | P1 | S | 001 | DONE |
 | 004 | Remove local and generated artifacts from repo scope | P2 | S | - | TODO |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJECTED (with one-line rationale).

@@ -11,6 +11,8 @@ const defaultTrait = REININ_TRAITS[0];
 const defaultPole = defaultTrait.poles[0];
 const expectedRussianText = [
   'Экстраверсия / Интроверсия',
+  'Режим',
+  'Тетрахотомия',
   'Интуиция возможностей',
   'Базовая',
   'Процесс / Результат',

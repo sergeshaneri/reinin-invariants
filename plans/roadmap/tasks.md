@@ -30,9 +30,9 @@
 
 | ID | Depends | Status | Цель | Вероятные файлы | Проверки | Риски |
 |---|---|---:|---|---|---|---|
-| U2.1 | D1.8 | TODO | Добавить `mode` в app state и URL parser без изменения default behavior. | `src/App.tsx`, `src/data/selectors.ts`, possible `src/appState.ts`, tests | `npm test`, `npm run smoke:render` | URL regression для текущего `trait/pole/view`. |
-| U2.2 | U2.1 | TODO | Добавить `ModeSelector` для перехода между признаком, типом, тетрахотомией, октохотомией. | `src/components/ModeSelector.tsx`, `src/App.tsx` | `npm run lint`, e2e basic navigation | Слишком много controls в первом viewport. |
-| U2.3 | U2.1 | TODO | Добавить `TypeSelector` с 16 типами и URL param `type`. | `src/components/TypeSelector.tsx`, `src/App.tsx` | Tests for URL clamp/fallback, e2e select type | Спорный порядок типов в списке. |
+| U2.1 | D1.8 | DONE | Добавить `mode` в app state и URL parser без изменения default behavior. | `src/App.tsx`, `src/data/selectors.ts`, possible `src/appState.ts`, tests | `npm test`, `npm run smoke:render` | URL regression для текущего `trait/pole/view`. |
+| U2.2 | U2.1 | DONE | Добавить `ModeSelector` для перехода между признаком, типом, тетрахотомией, октохотомией. | `src/components/ModeSelector.tsx`, `src/App.tsx` | `npm run lint`, e2e basic navigation | Слишком много controls в первом viewport. |
+| U2.3 | U2.1 | DONE | Добавить `TypeSelector` с 16 типами и URL param `type`. | `src/components/TypeSelector.tsx`, `src/App.tsx` | Tests for URL clamp/fallback, e2e select type | Спорный порядок типов в списке. |
 | U2.4 | U2.3 | TODO | Создать `TypeModelDiagram` для модели А выбранного типа. | `src/diagrams/TypeModelDiagram.tsx`, `src/diagrams/registry.ts`, `src/diagrams/types.ts` | `npm run build`, visual smoke, e2e desktop/mobile | Перегрузка диаграммы текстом на mobile. |
 | U2.5 | U2.4 | TODO | Подсвечивать текущий trait invariant на модели А типа. | `src/diagrams/TypeModelDiagram.tsx`, `src/data/selectors.ts`, tests | Unit tests selector, e2e hover/click smoke | Нужно ясно показать, что подсветка является примером, а не новой формулой. |
 | U2.6 | U2.5 | TODO | Добавить панель "типы на полюсе" для выбранного признака. | `src/components/TraitTypesPanel.tsx`, `src/App.tsx`, selectors | `npm run smoke:render`, e2e | Дублирование с будущей partition grid. |

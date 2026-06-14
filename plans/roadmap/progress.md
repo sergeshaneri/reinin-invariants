@@ -17,6 +17,9 @@
 | Domain foundation | DONE | D1.1-D1.8 complete. |
 | 16 Model A types | DONE | Implemented with stable type IDs and tests. |
 | Trait membership by type | DONE | Membership tables and partition helpers are covered by tests. |
+| App mode URL state | DONE | U2.1 added mode parsing/serialization without changing default trait behavior. |
+| Visible mode selector | DONE | U2.2 added mode switching and e2e URL coverage. |
+| Type selector | DONE | U2.3 added canonical 16-type selection and `type` URL state in type mode. |
 | Tetrachotomies | TODO | Depends on generic partition helpers. |
 | Octochotomies | TODO | Depends on GF(2) rank and independent triple validation. |
 | Aspect icons | TODO | Should follow stable aspect visual metadata. |
@@ -26,7 +29,7 @@
 
 ## Recommended Next Step
 
-Continue with `U2.1` from `tasks.md`: add `mode` to app state and URL parser without changing default behavior. D1.1-D1.8 now provide stable domain data, partition diagnostics and selector view models.
+Continue with `U2.4` from `tasks.md`: create `TypeModelDiagram` for the selected type's Model A. U2.3 now provides selected TIM state and the `type` URL parameter in type mode.
 
 ## Milestone Checklist
 
@@ -247,3 +250,77 @@ Continue with `U2.1` from `tasks.md`: add `mode` to app state and URL parser wit
   - none
 - Remaining:
   - U2.1 should introduce app mode state and URL parsing over the selector-ready domain layer.
+
+### 2026-06-14 - Task U2.1
+
+- Status: DONE
+- Changed files:
+  - `src/appState.ts`
+  - `src/appState.test.ts`
+  - `src/App.tsx`
+  - `plans/roadmap/tasks.md`
+  - `plans/roadmap/progress.md`
+- Summary:
+  - Added `AppMode` and app URL state parsing/serialization for `trait`, `type`, `tetrachotomy` and `octochotomy`.
+  - Moved initial URL parsing out of `App.tsx` and kept existing default trait URLs free of a `mode` parameter.
+  - Added regression tests for the current `trait/pole/view` URL contract and invalid URL fallbacks.
+- Checks:
+  - `npm test -- src/appState.test.ts`: passed
+  - `npm run lint`: passed
+  - `npm run smoke:render`: passed
+  - `npm run validate`: passed
+- Decisions:
+  - none
+- Remaining:
+  - U2.2 should add the visible mode selector.
+
+### 2026-06-14 - Task U2.2
+
+- Status: DONE
+- Changed files:
+  - `src/components/ModeSelector.tsx`
+  - `src/App.tsx`
+  - `scripts/render-smoke.tsx`
+  - `tests/e2e/app.spec.ts`
+  - `tests/e2e/app.spec.ts-snapshots/reinin-invariants-app-chromium-desktop-win32.png`
+  - `tests/e2e/app.spec.ts-snapshots/reinin-invariants-app-chromium-mobile-win32.png`
+  - `plans/roadmap/tasks.md`
+  - `plans/roadmap/progress.md`
+- Summary:
+  - Added a compact `ModeSelector` for trait, type, tetrachotomy and octochotomy modes.
+  - Wired mode selection into app state and URL serialization while keeping default trait mode free of a `mode` query parameter.
+  - Added e2e coverage for mode switching and updated visual snapshots for the intentional new control.
+- Checks:
+  - `npm run lint`: passed
+  - `npm run smoke:render`: passed
+  - `npm run test:e2e`: passed after snapshot update
+  - `npm run validate`: passed
+- Decisions:
+  - none
+- Remaining:
+  - U2.3 should add `TypeSelector` and the `type` URL parameter.
+
+### 2026-06-14 - Task U2.3
+
+- Status: DONE
+- Changed files:
+  - `src/appState.ts`
+  - `src/appState.test.ts`
+  - `src/App.tsx`
+  - `src/components/TypeSelector.tsx`
+  - `tests/e2e/app.spec.ts`
+  - `plans/roadmap/tasks.md`
+  - `plans/roadmap/progress.md`
+- Summary:
+  - Added selected TIM state to app URL parsing and serialization.
+  - Added `TypeSelector` with all 16 TIMs in canonical type order.
+  - Rendered the selector in type mode and covered URL sync through e2e.
+- Checks:
+  - `npm test -- src/appState.test.ts`: passed
+  - `npm run lint`: passed
+  - `npm run smoke:render`: passed
+  - `npm run test:e2e`: passed
+- Decisions:
+  - none
+- Remaining:
+  - U2.4 should create `TypeModelDiagram` for the selected type's Model A.

@@ -17,4 +17,11 @@ Domain ground-truth rule:
 - Do not use web sources as primary authority for socionics data in this repo. External sources may be used only as secondary orientation and must not override the user's tables.
 - If a task lacks required user-confirmed domain data, stop and request that data instead of improvising.
 
+Publish workflow:
+
+- Keep validation local and deterministic. Do not add automatic commits, pushes, PR creation, or other network side effects to validation scripts.
+- After a step is complete, verified, and coherent enough for history, commit it with a narrow message.
+- Push the current branch when the user asks to publish progress or when continuing safely across windows depends on persisted remote state.
+- Push directly to `main` only when the user explicitly asks for that target; otherwise use the current working branch and normal PR/merge flow.
+
 Keep this harness practical. Add new checks when they catch real project risks.

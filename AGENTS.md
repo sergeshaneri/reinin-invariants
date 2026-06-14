@@ -22,6 +22,7 @@ Use this file as the root operating guide for AI-assisted work in this repositor
 - Prefer deterministic validation over subjective review.
 - Do not edit generated files in `dist/` directly.
 - If a command is known to start a local dev/watch server, open a port, download dependencies, or write build caches outside the workspace, request sandbox escalation on the first attempt with a narrow justification and prefix rule instead of first running the command in the sandbox.
+- After a completed and verified step, commit and push when the change set is coherent, worthy of repository history, and the user has asked to publish or continue with persisted progress. Do not make validation commands perform network pushes automatically.
 
 ## Validation
 

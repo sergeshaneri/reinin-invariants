@@ -7,6 +7,7 @@ export default defineConfig(({mode}) => {
   const projectRoot = fileURLToPath(new URL('.', import.meta.url));
 
   return {
+    root: projectRoot,
     base: mode === 'production' ? '/reinin-invariants/' : '/',
     plugins: [react(), tailwindcss()],
     optimizeDeps: {

@@ -10,7 +10,7 @@
 - **Priority**: P1
 - **Effort**: M
 - **Risk**: MED
-- **Depends on**: `plans/001-add-characterization-tests.md`
+- **Depends on**: `plans/archive/001-add-characterization-tests.md`
 - **Category**: bug
 - **Planned at**: no commit, unborn HEAD, 2026-06-11
 

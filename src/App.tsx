@@ -44,12 +44,13 @@ const App: React.FC = () => {
 
   // При смене признака — сбрасываем view (но не на самой первой загрузке).
   // При смене полюса того же признака — индекс сохраняем, чтобы удобно сравнивать одну и ту же view на разных полюсах.
-  const isFirstRender = useRef(true);
+  const previousTraitIndex = useRef(selectedTraitIndex);
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
+    if (previousTraitIndex.current === selectedTraitIndex) {
       return;
     }
+
+    previousTraitIndex.current = selectedTraitIndex;
     setActiveViewIndex(0);
   }, [selectedTraitIndex]);
 
@@ -94,7 +95,7 @@ const App: React.FC = () => {
         <div className="lg:col-span-4">
           <TraitNav
             selectedTraitIndex={selectedTraitIndex}
-            onSelectTrait={(idx) => { setSelectedTraitIndex(idx); setSelectedPoleIndex(0); }}
+            onSelectTrait={(idx) => { setSelectedTraitIndex(idx); setSelectedPoleIndex(0); setActiveViewIndex(0); }}
             onShowHelp={setHelpClassId}
           />
         </div>

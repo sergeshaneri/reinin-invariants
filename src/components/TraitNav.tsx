@@ -49,6 +49,7 @@ export const TraitNav: React.FC<Props> = ({ selectedTraitIndex, onSelectTrait, o
                   <button
                     key={trait.id}
                     type="button"
+                    aria-current={isActive ? 'true' : undefined}
                     onClick={() => onSelectTrait(idx)}
                     className={`w-full text-left px-3 py-2.5 rounded-xl transition-colors flex items-start justify-between gap-2 group relative ${
                       isActive

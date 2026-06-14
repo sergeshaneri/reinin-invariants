@@ -9,7 +9,14 @@
     "preview": "vite preview",
     "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
     "lint": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run src",
+    "test:e2e": "node scripts/e2e-dev.mjs",
+    "test:e2e:preview": "node scripts/preview-e2e.mjs",
+    "test:e2e:update": "playwright test --update-snapshots",
+    "smoke:render": "tsx scripts/render-smoke.tsx",
+    "smoke:dist": "node scripts/smoke-dist.mjs",
+    "smoke": "node scripts/smoke-dev-server.mjs",
+    "validate": "node scripts/validate.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.546.0",
@@ -18,6 +25,7 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@tailwindcss/vite": "^4.1.14",
     "@types/node": "^22.14.0",
     "@types/react": "^19.2.14",
@@ -25,9 +33,9 @@
     "@vitejs/plugin-react": "^5.0.4",
     "autoprefixer": "^10.4.21",
     "tailwindcss": "^4.1.14",
-    "tsx": "^4.21.0",
+    "tsx": "^4.22.4",
     "typescript": "~5.8.2",
-    "vite": "^6.2.0",
+    "vite": "^8.0.16",
     "vitest": "^4.1.8"
   }
 }

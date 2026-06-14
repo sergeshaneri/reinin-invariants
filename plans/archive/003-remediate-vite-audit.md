@@ -10,7 +10,7 @@
 - **Priority**: P1
 - **Effort**: S
 - **Risk**: LOW
-- **Depends on**: `plans/001-add-characterization-tests.md` recommended
+- **Depends on**: `plans/archive/001-add-characterization-tests.md` recommended
 - **Category**: security
 - **Planned at**: no commit, unborn HEAD, 2026-06-11
 

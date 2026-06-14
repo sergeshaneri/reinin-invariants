@@ -1,5 +1,9 @@
 export type AspectId = 'Ne' | 'Si' | 'Fe' | 'Ti' | 'Te' | 'Fi' | 'Se' | 'Ni';
 
+export * from './types';
+export * from './memberships';
+export * from './partitions';
+
 // Признаки Аспектов — 7 бинарных дихотомий, образующих нетривиальные столбцы матрицы Адамара H₃.
 // Тривиальный столбец «Сущ» (все +) опущен — он не различает группы.
 export type AspectFeatureKey =
@@ -285,8 +289,25 @@ export interface TraitPole {
 
 export type TraitClass = 1 | 2 | 3;
 
+export type ReininTraitId =
+  | 'vertness'
+  | 'nalness'
+  | 'talness'
+  | 'carefree'
+  | 'yielding'
+  | 'intuition'
+  | 'logic'
+  | 'subjectivism'
+  | 'judicious'
+  | 'constructivism'
+  | 'tactical'
+  | 'democracy'
+  | 'positivism'
+  | 'asking'
+  | 'process';
+
 export interface ReininTrait {
-  id: string;
+  id: ReininTraitId;
   name: string;
   class: TraitClass;
   diagramId?: string; // ключ в реестре диаграмм; по умолчанию — 'aspect-function'.

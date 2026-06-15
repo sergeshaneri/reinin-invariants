@@ -49,6 +49,8 @@ Out of scope:
 - Do not treat web sources as authoritative for Model A, socion membership, aspecton/functionon order, trait polarity or semantic interpretations.
 - Keep changes surgical and avoid unrelated refactors.
 - Work with existing dirty files; do not revert user changes.
+- In Windows PowerShell, include the UTF-8 encoding prefix in the same command when printing repository files, diffs, or other likely non-ASCII text.
+- If `.git` is read-only in the sandbox, request scoped escalation on the first attempt for git metadata writes such as `git add` and `git commit`.
 
 ## Steps
 

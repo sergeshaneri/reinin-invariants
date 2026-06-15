@@ -17,6 +17,17 @@ Use this file to convert repeated agent mistakes into concrete harness changes.
 
 ## Active Entries
 
+### 2026-06-15 - Preflight Rules Applied Too Late
+
+- Task: Continue from `Recommended Next Step` as orchestrator.
+- What happened: The agent read `tasks.md` once through Windows PowerShell without the UTF-8 prefix even though `AGENTS.md` already documented the encoding rule, producing mojibake in command output. The agent also first attempted `git add` inside a sandbox where `.git` metadata was read-only, then retried with escalation.
+- Expected behavior: Apply known lightweight preflight rules on the first attempt: attach the UTF-8 setup to PowerShell commands that print repository text, and request scoped escalation before git metadata writes when `.git` is read-only.
+- Root cause: The rules were documented, but framed too generally. The agent treated them as situational reminders instead of concrete first-attempt command habits.
+- Proposed harness change: Strengthen `AGENTS.md`, `harness/README.md`, and `task-template.md` with narrow first-attempt rules for PowerShell text output and git metadata writes.
+- Change type: rule | workflow | documentation
+- Acceptance test: A new session reads Cyrillic repository files without mojibake on the first print command, and does not produce a predictable sandbox failure before `git add` or `git commit` when `.git` is read-only.
+- Status: accepted
+
 ### 2026-06-15 - Dev E2E Port 3002 Occupied
 
 - Task: Validate D3.1 dichotomy detail path changes.

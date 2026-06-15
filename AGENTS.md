@@ -18,10 +18,11 @@ Use this file as the root operating guide for AI-assisted work in this repositor
 - Keep changes surgical. Do not refactor adjacent UI or data structures unless the task requires it.
 - Treat `src/data/socionics.ts` as source-of-truth domain data. Structural changes need tests.
 - Preserve Russian user-facing text and verify encoding before changing text-heavy files.
-- On Windows PowerShell, set UTF-8 console/output encoding before reading or printing Cyrillic or other non-ASCII text: `[Console]::InputEncoding = [Text.UTF8Encoding]::new(); [Console]::OutputEncoding = [Text.UTF8Encoding]::new(); $OutputEncoding = [Text.UTF8Encoding]::new()`.
+- On Windows PowerShell, include this UTF-8 prefix in any command that prints repository file contents, diffs, or other likely non-ASCII text: `[Console]::InputEncoding = [Text.UTF8Encoding]::new(); [Console]::OutputEncoding = [Text.UTF8Encoding]::new(); $OutputEncoding = [Text.UTF8Encoding]::new(); <command>`. Do this on the first attempt; do not first "try and see" with default encoding.
 - Prefer deterministic validation over subjective review.
 - Do not edit generated files in `dist/` directly.
 - If a command is known to start a local dev/watch server, open a port, download dependencies, or write build caches outside the workspace, request sandbox escalation on the first attempt with a narrow justification and prefix rule instead of first running the command in the sandbox.
+- If `.git` is read-only in the active sandbox, request scoped escalation on the first attempt for git commands that write repository metadata (`git add`, `git commit`, branch switch/create, merge/rebase, push). Read-only commands such as `git status`, `git diff`, `git log`, and `git show` can run normally.
 - After a completed and verified step, commit and push when the change set is coherent, worthy of repository history, and the user has asked to publish or continue with persisted progress. Do not make validation commands perform network pushes automatically.
 
 ## Validation

@@ -25,6 +25,19 @@ Domain ground-truth rule:
 - Do not use web sources as primary authority for socionics data in this repo. External sources may be used only as secondary orientation and must not override the user's tables.
 - If a task lacks required user-confirmed domain data, stop and request that data instead of improvising.
 
+Windows PowerShell text-output rule:
+
+- When a PowerShell command prints repository file contents, diffs, or other likely non-ASCII text, include the UTF-8 setup in the same command invocation:
+  `[Console]::InputEncoding = [Text.UTF8Encoding]::new(); [Console]::OutputEncoding = [Text.UTF8Encoding]::new(); $OutputEncoding = [Text.UTF8Encoding]::new(); <command>`
+- Apply this on the first attempt. Do not read first with default encoding to check whether mojibake appears.
+- This is a command habit, not a separate preflight step; keep it attached to the actual read/print command.
+
+Git sandbox write rule:
+
+- Read-only git commands such as `git status`, `git diff`, `git log`, and `git show` can run without escalation.
+- If `.git` is read-only in the active sandbox, request scoped escalation on the first attempt for commands that write repository metadata: `git add`, `git commit`, branch switch/create, merge/rebase, and push.
+- Keep validation scripts local and do not bundle git writes into validation commands.
+
 Publish workflow:
 
 - Keep validation local and deterministic. Do not add automatic commits, pushes, PR creation, or other network side effects to validation scripts.

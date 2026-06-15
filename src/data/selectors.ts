@@ -122,6 +122,21 @@ export interface PartitionTypesPanelViewModel {
   types: readonly TypeSummaryViewModel[];
 }
 
+export interface PartitionCatalogEntryViewModel {
+  key: string;
+  traitIds: readonly ReininTraitId[];
+  title: string;
+  traits: readonly TraitSummaryViewModel[];
+  classCount: number;
+  classSize: number;
+  partition: PartitionViewModel;
+}
+
+export interface PartitionCatalogViewModel {
+  kind: Extract<PartitionKind, 'tetrachotomy' | 'octochotomy'>;
+  entries: readonly PartitionCatalogEntryViewModel[];
+}
+
 const getLocalizedText = (text: LocalizedText, locale: Locale): string => (
   text[locale] ?? text.ru
 );
@@ -243,6 +258,71 @@ const selectDefaultPartitionClass = (
   )) ?? partition.classes[0] ?? null
 );
 
+const buildTraitCombinations = (
+  traitIds: readonly ReininTraitId[],
+  size: number,
+): readonly (readonly ReininTraitId[])[] => {
+  const combinations: ReininTraitId[][] = [];
+
+  const visit = (startIndex: number, selected: ReininTraitId[]): void => {
+    if (selected.length === size) {
+      combinations.push([...selected]);
+      return;
+    }
+
+    const remainingSlots = size - selected.length;
+    const lastStartIndex = traitIds.length - remainingSlots;
+
+    for (let index = startIndex; index <= lastStartIndex; index += 1) {
+      selected.push(traitIds[index]);
+      visit(index + 1, selected);
+      selected.pop();
+    }
+  };
+
+  visit(0, []);
+
+  return combinations;
+};
+
+const getCatalogTraitCount = (
+  kind: PartitionCatalogViewModel['kind'],
+): number => (
+  kind === 'tetrachotomy' ? 2 : 3
+);
+
+const selectPartitionCatalog = (
+  kind: PartitionCatalogViewModel['kind'],
+  locale: Locale,
+): PartitionCatalogViewModel => {
+  const traitCount = getCatalogTraitCount(kind);
+  const entries = buildTraitCombinations(
+    REININ_TRAITS.map(trait => trait.id),
+    traitCount,
+  ).flatMap(traitIds => {
+    const partition = selectPartition(buildPartition(traitIds), locale);
+
+    if (!partition.ok) {
+      return [];
+    }
+
+    return [{
+      key: traitIds.join('+'),
+      traitIds,
+      title: partition.traits.map(trait => trait.name).join(' + '),
+      traits: partition.traits,
+      classCount: partition.classes.length,
+      classSize: partition.classes[0]?.types.length ?? 0,
+      partition,
+    }];
+  });
+
+  return {
+    kind,
+    entries,
+  };
+};
+
 export function selectTypeModelView(
   typeId: SocionicTypeId,
   locale: Locale = 'ru',
@@ -346,6 +426,18 @@ export function selectOctochotomyView(
   locale: Locale = 'ru',
 ): PartitionViewModel | PartitionDiagnosticViewModel {
   return selectPartition(buildPartition(traitIds), locale);
+}
+
+export function selectTetrachotomyCatalog(
+  locale: Locale = 'ru',
+): PartitionCatalogViewModel {
+  return selectPartitionCatalog('tetrachotomy', locale);
+}
+
+export function selectOctochotomyCatalog(
+  locale: Locale = 'ru',
+): PartitionCatalogViewModel {
+  return selectPartitionCatalog('octochotomy', locale);
 }
 
 export function selectDichotomyDistributionView(

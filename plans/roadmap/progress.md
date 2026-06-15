@@ -22,7 +22,7 @@
 | Type selector | DONE | U2.3 added canonical 16-type selection and `type` URL state in type mode. |
 | Type Model A diagram | DONE | U2.4 renders selected TIM Model A in type mode. |
 | Type invariant highlight | DONE/SUPERSEDED | U2.5 works technically but is no longer the desired UX direction. |
-| Partition Explorer UX | TODO | D3.4 added compact Model A previews and global aspect display mode to the dichotomy detail path; next work starts with C4.1 partition catalogs. |
+| Partition Explorer UX | TODO | C4.1 added computed partition catalogs for valid tetrachotomy pairs and independent octochotomy triples; next work starts with C4.2 chooser UI. |
 | Tetrachotomies | TODO | Should be selected through sequential traits, catalog list, or visual patterns and show component composition. |
 | Octochotomies | TODO | Should mirror tetrachotomy UX with diagnostics for dependent triples. |
 | Aspect icons | TODO | Should follow stable aspect visual metadata. |
@@ -32,7 +32,7 @@
 
 ## Recommended Next Step
 
-Continue with `C4.1` from `tasks.md`: add selectors for catalogs of valid tetrachotomy pairs and independent octochotomy triples.
+Continue with `C4.2` from `tasks.md`: add the multi-entry partition chooser with sequential trait selection, catalog list and visual pattern gallery.
 
 ## Milestone Checklist
 
@@ -650,3 +650,23 @@ Continue with `C4.1` from `tasks.md`: add selectors for catalogs of valid tetrac
   - none
 - Remaining:
   - C4.1 should add catalogs for valid tetrachotomy pairs and independent octochotomy triples.
+
+### 2026-06-15 - Task C4.1
+
+- Status: DONE
+- Changed files:
+  - `src/data/selectors.ts`
+  - `src/data/selectors.test.ts`
+  - `plans/roadmap/tasks.md`
+  - `plans/roadmap/progress.md`
+- Summary:
+  - Added computed catalog selectors for valid tetrachotomy pairs and independent octochotomy triples.
+  - Reused existing partition view models as preview pattern data, so catalog entries carry 16-type pattern cells without new hand-authored tetra/octo labels.
+  - Added deterministic tests for catalog counts, class sizes, preview cells and exclusion of dependent triples.
+- Checks:
+  - `npm test -- src/data/selectors.test.ts`: passed
+  - `npm run lint`: passed
+- Decisions:
+  - none
+- Remaining:
+  - C4.2 should add the multi-entry chooser UI over these catalogs.

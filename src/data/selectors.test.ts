@@ -4,9 +4,11 @@ import { TRAIT_TYPE_MEMBERSHIPS_BY_TRAIT_ID } from './memberships';
 import {
   selectDichotomyDistributionView,
   selectDichotomyTypesPanelView,
+  selectOctochotomyCatalog,
   selectOctochotomyView,
   selectPartitionExplorerView,
   selectPartitionTypesPanelView,
+  selectTetrachotomyCatalog,
   selectTetrachotomyView,
   selectTypeModelPreviews,
   selectTypeModelView,
@@ -111,6 +113,69 @@ describe('domain selectors', () => {
     expect(view.kind).toBe('octochotomy');
     expect(view.classes).toHaveLength(8);
     expect(view.classes.every(partitionClass => partitionClass.types.length === 2)).toBe(true);
+  });
+
+  it('selects a catalog of every valid tetrachotomy pair with preview pattern data', () => {
+    const catalog = selectTetrachotomyCatalog();
+
+    expect(catalog.kind).toBe('tetrachotomy');
+    expect(catalog.entries).toHaveLength(105);
+    expect(catalog.entries[0]).toMatchObject({
+      key: 'vertness+nalness',
+      traitIds: ['vertness', 'nalness'],
+      classCount: 4,
+      classSize: 4,
+      partition: {
+        ok: true,
+        kind: 'tetrachotomy',
+      },
+    });
+    expect(catalog.entries[0].partition.patternCells[0]).toMatchObject({
+      type: { id: 'ILE' },
+      classKey: 'vertness:0|nalness:0',
+    });
+    expect(catalog.entries.at(-1)).toMatchObject({
+      key: 'asking+process',
+      traitIds: ['asking', 'process'],
+    });
+    expect(catalog.entries.every(entry => (
+      entry.partition.classes.length === 4
+      && entry.partition.classes.every(partitionClass => partitionClass.types.length === 4)
+      && entry.partition.patternCells.length === 16
+    ))).toBe(true);
+  });
+
+  it('selects a catalog of independent octochotomy triples and excludes dependent triples', () => {
+    const catalog = selectOctochotomyCatalog();
+
+    expect(catalog.kind).toBe('octochotomy');
+    expect(catalog.entries).toHaveLength(420);
+    expect(catalog.entries[0]).toMatchObject({
+      key: 'vertness+nalness+carefree',
+      traitIds: ['vertness', 'nalness', 'carefree'],
+      classCount: 8,
+      classSize: 2,
+      partition: {
+        ok: true,
+        kind: 'octochotomy',
+      },
+    });
+    expect(catalog.entries[0].partition.patternCells[0]).toMatchObject({
+      type: { id: 'ILE' },
+      classKey: 'vertness:0|nalness:0|carefree:0',
+    });
+    expect(catalog.entries.at(-1)).toMatchObject({
+      key: 'positivism+asking+process',
+      traitIds: ['positivism', 'asking', 'process'],
+    });
+    expect(catalog.entries.some(entry => (
+      entry.key === 'vertness+nalness+talness'
+    ))).toBe(false);
+    expect(catalog.entries.every(entry => (
+      entry.partition.classes.length === 8
+      && entry.partition.classes.every(partitionClass => partitionClass.types.length === 2)
+      && entry.partition.patternCells.length === 16
+    ))).toBe(true);
   });
 
   it('selects a dichotomy distribution class by pole index', () => {

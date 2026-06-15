@@ -53,7 +53,7 @@
 
 | ID | Depends | Status | Цель | Вероятные файлы | Проверки | Риски |
 |---|---|---:|---|---|---|---|
-| C4.1 | X2.3 | TODO | Добавить selectors для catalogs: все валидные pairs и independent triples с preview pattern data. | `src/data/partitions.ts`, `src/data/selectors.ts`, tests | Tests: counts, class sizes, dependent triples excluded | Не импровизировать labels готовых tetra/octo без данных пользователя. |
+| C4.1 | X2.3 | DONE | Добавить selectors для catalogs: все валидные pairs и independent triples с preview pattern data. | `src/data/partitions.ts`, `src/data/selectors.ts`, tests | Tests: counts, class sizes, dependent triples excluded | Не импровизировать labels готовых tetra/octo без данных пользователя. |
 | C4.2 | C4.1 | TODO | Добавить multi-entry chooser: sequential trait selection, catalog list, visual pattern gallery. | `src/components/PartitionChooser.tsx`, `src/App.tsx` | e2e choose tetra/octo through all entry modes | Сложность UI: нужны compact controls и один canonical state. |
 | C4.3 | C4.2 | TODO | Добавить composition view для тетрахотомий: 2 component dichotomy cards -> final 4-class pattern. | `src/components/PartitionCompositionView.tsx`, selectors | e2e component toggles, render smoke | Важно показать, что итог = пересечение компонентов, не новый hand-authored object. |
 | C4.4 | C4.3 | TODO | Добавить detail тетрахотомии: 4 classes, selected class default = class ИЛЭ, types panel, Model A previews. | `src/components/TetrachotomyView.tsx`, `src/components/ModelAPreviewGrid.tsx` | selector tests, e2e desktop/mobile | 4 groups x 4 types могут перегрузить mobile layout. |

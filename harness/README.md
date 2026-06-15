@@ -10,6 +10,14 @@ Current harness:
 - `npm run test:e2e` opens the app in Chromium desktop and mobile viewports, checks key UI controls, captures a screenshot snapshot, and fails on browser console errors.
 - `harness/failure-log.md` records recurring agent failures and proposed harness fixes.
 
+Dev e2e port rule:
+
+- `npm run test:e2e` uses `127.0.0.1:3002` through `scripts/e2e-dev.mjs`.
+- If `3002` is free, the script starts a strict-port Vite server and closes it after Playwright exits.
+- If `3002` already serves this app's Vite dev server at `http://127.0.0.1:3002/reinin-invariants/`, the script reuses it automatically for Playwright.
+- If port `3002` is already occupied, do not kill the process unless the user explicitly confirms that exact PID can be stopped.
+- If the occupied port is not clearly this app, the script stops with an explanatory error; ask the user to free port `3002` or confirm which process may be stopped.
+
 Domain ground-truth rule:
 
 - For socionics domain facts, the user's supplied tables and decisions are the source of truth.

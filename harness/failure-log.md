@@ -17,6 +17,28 @@ Use this file to convert repeated agent mistakes into concrete harness changes.
 
 ## Active Entries
 
+### 2026-06-15 - Dev E2E Port 3002 Occupied
+
+- Task: Validate D3.1 dichotomy detail path changes.
+- What happened: `npm run test:e2e` could not start its strict-port Vite server because `127.0.0.1:3002` was already occupied by an existing `node` process. This made `npm run validate` ambiguous even though the already-running server could serve the app.
+- Expected behavior: Agents should handle an occupied e2e port deterministically without killing unknown user processes or claiming full validation passed when the strict-port runner could not start normally.
+- Root cause: The harness had strict-port e2e to avoid stale server reuse, but no explicit operating rule for a pre-existing server on the same port.
+- Proposed harness change: Document a dev e2e port rule: do not stop unknown PIDs without explicit user confirmation; verify whether `http://127.0.0.1:3002/reinin-invariants/` is the current Vite app; if verified, run Playwright with `PLAYWRIGHT_EXTERNAL_SERVER=1`; otherwise ask the user to free the port.
+- Change type: rule | workflow | documentation
+- Acceptance test: `npm run test:e2e` automatically reuses a verified existing Vite dev server on `3002`; if the port is occupied by something else, it stops with an explanatory error before touching the process.
+- Status: accepted
+
+### 2026-06-14 - New Frontend Surface Lacked Visual Coverage
+
+- Task: Add and refine a new user-facing frontend surface.
+- What happened: `npm run validate` passed while the newly changed screen still had a visible UI regression, because screenshot coverage existed only for an older/default screen.
+- Expected behavior: When a task adds or materially changes a frontend surface, validation should exercise that exact changed surface with browser-level semantic assertions and, when layout/visual presentation is part of the task, a screenshot baseline.
+- Root cause: The e2e harness had a default-screen visual snapshot and broad navigation checks, but no rule tying frontend task scope to coverage of the newly changed screen.
+- Proposed harness change: For each frontend task, add or update the smallest Playwright coverage that opens the changed route/state, asserts the user-visible requirements from the task, and stores desktop/mobile screenshots when the visual layout is newly introduced or materially changed.
+- Change type: test
+- Acceptance test: `npm run validate` fails if a newly introduced or materially changed frontend surface is not covered by route/state-specific browser assertions, and fails on visual regressions for surfaces whose layout was part of the task.
+- Status: accepted
+
 ### 2026-06-14 - Windows PowerShell Cyrillic Output Mojibake
 
 - Task: Work with repository files and paths containing Cyrillic text on Windows.

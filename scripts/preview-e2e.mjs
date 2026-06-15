@@ -85,10 +85,7 @@ try {
   await expectVisible(page.getByRole('heading', { name: 'Признаки' }), 'traits heading');
   await expectVisible(page.getByRole('heading', { name: 'Аспектон' }), 'aspecton heading');
   await expectVisible(page.getByRole('heading', { name: 'Функцион' }), 'functionon heading');
-  await expectVisible(
-    page.getByRole('button', { name: /Экстраверсия \/ Интроверсия/ }),
-    'default trait button',
-  );
+  await expectVisible(page.locator('[data-trait-nav="vertness"]'), 'default trait button');
   await expectVisible(
     page.getByRole('button', { name: /Интуиция возможностей/ }),
     'default aspect button',

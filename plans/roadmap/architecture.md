@@ -79,11 +79,40 @@ URL params должны оставаться стабильными и human-rea
 
 ```text
 ?mode=trait&trait=democracy&pole=1&view=2
-?mode=type&type=ILE&trait=democracy
-?mode=tetra&traits=democracy,process
-?mode=octo&traits=democracy,process,asking
+?mode=type&type=ILE
+?mode=tetrachotomy&traits=democracy,process&class=democracy:0|process:1
+?mode=octochotomy&traits=democracy,process,asking&class=democracy:0|process:1|asking:0
 ?lang=en&theme=dark
 ```
+
+### Partition Explorer Layer
+
+Дихотомии, тетрахотомии и октохотомии должны развиваться как одно UX-семейство, а не как три независимые страницы.
+
+Canonical state для любого разбиения:
+
+- `kind`: `dichotomy` | `tetrachotomy` | `octochotomy`;
+- `traitIds`: один, два или три независимых признака;
+- `selectedClassKey`: выбранный полюс/класс, по умолчанию класс, содержащий ИЛЭ;
+- `entryMode`: optional UI-only hint для выбора через sidebar/list, sequential picker, catalog или visual gallery.
+
+Разные способы выбора обязаны сходиться в один canonical state:
+
+- дихотомия: sidebar/list или visual mini-pattern gallery;
+- тетрахотомия: последовательный выбор 2 признаков, catalog готовых пар или visual pattern gallery;
+- октохотомия: последовательный выбор 3 признаков, catalog независимых троек или visual pattern gallery.
+
+Экран результата должен показывать:
+
+- component dichotomy cards для каждого выбранного признака;
+- итоговую схему распределения 16 типов;
+- выбранный класс/полюс;
+- типы внутри выбранного класса;
+- компактные Model A previews с подсветкой того, что демонстрирует принадлежность к выбранному классу.
+
+Type mode не должен скрыто зависеть от `trait`, `pole` или partition state. Если позже нужен путь "тип -> признаки типа", он должен иметь отдельное явное state/URL-поле, а не переиспользовать состояние режима признаков.
+
+Future direction: решетка подгрупп/подпространств группы признаков должна опираться на эти же trait vectors и partition keys, но не блокировать ближайший Partition Explorer.
 
 ### UI Layer
 
@@ -148,4 +177,3 @@ Locale adapter должен давать Russian fallback, чтобы непол
 - Тетрахотомии и октохотомии можно ошибочно посчитать простым UI-фильтром. Mitigation: pure partition helpers и unit tests с expected class sizes.
 - Темная тема может превратиться в ручную замену классов. Mitigation: tokens first, component migration second.
 - Значки аспектов могут ухудшить доступность. Mitigation: text fallback, `aria-label`, tooltip with full name.
-

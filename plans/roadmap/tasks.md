@@ -26,43 +26,53 @@
 | D1.7 | D1.6 | DONE | Добавить diagnostic для dependent или invalid partition requests. | `src/data/partitions.ts`, `src/data/partitions.test.ts` | Tests: duplicate trait rejected, dependent triple rejected, unknown ID impossible by type or guarded | UI должен получить понятную причину отказа. |
 | D1.8 | D1.6 | DONE | Добавить selectors для type model, trait example, tetrachotomy и octochotomy view models. | `src/data/selectors.ts`, `src/data/selectors.test.ts` | Unit tests snapshot-like на компактные view models | Риск слишком раннего усложнения selector API. |
 
-## Phase 2: Type Examples and 16 Model A Views
+## Phase 2: Navigation UX Realignment and Partition Explorer Foundation
 
 | ID | Depends | Status | Цель | Вероятные файлы | Проверки | Риски |
 |---|---|---:|---|---|---|---|
 | U2.1 | D1.8 | DONE | Добавить `mode` в app state и URL parser без изменения default behavior. | `src/App.tsx`, `src/data/selectors.ts`, possible `src/appState.ts`, tests | `npm test`, `npm run smoke:render` | URL regression для текущего `trait/pole/view`. |
 | U2.2 | U2.1 | DONE | Добавить `ModeSelector` для перехода между признаком, типом, тетрахотомией, октохотомией. | `src/components/ModeSelector.tsx`, `src/App.tsx` | `npm run lint`, e2e basic navigation | Слишком много controls в первом viewport. |
 | U2.3 | U2.1 | DONE | Добавить `TypeSelector` с 16 типами и URL param `type`. | `src/components/TypeSelector.tsx`, `src/App.tsx` | Tests for URL clamp/fallback, e2e select type | Спорный порядок типов в списке. |
-| U2.4 | U2.3 | TODO | Создать `TypeModelDiagram` для модели А выбранного типа. | `src/diagrams/TypeModelDiagram.tsx`, `src/diagrams/registry.ts`, `src/diagrams/types.ts` | `npm run build`, visual smoke, e2e desktop/mobile | Перегрузка диаграммы текстом на mobile. |
-| U2.5 | U2.4 | TODO | Подсвечивать текущий trait invariant на модели А типа. | `src/diagrams/TypeModelDiagram.tsx`, `src/data/selectors.ts`, tests | Unit tests selector, e2e hover/click smoke | Нужно ясно показать, что подсветка является примером, а не новой формулой. |
-| U2.6 | U2.5 | TODO | Добавить панель "типы на полюсе" для выбранного признака. | `src/components/TraitTypesPanel.tsx`, `src/App.tsx`, selectors | `npm run smoke:render`, e2e | Дублирование с будущей partition grid. |
+| U2.4 | U2.3 | DONE | Создать `TypeModelDiagram` для модели А выбранного типа. | `src/diagrams/TypeModelDiagram.tsx`, `src/App.tsx`, `tests/e2e/app.spec.ts` | `npm run build`, visual smoke, e2e desktop/mobile | Перегрузка диаграммы текстом на mobile. |
+| U2.5 | U2.4 | DONE | Подсвечивать текущий trait invariant на модели А типа. | `src/diagrams/TypeModelDiagram.tsx`, `src/data/selectors.ts`, tests | Unit tests selector, e2e smoke | UX признан неверным: type mode не должен скрыто зависеть от выбранного признака. |
+| X2.1 | U2.5 | DONE | Убрать скрытую зависимость type mode от `trait`: модель А типа должна быть чистым type path. | `src/App.tsx`, `src/diagrams/TypeModelDiagram.tsx`, `src/data/selectors.ts`, tests | `npm run lint`, e2e type URL regression | Не потерять полезный `TypeModelDiagram`; подсветку перенести в partition path. |
+| X2.2 | X2.1 | DONE | Ввести общую state/URL-модель Partition Explorer: `kind`, `traitIds`, `selectedClassKey`, дефолтный класс = класс ИЛЭ. | `src/appState.ts`, `src/data/selectors.ts`, tests | Unit URL tests, selector tests | Не смешать `trait` path, `type` path и partition path в одно скрытое состояние. |
+| X2.3 | X2.2 | DONE | Создать shared 16-type pattern card для дихотомий, тетрахотомий и октохотомий в canonical H3 порядке. | `src/components/TypePatternCard.tsx`, selectors, tests | render smoke, e2e visual smoke | Цвет не должен быть единственным каналом: нужны labels/tooltips. |
+| X2.4 | X2.3 | DONE | Добавить visual chooser для дихотомий: галерея мини-схем + сохранить sidebar/list chooser. | `src/components/DichotomyGallery.tsx`, `src/components/TraitNav.tsx`, `src/App.tsx` | e2e choose trait by card and sidebar | Два способа выбора не должны вести разные состояния. |
 
-## Phase 3: Tetrachotomies
-
-| ID | Depends | Status | Цель | Вероятные файлы | Проверки | Риски |
-|---|---|---:|---|---|---|---|
-| T3.1 | D1.8 | TODO | Добавить selector для списка всех валидных пар признаков. | `src/data/partitions.ts`, `src/data/selectors.ts`, tests | Tests: количество пар, каждая пара 4x4 | Если есть исключения, нужно доменное объяснение. |
-| T3.2 | U2.1, T3.1 | TODO | Добавить `PartitionSelector` для выбора двух признаков. | `src/components/PartitionSelector.tsx`, `src/App.tsx` | e2e select two traits, URL sync | UI выбора 15x15 может быть шумным. |
-| T3.3 | T3.2 | TODO | Добавить `TetrachotomyView`: 4 класса по 4 типа, labels полюсов. | `src/components/TetrachotomyView.tsx`, selectors | Unit selector tests, e2e desktop/mobile | Длинные имена полюсов могут ломать layout. |
-| T3.4 | T3.3 | TODO | Добавить link-through из класса тетрахотомии к списку типов и type examples. | `src/components/TetrachotomyView.tsx`, `src/App.tsx` | e2e click class/type | Потеря контекста выбранных признаков при переходе. |
-| T3.5 | T3.3 | TODO | Добавить формульное summary тетрахотомии без дублирования domain logic в JSX. | `src/components/PartitionFormulaPanel.tsx`, selectors | Snapshot-like selector tests, render smoke | Непонятные labels при неполной локализации. |
-
-## Phase 4: Octochotomies
+## Phase 3: Dichotomy Detail Path
 
 | ID | Depends | Status | Цель | Вероятные файлы | Проверки | Риски |
 |---|---|---:|---|---|---|---|
-| O4.1 | D1.7 | TODO | Добавить selector валидных independent triples. | `src/data/partitions.ts`, `src/data/selectors.ts`, tests | Tests: valid triples rank 3, dependent triples excluded | Ошибка rank даст ложные октохотомии. |
-| O4.2 | U2.1, O4.1 | TODO | Расширить `PartitionSelector` до режима трех признаков с disabled dependent combos. | `src/components/PartitionSelector.tsx`, `src/App.tsx` | e2e select valid/invalid triple | Трудно объяснить disabled состояние без лишнего текста. |
-| O4.3 | O4.2 | TODO | Добавить `OctochotomyView`: 8 классов по 2 типа. | `src/components/OctochotomyView.tsx`, selectors | Unit selector tests, e2e mobile layout | 8 карточек могут быть слишком плотными. |
-| O4.4 | O4.3 | TODO | Добавить diagnostic panel для зависимых triples. | `src/components/PartitionDiagnostic.tsx`, selectors | Tests for diagnostic, e2e invalid URL | Нужно не пугать пользователя математическим сообщением. |
+| D3.1 | X2.4 | DONE | Пересобрать trait screen как путь дихотомии: признак -> полюс -> view; полюс по умолчанию = полюс ИЛЭ. | `src/App.tsx`, `src/appState.ts`, `src/data/selectors.ts`, tests | URL tests, e2e default pole for ILE | ИЛЭ подтвержден пользователем как первый полюс во всех дихотомиях; старые links без `pole` сохраняют поведение. |
+| D3.2 | D3.1 | DONE | Добавить в detail дихотомии схему распределения 16 типов по двум полюсам. | `src/components/DichotomyDistribution.tsx`, selectors | e2e select pole from pattern | Паттерн должен быть понятен без длинных объяснений на экране. |
+| D3.3 | D3.2 | DONE | Добавить панель типов выбранного полюса как часть dichotomy path. | `src/components/PartitionTypesPanel.tsx`, selectors | `npm run smoke:render`, e2e | Не дублировать будущий grid; панель должна быть reusable для tetra/octo. |
+| D3.4 | D3.3 | DONE | Добавить 8 compact Model A previews для типов выбранного полюса с подсветкой детерминирующих аспектов/позиций и переключением аспектов pictogram/abbrev. | `src/components/ModelAPreviewGrid.tsx`, `src/components/AspectGlyph.tsx`, `src/diagrams/TypeModelDiagram.tsx`, selectors | selector tests, e2e mobile/desktop | Для `isBlockPermutation` views подсветка должна показывать принадлежность аспект-функция к допустимому блоку, а не ложную уникальную биекцию блоков. |
 
+## Phase 4: Tetrachotomy and Octochotomy Composition
+
+| ID | Depends | Status | Цель | Вероятные файлы | Проверки | Риски |
+|---|---|---:|---|---|---|---|
+| C4.1 | X2.3 | TODO | Добавить selectors для catalogs: все валидные pairs и independent triples с preview pattern data. | `src/data/partitions.ts`, `src/data/selectors.ts`, tests | Tests: counts, class sizes, dependent triples excluded | Не импровизировать labels готовых tetra/octo без данных пользователя. |
+| C4.2 | C4.1 | TODO | Добавить multi-entry chooser: sequential trait selection, catalog list, visual pattern gallery. | `src/components/PartitionChooser.tsx`, `src/App.tsx` | e2e choose tetra/octo through all entry modes | Сложность UI: нужны compact controls и один canonical state. |
+| C4.3 | C4.2 | TODO | Добавить composition view для тетрахотомий: 2 component dichotomy cards -> final 4-class pattern. | `src/components/PartitionCompositionView.tsx`, selectors | e2e component toggles, render smoke | Важно показать, что итог = пересечение компонентов, не новый hand-authored object. |
+| C4.4 | C4.3 | TODO | Добавить detail тетрахотомии: 4 classes, selected class default = class ИЛЭ, types panel, Model A previews. | `src/components/TetrachotomyView.tsx`, `src/components/ModelAPreviewGrid.tsx` | selector tests, e2e desktop/mobile | 4 groups x 4 types могут перегрузить mobile layout. |
+| C4.5 | C4.2 | TODO | Добавить composition view для октохотомий: 3 component dichotomy cards -> final 8-class pattern. | `src/components/PartitionCompositionView.tsx`, selectors | e2e component/final highlight modes | Нужна хорошая diagnostic для dependent triples. |
+| C4.6 | C4.5 | TODO | Добавить detail октохотомии: 8 classes, selected class default = class ИЛЭ, types panel, Model A previews. | `src/components/OctochotomyView.tsx`, `src/components/PartitionDiagnostic.tsx` | e2e valid and invalid triple | 8 classes должны быть readable без card-heavy перегруза. |
+
+## Phase 4L: Future Subgroup Lattice
+
+| ID | Depends | Status | Цель | Вероятные файлы | Проверки | Риски |
+|---|---|---:|---|---|---|---|
+| G4L.1 | C4.6 | TODO | Зафиксировать domain model для решетки подгрупп/подпространств группы признаков. | `plans/roadmap/domain-model.md`, possible `src/data/lattice.ts` | domain review, no UI required | Дальняя фаза: не блокировать ближний Partition Explorer. |
+| G4L.2 | G4L.1 | TODO | Прототип визуализации включений: дихотомии -> тетрахотомии -> октохотомии. | `src/components/LatticeView.tsx` or docs prototype | visual smoke only | Риск сделать математически красиво, но непонятно для целевого сценария. |
 ## Phase 5: Aspect Icons
 
 | ID | Depends | Status | Цель | Вероятные файлы | Проверки | Риски |
 |---|---|---:|---|---|---|---|
 | V5.1 | D1.1 | TODO | Определить icon metadata для всех аспектов без React в domain records. | `src/data/aspectVisuals.ts`, `src/data/socionics.ts`, tests | Tests: every `AspectId` has visual metadata | Спорные icon metaphors для аспектов. |
 | V5.2 | V5.1 | TODO | Создать UI registry, который мапит `iconKey` в lucide/custom icon. | `src/components/AspectIcon.tsx`, `src/diagrams/AspectFunctionDiagram.tsx`, `src/diagrams/TypeModelDiagram.tsx` | `npm run lint`, render smoke | Bundle size и визуальная неоднозначность. |
-| V5.3 | V5.2 | TODO | Добавить настройку compact display: icon, symbol, icon+symbol. | `src/components/AspectDisplayToggle.tsx`, `src/App.tsx` | e2e toggle, accessibility labels | Persisted preference может конфликтовать с language/theme params. |
+| V5.3 | V5.2 | TODO | Расширить настройку compact display после D3.4: icon, symbol, icon+symbol, persistence if needed. | `src/components/AspectDisplayToggle.tsx`, `src/App.tsx` | e2e toggle, accessibility labels | Persisted preference может конфликтовать с language/theme params. |
 
 ## Phase 6: Dark Theme
 
@@ -96,7 +106,7 @@
 
 | ID | Depends | Status | Цель | Вероятные файлы | Проверки | Риски |
 |---|---|---:|---|---|---|---|
-| Q9.1 | U2.6, T3.5, O4.4 | TODO | Расширить smoke render на новые режимы. | `scripts/render-smoke.tsx`, tests | `npm run smoke:render` | Smoke должен оставаться быстрым. |
+| Q9.1 | D3.4, C4.6 | TODO | Расширить smoke render на новые partition/detail режимы. | `scripts/render-smoke.tsx`, tests | `npm run smoke:render` | Smoke должен оставаться быстрым. |
 | Q9.2 | H6.4, L7.5 | TODO | Добавить e2e сценарии theme + locale + partitions. | `tests/*` | `npm run test:e2e` | Playwright snapshots могут требовать стабильных размеров. |
 | Q9.3 | all feature phases | TODO | Запустить полную проверку и обновить `plans/roadmap/progress.md`. | `plans/roadmap/progress.md` | `npm run validate` | Audit или smoke могут упасть из-за внешнего окружения. |
 | Q9.4 | D1.4 | TODO | Добавить краткое объяснение H3-порядка аспектон/функцион/социон в справку или документацию, не перегружая главный экран. | `plans/roadmap/PRD.md`, `src/components/HelpModal.tsx` или docs | `npm run smoke:render`, `npm run test:e2e` если меняется UI | Теоретическое объяснение может стать слишком длинным для первого экрана. |

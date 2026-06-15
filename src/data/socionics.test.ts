@@ -15,6 +15,24 @@ const aspectIds = new Set(ASPECTS.map(aspect => aspect.id));
 const functionIds = new Set(FUNCTIONS.map(fn => fn.id));
 const traitIds = new Set(REININ_TRAITS.map(trait => trait.id));
 const socionicTypeIds = new Set(SOCIONIC_TYPES.map(type => type.id));
+const historicalTypeAliases = {
+  ILE: 'Дон Кихот',
+  SEI: 'Дюма',
+  ESE: 'Гюго',
+  LII: 'Робеспьер',
+  EIE: 'Гамлет',
+  LSI: 'Максим Горький',
+  SLE: 'Жуков',
+  IEI: 'Есенин',
+  LIE: 'Джек Лондон',
+  ESI: 'Драйзер',
+  SEE: 'Наполеон',
+  ILI: 'Бальзак',
+  IEE: 'Гексли',
+  SLI: 'Габен',
+  LSE: 'Штирлиц',
+  EII: 'Достоевский',
+} as const;
 
 const expectUnique = <T>(values: T[], label: string) => {
   const seen = new Set<T>();
@@ -55,6 +73,14 @@ describe('socionics data', () => {
       expect(type.names.en?.trim(), `${type.id} English name`).not.toBe('');
       expect(type.aliases.socionics?.length, `${type.id} socionics aliases`).toBeGreaterThan(0);
       expect(type.aliases.mbtiLike?.length, `${type.id} MBTI-like aliases`).toBeGreaterThan(0);
+    });
+  });
+
+  it('keeps confirmed Russian historical type aliases', () => {
+    SOCIONIC_TYPES.forEach(type => {
+      expect(type.aliases.socionics?.[1], `${type.id} historical alias`).toBe(
+        historicalTypeAliases[type.id],
+      );
     });
   });
 

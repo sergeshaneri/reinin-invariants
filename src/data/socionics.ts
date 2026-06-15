@@ -372,7 +372,7 @@ export const REININ_TRAITS: ReininTrait[] = [
   },
   {
     id: 'nalness',
-    name: 'Рациональность / Иррациональность',
+    name: 'Иррациональность / Рациональность',
     class: 1,
     poles: [
       {

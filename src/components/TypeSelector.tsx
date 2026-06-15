@@ -18,7 +18,7 @@ export const TypeSelector: React.FC<Props> = ({ selectedTypeId, onSelectType }) 
     <div className="flex items-center justify-between mb-5 px-1">
       <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 flex items-center gap-2">
         <Boxes className="w-3.5 h-3.5 text-indigo-500" strokeWidth={2} />
-        TIM
+        ТИМ
       </h2>
       <span className="text-[11px] font-medium text-slate-400 font-mono">{SOCIONIC_TYPES.length}</span>
     </div>
@@ -26,9 +26,10 @@ export const TypeSelector: React.FC<Props> = ({ selectedTypeId, onSelectType }) 
     <div className="grid grid-cols-2 gap-2">
       {SOCIONIC_TYPES.map((type) => {
         const isActive = selectedTypeId === type.id;
-        const socionicsAlias = type.aliases.socionics?.[0];
-        const mbtiAlias = type.aliases.mbtiLike?.[0];
-        const label = [type.id, socionicsAlias, mbtiAlias].filter(Boolean).join(' · ');
+        const visibleCode = type.aliases.socionics?.[0] ?? type.names.ru;
+        const historicalAlias = type.aliases.socionics?.[1];
+        const aliasLine = historicalAlias || type.names.ru;
+        const label = [visibleCode, aliasLine, type.names.ru].filter(Boolean).join(' - ');
 
         return (
           <button
@@ -46,15 +47,15 @@ export const TypeSelector: React.FC<Props> = ({ selectedTypeId, onSelectType }) 
           >
             <span className="flex items-start justify-between gap-2">
               <span className="min-w-0">
-                <span className="block text-[15px] font-bold leading-none tracking-normal">{type.id}</span>
+                <span className="block text-[15px] font-bold leading-none tracking-normal">{visibleCode}</span>
                 <span className={`mt-1 block truncate text-[11px] font-medium ${isActive ? 'text-indigo-100' : 'text-slate-500'}`}>
-                  {socionicsAlias ?? type.names.ru}
+                  {aliasLine}
                 </span>
               </span>
               <Badge className={`h-3.5 w-3.5 shrink-0 ${isActive ? 'text-indigo-200' : 'text-slate-300'}`} strokeWidth={2} />
             </span>
             <span className={`mt-2 block text-[11px] leading-snug ${isActive ? 'text-slate-200' : 'text-slate-500'}`}>
-              {type.names.en ?? mbtiAlias ?? type.quadraId}
+              {type.names.ru}
             </span>
           </button>
         );

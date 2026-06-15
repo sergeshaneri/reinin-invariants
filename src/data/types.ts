@@ -53,7 +53,7 @@ export const SOCIONIC_TYPES: readonly SocionicType[] = [
     id: 'ILE',
     quadraId: 'alpha',
     names: { ru: 'Интуитивно-логический экстраверт', en: 'Intuitive Logical Extravert' },
-    aliases: { socionics: ['ИЛЭ'], mbtiLike: ['ENTp'] },
+    aliases: { socionics: ['ИЛЭ', 'Дон Кихот'], mbtiLike: ['ENTp'] },
     modelA: [
       { functionId: 1, aspectId: 'Ne' },
       { functionId: 2, aspectId: 'Ti' },
@@ -69,7 +69,7 @@ export const SOCIONIC_TYPES: readonly SocionicType[] = [
     id: 'SEI',
     quadraId: 'alpha',
     names: { ru: 'Сенсорно-этический интроверт', en: 'Sensory Ethical Introvert' },
-    aliases: { socionics: ['СЭИ'], mbtiLike: ['ISFp'] },
+    aliases: { socionics: ['СЭИ', 'Дюма'], mbtiLike: ['ISFp'] },
     modelA: [
       { functionId: 1, aspectId: 'Si' },
       { functionId: 2, aspectId: 'Fe' },
@@ -85,7 +85,7 @@ export const SOCIONIC_TYPES: readonly SocionicType[] = [
     id: 'ESE',
     quadraId: 'alpha',
     names: { ru: 'Этико-сенсорный экстраверт', en: 'Ethical Sensory Extravert' },
-    aliases: { socionics: ['ЭСЭ'], mbtiLike: ['ESFj'] },
+    aliases: { socionics: ['ЭСЭ', 'Гюго'], mbtiLike: ['ESFj'] },
     modelA: [
       { functionId: 1, aspectId: 'Fe' },
       { functionId: 2, aspectId: 'Si' },
@@ -101,7 +101,7 @@ export const SOCIONIC_TYPES: readonly SocionicType[] = [
     id: 'LII',
     quadraId: 'alpha',
     names: { ru: 'Логико-интуитивный интроверт', en: 'Logical Intuitive Introvert' },
-    aliases: { socionics: ['ЛИИ'], mbtiLike: ['INTj'] },
+    aliases: { socionics: ['ЛИИ', 'Робеспьер'], mbtiLike: ['INTj'] },
     modelA: [
       { functionId: 1, aspectId: 'Ti' },
       { functionId: 2, aspectId: 'Ne' },
@@ -117,7 +117,7 @@ export const SOCIONIC_TYPES: readonly SocionicType[] = [
     id: 'EIE',
     quadraId: 'beta',
     names: { ru: 'Этико-интуитивный экстраверт', en: 'Ethical Intuitive Extravert' },
-    aliases: { socionics: ['ЭИЭ'], mbtiLike: ['ENFj'] },
+    aliases: { socionics: ['ЭИЭ', 'Гамлет'], mbtiLike: ['ENFj'] },
     modelA: [
       { functionId: 1, aspectId: 'Fe' },
       { functionId: 2, aspectId: 'Ni' },
@@ -133,7 +133,7 @@ export const SOCIONIC_TYPES: readonly SocionicType[] = [
     id: 'LSI',
     quadraId: 'beta',
     names: { ru: 'Логико-сенсорный интроверт', en: 'Logical Sensory Introvert' },
-    aliases: { socionics: ['ЛСИ'], mbtiLike: ['ISTj'] },
+    aliases: { socionics: ['ЛСИ', 'Максим Горький'], mbtiLike: ['ISTj'] },
     modelA: [
       { functionId: 1, aspectId: 'Ti' },
       { functionId: 2, aspectId: 'Se' },
@@ -149,7 +149,7 @@ export const SOCIONIC_TYPES: readonly SocionicType[] = [
     id: 'SLE',
     quadraId: 'beta',
     names: { ru: 'Сенсорно-логический экстраверт', en: 'Sensory Logical Extravert' },
-    aliases: { socionics: ['СЛЭ'], mbtiLike: ['ESTp'] },
+    aliases: { socionics: ['СЛЭ', 'Жуков'], mbtiLike: ['ESTp'] },
     modelA: [
       { functionId: 1, aspectId: 'Se' },
       { functionId: 2, aspectId: 'Ti' },
@@ -165,7 +165,7 @@ export const SOCIONIC_TYPES: readonly SocionicType[] = [
     id: 'IEI',
     quadraId: 'beta',
     names: { ru: 'Интуитивно-этический интроверт', en: 'Intuitive Ethical Introvert' },
-    aliases: { socionics: ['ИЭИ'], mbtiLike: ['INFp'] },
+    aliases: { socionics: ['ИЭИ', 'Есенин'], mbtiLike: ['INFp'] },
     modelA: [
       { functionId: 1, aspectId: 'Ni' },
       { functionId: 2, aspectId: 'Fe' },
@@ -181,7 +181,7 @@ export const SOCIONIC_TYPES: readonly SocionicType[] = [
     id: 'LIE',
     quadraId: 'gamma',
     names: { ru: 'Логико-интуитивный экстраверт', en: 'Logical Intuitive Extravert' },
-    aliases: { socionics: ['ЛИЭ'], mbtiLike: ['ENTj'] },
+    aliases: { socionics: ['ЛИЭ', 'Джек Лондон'], mbtiLike: ['ENTj'] },
     modelA: [
       { functionId: 1, aspectId: 'Te' },
       { functionId: 2, aspectId: 'Ni' },
@@ -197,7 +197,7 @@ export const SOCIONIC_TYPES: readonly SocionicType[] = [
     id: 'ESI',
     quadraId: 'gamma',
     names: { ru: 'Этико-сенсорный интроверт', en: 'Ethical Sensory Introvert' },
-    aliases: { socionics: ['ЭСИ'], mbtiLike: ['ISFj'] },
+    aliases: { socionics: ['ЭСИ', 'Драйзер'], mbtiLike: ['ISFj'] },
     modelA: [
       { functionId: 1, aspectId: 'Fi' },
       { functionId: 2, aspectId: 'Se' },
@@ -213,7 +213,7 @@ export const SOCIONIC_TYPES: readonly SocionicType[] = [
     id: 'SEE',
     quadraId: 'gamma',
     names: { ru: 'Сенсорно-этический экстраверт', en: 'Sensory Ethical Extravert' },
-    aliases: { socionics: ['СЭЭ'], mbtiLike: ['ESFp'] },
+    aliases: { socionics: ['СЭЭ', 'Наполеон'], mbtiLike: ['ESFp'] },
     modelA: [
       { functionId: 1, aspectId: 'Se' },
       { functionId: 2, aspectId: 'Fi' },
@@ -229,7 +229,7 @@ export const SOCIONIC_TYPES: readonly SocionicType[] = [
     id: 'ILI',
     quadraId: 'gamma',
     names: { ru: 'Интуитивно-логический интроверт', en: 'Intuitive Logical Introvert' },
-    aliases: { socionics: ['ИЛИ'], mbtiLike: ['INTp'] },
+    aliases: { socionics: ['ИЛИ', 'Бальзак'], mbtiLike: ['INTp'] },
     modelA: [
       { functionId: 1, aspectId: 'Ni' },
       { functionId: 2, aspectId: 'Te' },
@@ -245,7 +245,7 @@ export const SOCIONIC_TYPES: readonly SocionicType[] = [
     id: 'IEE',
     quadraId: 'delta',
     names: { ru: 'Интуитивно-этический экстраверт', en: 'Intuitive Ethical Extravert' },
-    aliases: { socionics: ['ИЭЭ'], mbtiLike: ['ENFp'] },
+    aliases: { socionics: ['ИЭЭ', 'Гексли'], mbtiLike: ['ENFp'] },
     modelA: [
       { functionId: 1, aspectId: 'Ne' },
       { functionId: 2, aspectId: 'Fi' },
@@ -261,7 +261,7 @@ export const SOCIONIC_TYPES: readonly SocionicType[] = [
     id: 'SLI',
     quadraId: 'delta',
     names: { ru: 'Сенсорно-логический интроверт', en: 'Sensory Logical Introvert' },
-    aliases: { socionics: ['СЛИ'], mbtiLike: ['ISTp'] },
+    aliases: { socionics: ['СЛИ', 'Габен'], mbtiLike: ['ISTp'] },
     modelA: [
       { functionId: 1, aspectId: 'Si' },
       { functionId: 2, aspectId: 'Te' },
@@ -277,7 +277,7 @@ export const SOCIONIC_TYPES: readonly SocionicType[] = [
     id: 'LSE',
     quadraId: 'delta',
     names: { ru: 'Логико-сенсорный экстраверт', en: 'Logical Sensory Extravert' },
-    aliases: { socionics: ['ЛСЭ'], mbtiLike: ['ESTj'] },
+    aliases: { socionics: ['ЛСЭ', 'Штирлиц'], mbtiLike: ['ESTj'] },
     modelA: [
       { functionId: 1, aspectId: 'Te' },
       { functionId: 2, aspectId: 'Si' },
@@ -293,7 +293,7 @@ export const SOCIONIC_TYPES: readonly SocionicType[] = [
     id: 'EII',
     quadraId: 'delta',
     names: { ru: 'Этико-интуитивный интроверт', en: 'Ethical Intuitive Introvert' },
-    aliases: { socionics: ['ЭИИ'], mbtiLike: ['INFj'] },
+    aliases: { socionics: ['ЭИИ', 'Достоевский'], mbtiLike: ['INFj'] },
     modelA: [
       { functionId: 1, aspectId: 'Fi' },
       { functionId: 2, aspectId: 'Ne' },

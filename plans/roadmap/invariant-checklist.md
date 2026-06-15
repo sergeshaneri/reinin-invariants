@@ -85,7 +85,7 @@ Required for D1.4:
 
 ## Partitions
 
-Required for D1.5 through O4.4:
+Required for D1.5 through C4.6:
 
 - One trait produces 2 classes.
 - Each dichotomy class contains 8 types.
@@ -160,4 +160,3 @@ Required for S8.*:
 - Missing interpretation returns an empty state, not an exception.
 - Interpretation records do not alter membership or partition results.
 - Draft content is not shown in release views unless explicitly allowed.
-

@@ -1,16 +1,32 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { REININ_TRAITS, AspectId, TraitClass } from './data/socionics';
-import { readInitialAppState, serializeAppUrlState } from './appState';
+import { REININ_TRAITS, AspectId, TraitClass, type PoleIndex } from './data/socionics';
+import {
+  getDefaultPartitionState,
+  getDefaultTraitPoleIndex,
+  getPartitionKindForMode,
+  readInitialAppState,
+  serializeAppUrlState,
+  type AppMode,
+  type PartitionExplorerState,
+} from './appState';
+import { selectDichotomyTypesPanelView, selectPartitionExplorerView } from './data/selectors';
 import { DIAGRAMS, DEFAULT_DIAGRAM_ID } from './diagrams/registry';
 import { HelpModal } from './components/HelpModal';
 import { Header } from './components/Header';
 import { ModeSelector } from './components/ModeSelector';
+import { AspectDisplayToggle } from './components/AspectDisplayToggle';
+import type { AspectDisplayMode } from './components/AspectGlyph';
 import { TraitNav } from './components/TraitNav';
 import { TypeSelector } from './components/TypeSelector';
+import { TypePatternCard } from './components/TypePatternCard';
+import { DichotomyDistribution } from './components/DichotomyDistribution';
+import { DichotomyGallery } from './components/DichotomyGallery';
+import { PartitionTypesPanel } from './components/PartitionTypesPanel';
 import { PoleSelector } from './components/PoleSelector';
 import { ViewSelector } from './components/ViewSelector';
 import { FormulaPanel } from './components/FormulaPanel';
 import { Footer } from './components/Footer';
+import { TypeModelDiagram } from './diagrams/TypeModelDiagram';
 import {
   clearActiveCell,
   resolveActiveCell,
@@ -26,6 +42,8 @@ const App: React.FC = () => {
   const [selectedPoleIndex, setSelectedPoleIndex] = useState(initial.poleIdx);
   const [activeViewIndex, setActiveViewIndex] = useState(initial.viewIdx);
   const [selectedTypeId, setSelectedTypeId] = useState(initial.typeId);
+  const [partition, setPartition] = useState<PartitionExplorerState>(initial.partition);
+  const [aspectDisplayMode, setAspectDisplayMode] = useState<AspectDisplayMode>('icon');
   const [hoveredCell, setHoveredCell] = useState<ActiveCell>(null);
   const [pinnedCell, setPinnedCell] = useState<ActiveCell>(null);
   const [helpClassId, setHelpClassId] = useState<TraitClass | null>(null);
@@ -33,6 +51,23 @@ const App: React.FC = () => {
   const currentTrait = REININ_TRAITS[selectedTraitIndex];
   const currentPole = currentTrait.poles[selectedPoleIndex];
   const currentView = currentPole.views[activeViewIndex] ?? currentPole.views[0];
+  const isPartitionMode = mode === 'tetrachotomy' || mode === 'octochotomy';
+  const partitionView = selectPartitionExplorerView(partition.traitIds, partition.selectedClassKey);
+
+  const handleSelectMode = (nextMode: AppMode) => {
+    const nextKind = getPartitionKindForMode(nextMode);
+
+    setMode(nextMode);
+    setPartition(current => (
+      current.kind === nextKind ? current : getDefaultPartitionState(nextKind)
+    ));
+  };
+
+  const handleSelectTrait = (idx: number) => {
+    setSelectedTraitIndex(idx);
+    setSelectedPoleIndex(getDefaultTraitPoleIndex(REININ_TRAITS[idx]?.id ?? REININ_TRAITS[0].id));
+    setActiveViewIndex(0);
+  };
 
   // При смене признака — сбрасываем view (но не на самой первой загрузке).
   // При смене полюса того же признака — индекс сохраняем, чтобы удобно сравнивать одну и ту же view на разных полюсах.
@@ -60,11 +95,12 @@ const App: React.FC = () => {
       poleIdx: selectedPoleIndex,
       viewIdx: activeViewIndex,
       typeId: selectedTypeId,
+      partition,
     });
     const newSearch = params.toString();
     const newUrl = `${window.location.pathname}${newSearch ? '?' + newSearch : ''}`;
     window.history.replaceState(null, '', newUrl);
-  }, [mode, selectedTraitIndex, selectedPoleIndex, activeViewIndex, selectedTypeId]);
+  }, [mode, selectedTraitIndex, selectedPoleIndex, activeViewIndex, selectedTypeId, partition]);
 
   // При смене признака/полюса — сбрасываем "пин" клеток.
   useEffect(() => {
@@ -76,7 +112,10 @@ const App: React.FC = () => {
   const activeCell = resolveActiveCell(hoveredCell, pinnedCell);
 
   return (
-    <div className="min-h-[100dvh] bg-[#f8fafc] text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-900">
+    <div
+      className="min-h-[100dvh] bg-[#f8fafc] text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-900"
+      data-aspect-display-mode={aspectDisplayMode}
+    >
       <HelpModal classId={helpClassId} onClose={() => setHelpClassId(null)} />
 
       <div className="fixed inset-0 pointer-events-none overflow-hidden motion-reduce:hidden">
@@ -87,7 +126,11 @@ const App: React.FC = () => {
       <Header />
 
       <main className="relative max-w-7xl mx-auto px-4 md:px-6 pb-16 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
-        <ModeSelector mode={mode} onSelectMode={setMode} />
+        <ModeSelector mode={mode} onSelectMode={handleSelectMode} />
+        <AspectDisplayToggle
+          mode={aspectDisplayMode}
+          onSelectMode={setAspectDisplayMode}
+        />
 
         <div className="lg:col-span-4">
           {mode === 'type' ? (
@@ -95,41 +138,102 @@ const App: React.FC = () => {
               selectedTypeId={selectedTypeId}
               onSelectType={setSelectedTypeId}
             />
+          ) : isPartitionMode ? (
+            <section className="rounded-[28px] border border-slate-200/60 bg-white/90 p-5 shadow-sm backdrop-blur-xl">
+              <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                Признаки
+              </h2>
+              <div className="mt-4 space-y-2">
+                {partitionView.partition.traits.map((trait, index) => (
+                  <div
+                    key={trait.id}
+                    className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3"
+                  >
+                    <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                      {index + 1}
+                    </div>
+                    <div className="mt-1 text-sm font-semibold leading-snug text-slate-800">
+                      {trait.name}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
           ) : (
             <TraitNav
               selectedTraitIndex={selectedTraitIndex}
-              onSelectTrait={(idx) => { setSelectedTraitIndex(idx); setSelectedPoleIndex(0); setActiveViewIndex(0); }}
+              onSelectTrait={handleSelectTrait}
               onShowHelp={setHelpClassId}
             />
           )}
         </div>
 
         <div className="lg:col-span-8 space-y-5 md:space-y-6">
-          <PoleSelector
-            trait={currentTrait}
-            selectedPoleIndex={selectedPoleIndex}
-            activeView={currentView}
-            onSelectPole={setSelectedPoleIndex}
-          />
+          {mode === 'type' ? (
+            <TypeModelDiagram
+              typeId={selectedTypeId}
+              aspectDisplayMode={aspectDisplayMode}
+            />
+          ) : isPartitionMode ? (
+            <TypePatternCard
+              view={partitionView}
+              onSelectClass={(selectedClassKey) => {
+                setPartition(current => ({
+                  ...current,
+                  selectedClassKey,
+                }));
+              }}
+            />
+          ) : (
+            <section
+              className="space-y-5 md:space-y-6"
+              data-dichotomy-detail={currentTrait.id}
+              data-selected-pole-index={selectedPoleIndex}
+            >
+              <DichotomyGallery
+                selectedTraitIndex={selectedTraitIndex}
+                onSelectTrait={handleSelectTrait}
+              />
 
-          <ViewSelector
-            views={currentPole.views}
-            activeViewIndex={activeViewIndex}
-            onSelect={setActiveViewIndex}
-          />
+              <PoleSelector
+                trait={currentTrait}
+                selectedPoleIndex={selectedPoleIndex}
+                activeView={currentView}
+                onSelectPole={setSelectedPoleIndex}
+              />
 
-          <Diagram
-            trait={currentTrait}
-            pole={currentPole}
-            view={currentView}
-            activeCell={activeCell}
-            onAspectHover={(id) => setHoveredCell(id === null ? null : { kind: 'aspect', id })}
-            onFunctionHover={(id) => setHoveredCell(id === null ? null : { kind: 'function', id })}
-            onAspectClick={(id) => setPinnedCell(current => togglePinnedCell(current, { kind: 'aspect', id }))}
-            onFunctionClick={(id) => setPinnedCell(current => togglePinnedCell(current, { kind: 'function', id }))}
-          />
+              <DichotomyDistribution
+                traitId={currentTrait.id}
+                selectedPoleIndex={selectedPoleIndex as PoleIndex}
+                onSelectPole={setSelectedPoleIndex}
+              />
 
-          <FormulaPanel trait={currentTrait} view={currentView} />
+              <PartitionTypesPanel
+                view={selectDichotomyTypesPanelView(currentTrait.id, selectedPoleIndex as PoleIndex)}
+                activeView={currentView}
+                aspectDisplayMode={aspectDisplayMode}
+              />
+
+              <ViewSelector
+                views={currentPole.views}
+                activeViewIndex={activeViewIndex}
+                onSelect={setActiveViewIndex}
+              />
+
+              <Diagram
+                trait={currentTrait}
+                pole={currentPole}
+                view={currentView}
+                activeCell={activeCell}
+                onAspectHover={(id) => setHoveredCell(id === null ? null : { kind: 'aspect', id })}
+                onFunctionHover={(id) => setHoveredCell(id === null ? null : { kind: 'function', id })}
+                onAspectClick={(id) => setPinnedCell(current => togglePinnedCell(current, { kind: 'aspect', id }))}
+                onFunctionClick={(id) => setPinnedCell(current => togglePinnedCell(current, { kind: 'function', id }))}
+              />
+
+              <FormulaPanel trait={currentTrait} view={currentView} />
+            </section>
+          )}
         </div>
       </main>
 

@@ -18,6 +18,7 @@ Use this file as the root operating guide for AI-assisted work in this repositor
 - Keep changes surgical. Do not refactor adjacent UI or data structures unless the task requires it.
 - Treat `src/data/socionics.ts` as source-of-truth domain data. Structural changes need tests.
 - Preserve Russian user-facing text and verify encoding before changing text-heavy files.
+- Use the `caveman` skill at `ultra` level by default for agent-user communication, unless the user asks for another style or normal mode. Keep code, commands, error messages, commits, PR text, and safety-critical confirmations precise and uncompressed when compression would create ambiguity.
 - On Windows PowerShell, include this UTF-8 prefix in any command that prints repository file contents, diffs, or other likely non-ASCII text: `[Console]::InputEncoding = [Text.UTF8Encoding]::new(); [Console]::OutputEncoding = [Text.UTF8Encoding]::new(); $OutputEncoding = [Text.UTF8Encoding]::new(); <command>`. Do this on the first attempt; do not first "try and see" with default encoding.
 - Prefer deterministic validation over subjective review.
 - Do not edit generated files in `dist/` directly.

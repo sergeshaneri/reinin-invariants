@@ -54,11 +54,11 @@
 | ID | Depends | Status | Цель | Вероятные файлы | Проверки | Риски |
 |---|---|---:|---|---|---|---|
 | C4.1 | X2.3 | DONE | Добавить selectors для catalogs: все валидные pairs и independent triples с preview pattern data. | `src/data/partitions.ts`, `src/data/selectors.ts`, tests | Tests: counts, class sizes, dependent triples excluded | Не импровизировать labels готовых tetra/octo без данных пользователя. |
-| C4.2 | C4.1 | TODO | Добавить multi-entry chooser: sequential trait selection, catalog list, visual pattern gallery. | `src/components/PartitionChooser.tsx`, `src/App.tsx` | e2e choose tetra/octo through all entry modes | Сложность UI: нужны compact controls и один canonical state. |
-| C4.3 | C4.2 | TODO | Добавить composition view для тетрахотомий: 2 component dichotomy cards -> final 4-class pattern. | `src/components/PartitionCompositionView.tsx`, selectors | e2e component toggles, render smoke | Важно показать, что итог = пересечение компонентов, не новый hand-authored object. |
-| C4.4 | C4.3 | TODO | Добавить detail тетрахотомии: 4 classes, selected class default = class ИЛЭ, types panel, Model A previews. | `src/components/TetrachotomyView.tsx`, `src/components/ModelAPreviewGrid.tsx` | selector tests, e2e desktop/mobile | 4 groups x 4 types могут перегрузить mobile layout. |
-| C4.5 | C4.2 | TODO | Добавить composition view для октохотомий: 3 component dichotomy cards -> final 8-class pattern. | `src/components/PartitionCompositionView.tsx`, selectors | e2e component/final highlight modes | Нужна хорошая diagnostic для dependent triples. |
-| C4.6 | C4.5 | TODO | Добавить detail октохотомии: 8 classes, selected class default = class ИЛЭ, types panel, Model A previews. | `src/components/OctochotomyView.tsx`, `src/components/PartitionDiagnostic.tsx` | e2e valid and invalid triple | 8 classes должны быть readable без card-heavy перегруза. |
+| C4.2 | C4.1 | DONE | Добавить multi-entry chooser: sequential trait selection, catalog list, visual pattern gallery. | `src/components/PartitionChooser.tsx`, `src/App.tsx` | e2e choose tetra/octo through all entry modes | Сложность UI: нужны compact controls и один canonical state. |
+| C4.3 | C4.2 | DONE | Добавить composition view для тетрахотомий: 2 component dichotomy cards -> final 4-class pattern. | `src/components/PartitionCompositionView.tsx`, selectors | e2e component toggles, render smoke | Важно показать, что итог = пересечение компонентов, не новый hand-authored object. |
+| C4.4 | C4.3 | DONE | Добавить detail тетрахотомии: 4 classes, selected class default = class ИЛЭ, types panel, Model A previews. | `src/components/TetrachotomyView.tsx`, `src/components/ModelAPreviewGrid.tsx` | selector tests, e2e desktop/mobile | 4 groups x 4 types могут перегрузить mobile layout. |
+| C4.5 | C4.2 | DONE | Добавить composition view для октохотомий: 3 component dichotomy cards -> final 8-class pattern. | `src/components/PartitionCompositionView.tsx`, selectors | e2e component/final highlight modes | Нужна хорошая diagnostic для dependent triples. |
+| C4.6 | C4.5 | DONE | Добавить detail октохотомии: 8 classes, selected class default = class ИЛЭ, types panel, Model A previews. | `src/components/OctochotomyView.tsx`, `src/components/PartitionDiagnostic.tsx` | e2e valid and invalid triple | 8 classes должны быть readable без card-heavy перегруза. |
 
 ## Phase 4L: Future Subgroup Lattice
 
@@ -106,7 +106,7 @@
 
 | ID | Depends | Status | Цель | Вероятные файлы | Проверки | Риски |
 |---|---|---:|---|---|---|---|
-| Q9.1 | D3.4, C4.6 | TODO | Расширить smoke render на новые partition/detail режимы. | `scripts/render-smoke.tsx`, tests | `npm run smoke:render` | Smoke должен оставаться быстрым. |
+| Q9.1 | D3.4, C4.6 | DONE | Расширить smoke render на новые partition/detail режимы. | `scripts/render-smoke.tsx`, tests | `npm run smoke:render` | Smoke должен оставаться быстрым. |
 | Q9.2 | H6.4, L7.5 | TODO | Добавить e2e сценарии theme + locale + partitions. | `tests/*` | `npm run test:e2e` | Playwright snapshots могут требовать стабильных размеров. |
 | Q9.3 | all feature phases | TODO | Запустить полную проверку и обновить `plans/roadmap/progress.md`. | `plans/roadmap/progress.md` | `npm run validate` | Audit или smoke могут упасть из-за внешнего окружения. |
-| Q9.4 | D1.4 | TODO | Добавить краткое объяснение H3-порядка аспектон/функцион/социон в справку или документацию, не перегружая главный экран. | `plans/roadmap/PRD.md`, `src/components/HelpModal.tsx` или docs | `npm run smoke:render`, `npm run test:e2e` если меняется UI | Теоретическое объяснение может стать слишком длинным для первого экрана. |
+| Q9.4 | D1.4 | DONE | Добавить краткое объяснение H3-порядка аспектон/функцион/социон в справку или документацию, не перегружая главный экран. | `plans/roadmap/PRD.md`, `src/components/HelpModal.tsx` или docs | `npm run smoke:render`, `npm run test:e2e` если меняется UI | Теоретическое объяснение может стать слишком длинным для первого экрана. |

@@ -17,6 +17,17 @@ Use this file to convert repeated agent mistakes into concrete harness changes.
 
 ## Active Entries
 
+### 2026-06-15 - Worker Wrote Mojibake UI Literals
+
+- Task: Implement C4.2 Partition Explorer chooser with Russian user-facing labels.
+- What happened: The worker added `src/components/PartitionChooser.tsx` with mojibake Russian UI literals such as `РўРµ...` and `РџРѕ...`.
+- Expected behavior: New Russian user-facing strings should be written as valid UTF-8 and reviewed before handoff.
+- Root cause: The UTF-8 rule covered shell output, but the worker did not apply an explicit post-edit scan for newly added Russian literals.
+- Proposed harness change: Add a narrow pre-handoff check for touched text-bearing files: scan diffs for common mojibake markers (`Р`, `С`, replacement characters) before claiming completion.
+- Change type: check
+- Acceptance test: A future task that adds Russian UI text fails pre-handoff review if the diff contains mojibake markers in user-facing literals.
+- Status: proposed
+
 ### 2026-06-15 - Preflight Rules Applied Too Late
 
 - Task: Continue from `Recommended Next Step` as orchestrator.

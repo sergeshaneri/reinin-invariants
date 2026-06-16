@@ -18,10 +18,13 @@ import { AspectDisplayToggle } from './components/AspectDisplayToggle';
 import type { AspectDisplayMode } from './components/AspectGlyph';
 import { TraitNav } from './components/TraitNav';
 import { TypeSelector } from './components/TypeSelector';
-import { TypePatternCard } from './components/TypePatternCard';
 import { DichotomyDistribution } from './components/DichotomyDistribution';
 import { DichotomyGallery } from './components/DichotomyGallery';
+import { PartitionChooser } from './components/PartitionChooser';
 import { PartitionTypesPanel } from './components/PartitionTypesPanel';
+import { PartitionCompositionView } from './components/PartitionCompositionView';
+import { TetrachotomyView } from './components/TetrachotomyView';
+import { OctochotomyView } from './components/OctochotomyView';
 import { PoleSelector } from './components/PoleSelector';
 import { ViewSelector } from './components/ViewSelector';
 import { FormulaPanel } from './components/FormulaPanel';
@@ -67,6 +70,14 @@ const App: React.FC = () => {
     setSelectedTraitIndex(idx);
     setSelectedPoleIndex(getDefaultTraitPoleIndex(REININ_TRAITS[idx]?.id ?? REININ_TRAITS[0].id));
     setActiveViewIndex(0);
+  };
+
+  const handleSelectPartitionTraits = (traitIds: PartitionExplorerState['traitIds']) => {
+    setPartition(current => ({
+      ...current,
+      traitIds,
+      selectedClassKey: '',
+    }));
   };
 
   // При смене признака — сбрасываем view (но не на самой первой загрузке).
@@ -139,26 +150,11 @@ const App: React.FC = () => {
               onSelectType={setSelectedTypeId}
             />
           ) : isPartitionMode ? (
-            <section className="rounded-[28px] border border-slate-200/60 bg-white/90 p-5 shadow-sm backdrop-blur-xl">
-              <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                Признаки
-              </h2>
-              <div className="mt-4 space-y-2">
-                {partitionView.partition.traits.map((trait, index) => (
-                  <div
-                    key={trait.id}
-                    className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3"
-                  >
-                    <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                      {index + 1}
-                    </div>
-                    <div className="mt-1 text-sm font-semibold leading-snug text-slate-800">
-                      {trait.name}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
+            <PartitionChooser
+              kind={partition.kind === 'octochotomy' ? 'octochotomy' : 'tetrachotomy'}
+              selectedTraitIds={partition.traitIds}
+              onSelectTraitIds={handleSelectPartitionTraits}
+            />
           ) : (
             <TraitNav
               selectedTraitIndex={selectedTraitIndex}
@@ -174,8 +170,30 @@ const App: React.FC = () => {
               typeId={selectedTypeId}
               aspectDisplayMode={aspectDisplayMode}
             />
+          ) : mode === 'tetrachotomy' ? (
+            <TetrachotomyView
+              view={partitionView}
+              aspectDisplayMode={aspectDisplayMode}
+              onSelectClass={(selectedClassKey) => {
+                setPartition(current => ({
+                  ...current,
+                  selectedClassKey,
+                }));
+              }}
+            />
+          ) : mode === 'octochotomy' ? (
+            <OctochotomyView
+              view={partitionView}
+              aspectDisplayMode={aspectDisplayMode}
+              onSelectClass={(selectedClassKey) => {
+                setPartition(current => ({
+                  ...current,
+                  selectedClassKey,
+                }));
+              }}
+            />
           ) : isPartitionMode ? (
-            <TypePatternCard
+            <PartitionCompositionView
               view={partitionView}
               onSelectClass={(selectedClassKey) => {
                 setPartition(current => ({

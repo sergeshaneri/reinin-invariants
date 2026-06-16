@@ -192,6 +192,159 @@ test('switches app modes through the URL state', async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
+test('chooses tetra and octo partitions through sequential trait selection', async ({ page }) => {
+  const errors = collectPageErrors(page);
+
+  await page.goto('/?mode=tetrachotomy');
+  await expect(page.locator('[data-partition-chooser="tetrachotomy"]')).toBeVisible();
+
+  await page.locator('[data-partition-sequential-slot="1"][data-partition-sequential-trait="talness"]').click();
+  await expect(page.locator('[data-partition-pattern="tetrachotomy"]')).toBeVisible();
+  await expect(page.locator('[data-partition-catalog-entry="vertness+talness"]')).toHaveAttribute('aria-current', 'true');
+  await expect(page).toHaveURL(/mode=tetrachotomy/);
+  await expect(page).toHaveURL(/traits=vertness%2Ctalness/);
+
+  await page.getByRole('tab', { name: 'Октохотомия' }).click();
+  await expect(page.locator('[data-partition-chooser="octochotomy"]')).toBeVisible();
+  await page.locator('[data-partition-sequential-slot="2"][data-partition-sequential-trait="yielding"]').click();
+  await expect(page.locator('[data-partition-pattern="octochotomy"]')).toBeVisible();
+  await expect(page.locator('[data-partition-catalog-entry="vertness+nalness+yielding"]')).toHaveAttribute('aria-current', 'true');
+  await expect(page).toHaveURL(/mode=octochotomy/);
+  await expect(page).toHaveURL(/traits=vertness%2Cnalness%2Cyielding/);
+
+  expect(errors).toEqual([]);
+});
+
+test('chooses tetra and octo partitions through catalog entries', async ({ page }) => {
+  const errors = collectPageErrors(page);
+
+  await page.goto('/?mode=tetrachotomy');
+  await page.locator('[data-partition-catalog-entry="asking+process"]').click();
+  await expect(page.locator('[data-partition-catalog-entry="asking+process"]')).toHaveAttribute('aria-current', 'true');
+  await expect(page.locator('[data-partition-pattern="tetrachotomy"] [role="gridcell"]')).toHaveCount(16);
+  await expect(page).toHaveURL(/traits=asking%2Cprocess/);
+
+  await page.getByRole('tab', { name: 'Октохотомия' }).click();
+  await page.locator('[data-partition-catalog-entry="vertness+nalness+asking"]').click();
+  await expect(page.locator('[data-partition-catalog-entry="vertness+nalness+asking"]')).toHaveAttribute('aria-current', 'true');
+  await expect(page.locator('[data-partition-pattern="octochotomy"] [role="gridcell"]')).toHaveCount(16);
+  await expect(page).toHaveURL(/traits=vertness%2Cnalness%2Casking/);
+
+  expect(errors).toEqual([]);
+});
+
+test('chooses tetra and octo partitions through visual pattern gallery', async ({ page }) => {
+  const errors = collectPageErrors(page);
+
+  await page.goto('/?mode=tetrachotomy');
+  await page.locator('[data-partition-gallery-entry="vertness+talness"]').click();
+  await expect(page.locator('[data-partition-gallery-entry="vertness+talness"]')).toHaveAttribute('aria-current', 'true');
+  await expect(page.locator('[data-partition-catalog-entry="vertness+talness"]')).toHaveAttribute('aria-current', 'true');
+  await expect(page).toHaveURL(/traits=vertness%2Ctalness/);
+
+  await page.getByRole('tab', { name: 'Октохотомия' }).click();
+  await page.locator('[data-partition-gallery-entry="vertness+talness+carefree"]').click();
+  await expect(page.locator('[data-partition-gallery-entry="vertness+talness+carefree"]')).toHaveAttribute('aria-current', 'true');
+  await expect(page.locator('[data-partition-catalog-entry="vertness+talness+carefree"]')).toHaveAttribute('aria-current', 'true');
+  await expect(page).toHaveURL(/traits=vertness%2Ctalness%2Ccarefree/);
+
+  expect(errors).toEqual([]);
+});
+
+test('shows tetrachotomy composition and toggles component poles', async ({ page }) => {
+  const errors = collectPageErrors(page);
+
+  await page.goto('/?mode=tetrachotomy&traits=vertness,nalness');
+
+  const composition = page.locator('[data-partition-composition="tetrachotomy"]');
+  const finalPattern = composition.locator('[data-composition-final="true"]');
+  const detail = page.locator('[data-tetrachotomy-detail]');
+
+  await expect(detail).toHaveAttribute('data-selected-class-key', 'vertness:0|nalness:0');
+  await expect(composition).toBeVisible();
+  await expect(detail.locator('[data-tetrachotomy-class]')).toHaveCount(4);
+  await expect(detail.locator('[data-tetrachotomy-class="vertness:0|nalness:0"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(detail.locator('[data-partition-types-panel="tetrachotomy"]')).toHaveAttribute('data-selected-class-key', 'vertness:0|nalness:0');
+  await expect(detail.locator('[data-partition-types-panel="tetrachotomy"] [data-model-preview-type-id]')).toHaveCount(4);
+  await expect(detail.locator('[data-partition-types-panel="tetrachotomy"] [data-model-preview-type-id="ILE"]')).toBeVisible();
+  await expect(composition.locator('[data-composition-component-index]')).toHaveCount(2);
+  await expect(composition.locator('[data-composition-component-index="0"]')).toHaveAttribute('data-composition-component-trait', 'vertness');
+  await expect(composition.locator('[data-composition-component-index="1"]')).toHaveAttribute('data-composition-component-trait', 'nalness');
+  await expect(finalPattern.locator('[data-partition-pattern="tetrachotomy"] [role="gridcell"]')).toHaveCount(16);
+  await expect(finalPattern.locator('[data-partition-pattern="tetrachotomy"] [aria-pressed="true"]')).toHaveCount(4);
+
+  await composition.locator('[data-composition-pole="vertness"][data-composition-pole-index="1"]').click();
+
+  await expect(composition.locator('[data-composition-pole="vertness"][data-composition-pole-index="1"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(composition.locator('[data-composition-pole="nalness"][data-composition-pole-index="0"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(detail.locator('[data-tetrachotomy-class="vertness:1|nalness:0"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(detail.locator('[data-partition-types-panel="tetrachotomy"]')).toHaveAttribute('data-selected-class-key', 'vertness:1|nalness:0');
+  await expect(finalPattern.locator('[data-partition-pattern="tetrachotomy"] [aria-pressed="true"]')).toHaveCount(4);
+  await expect(page).toHaveURL(/class=vertness%3A1%7Cnalness%3A0/);
+
+  await finalPattern.locator('[data-type-id="ILE"]').click();
+
+  await expect(composition.locator('[data-composition-pole="vertness"][data-composition-pole-index="0"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(composition.locator('[data-composition-pole="nalness"][data-composition-pole-index="0"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(detail.locator('[data-tetrachotomy-class="vertness:0|nalness:0"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page).toHaveURL(/class=vertness%3A0%7Cnalness%3A0/);
+
+  expect(errors).toEqual([]);
+});
+
+test('shows octochotomy composition and toggles component poles', async ({ page }) => {
+  const errors = collectPageErrors(page);
+
+  await page.goto('/?mode=octochotomy&traits=vertness,nalness,carefree');
+
+  const composition = page.locator('[data-partition-composition="octochotomy"]');
+  const finalPattern = composition.locator('[data-composition-final="true"]');
+  const detail = page.locator('[data-octochotomy-detail]');
+
+  await expect(detail).toHaveAttribute('data-selected-class-key', 'vertness:0|nalness:0|carefree:0');
+  await expect(composition).toBeVisible();
+  await expect(detail.locator('[data-octochotomy-class]')).toHaveCount(8);
+  await expect(detail.locator('[data-octochotomy-class="vertness:0|nalness:0|carefree:0"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(detail.locator('[data-partition-types-panel="octochotomy"]')).toHaveAttribute('data-selected-class-key', 'vertness:0|nalness:0|carefree:0');
+  await expect(detail.locator('[data-partition-types-panel="octochotomy"] [data-model-preview-type-id]')).toHaveCount(2);
+  await expect(detail.locator('[data-partition-types-panel="octochotomy"] [data-model-preview-type-id="ILE"]')).toBeVisible();
+  await expect(composition.locator('[data-composition-component-index]')).toHaveCount(3);
+  await expect(composition.locator('[data-composition-component-index="0"]')).toHaveAttribute('data-composition-component-trait', 'vertness');
+  await expect(composition.locator('[data-composition-component-index="1"]')).toHaveAttribute('data-composition-component-trait', 'nalness');
+  await expect(composition.locator('[data-composition-component-index="2"]')).toHaveAttribute('data-composition-component-trait', 'carefree');
+  await expect(finalPattern.locator('[data-partition-pattern="octochotomy"] [role="gridcell"]')).toHaveCount(16);
+  await expect(finalPattern.locator('[data-partition-pattern="octochotomy"] [aria-pressed="true"]')).toHaveCount(2);
+
+  await composition.locator('[data-composition-pole="carefree"][data-composition-pole-index="1"]').click();
+
+  await expect(composition.locator('[data-composition-pole="vertness"][data-composition-pole-index="0"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(composition.locator('[data-composition-pole="nalness"][data-composition-pole-index="0"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(composition.locator('[data-composition-pole="carefree"][data-composition-pole-index="1"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(detail.locator('[data-octochotomy-class="vertness:0|nalness:0|carefree:1"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(detail.locator('[data-partition-types-panel="octochotomy"]')).toHaveAttribute('data-selected-class-key', 'vertness:0|nalness:0|carefree:1');
+  await expect(finalPattern.locator('[data-partition-pattern="octochotomy"] [aria-pressed="true"]')).toHaveCount(2);
+  await expect(page).toHaveURL(/class=vertness%3A0%7Cnalness%3A0%7Ccarefree%3A1/);
+
+  expect(errors).toEqual([]);
+});
+
+test('shows octochotomy diagnostics for dependent URL triples', async ({ page }) => {
+  const errors = collectPageErrors(page);
+
+  await page.goto('/?mode=octochotomy&traits=vertness,nalness,talness');
+
+  await expect(page.locator('[data-partition-chooser="octochotomy"]')).toBeVisible();
+  await expect(page.locator('[data-octochotomy-detail]')).toHaveCount(0);
+  await expect(page.locator('[data-partition-pattern="octochotomy"]')).toHaveCount(0);
+  await expect(page.locator('[data-partition-diagnostic="octochotomy"]')).toHaveAttribute('data-partition-diagnostic-reason', 'dependent-traits');
+  await expect(page.locator('[data-partition-diagnostic="octochotomy"]')).toContainText('Selected traits');
+  await expect(page).toHaveURL(/mode=octochotomy/);
+  await expect(page).toHaveURL(/traits=vertness%2Cnalness%2Ctalness/);
+  await expect(page).not.toHaveURL(/class=/);
+
+  expect(errors).toEqual([]);
+});
+
 test('renders type mode Model A without English abbreviations', async ({ page }) => {
   const errors = collectPageErrors(page);
 

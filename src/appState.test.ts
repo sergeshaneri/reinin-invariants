@@ -150,15 +150,31 @@ describe('app URL state', () => {
     });
   });
 
-  it('falls back to default partition traits for invalid partition URLs', () => {
+  it('keeps known unique dependent triples in partition URLs for diagnostics', () => {
     expect(parseAppUrlState('?mode=octochotomy&traits=vertness,nalness,talness')).toMatchObject({
+      mode: 'octochotomy',
+      partition: {
+        kind: 'octochotomy',
+        traitIds: ['vertness', 'nalness', 'talness'],
+        selectedClassKey: '',
+      },
+    });
+  });
+
+  it('falls back to default partition traits for structurally invalid partition URLs', () => {
+    expect(parseAppUrlState('?mode=tetrachotomy&traits=vertness,missing')).toMatchObject({
+      mode: 'tetrachotomy',
+      partition: defaultTetrachotomyPartition,
+    });
+
+    expect(parseAppUrlState('?mode=octochotomy&traits=vertness,nalness')).toMatchObject({
       mode: 'octochotomy',
       partition: defaultOctochotomyPartition,
     });
 
-    expect(parseAppUrlState('?mode=tetrachotomy&traits=vertness,missing')).toMatchObject({
-      mode: 'tetrachotomy',
-      partition: defaultTetrachotomyPartition,
+    expect(parseAppUrlState('?mode=octochotomy&traits=vertness,nalness,vertness')).toMatchObject({
+      mode: 'octochotomy',
+      partition: defaultOctochotomyPartition,
     });
   });
 

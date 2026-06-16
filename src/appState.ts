@@ -118,11 +118,7 @@ const parsePartitionTraitIds = (
     return DEFAULT_PARTITION_TRAITS[kind];
   }
 
-  const partition = buildPartition(traitIds);
-
-  return partition.ok && partition.kind === kind
-    ? traitIds
-    : DEFAULT_PARTITION_TRAITS[kind];
+  return traitIds;
 };
 
 const getIlePartitionClassKey = (traitIds: readonly ReininTraitId[]): string => {

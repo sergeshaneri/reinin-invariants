@@ -3,10 +3,10 @@
 ## Snapshot
 
 - Created: 2026-06-12.
-- Scope of this pass: planning and execution-harness artifacts only.
-- Source changes in this pass: none.
+- Scope of this pass: Partition Explorer hardening through Q9.4.
+- Source changes in this pass: Q9.1 render smoke covers partition detail modes and dependent diagnostics; Q9.4 documents H3 display order.
 - Existing dirty workspace changes were observed before planning and left untouched.
-- Validation: `npm run validate` passed after rerun outside the sandbox.
+- Validation: `npm run smoke:render` and `npm run lint` passed; `npm run validate` was not run for Q9.1 because it can write generated `dist/`.
 
 ## Current Status
 
@@ -22,9 +22,11 @@
 | Type selector | DONE | U2.3 added canonical 16-type selection and `type` URL state in type mode. |
 | Type Model A diagram | DONE | U2.4 renders selected TIM Model A in type mode. |
 | Type invariant highlight | DONE/SUPERSEDED | U2.5 works technically but is no longer the desired UX direction. |
-| Partition Explorer UX | TODO | C4.1 added computed partition catalogs for valid tetrachotomy pairs and independent octochotomy triples; next work starts with C4.2 chooser UI. |
-| Tetrachotomies | TODO | Should be selected through sequential traits, catalog list, or visual patterns and show component composition. |
-| Octochotomies | TODO | Should mirror tetrachotomy UX with diagnostics for dependent triples. |
+| Partition Explorer UX | DONE | C4.1 catalogs, C4.2 multi-entry chooser, C4.3 tetrachotomy composition, C4.4 tetrachotomy detail, C4.5 octochotomy composition and C4.6 octochotomy detail are complete. |
+| Tetrachotomies | DONE | C4.4 shows four classes, selected-class types and Model A previews. |
+| Octochotomies | DONE | C4.6 shows eight classes, selected-class types, Model A previews and dependent URL diagnostics. |
+| Render smoke hardening | DONE | Q9.1 covers default dichotomy, valid tetrachotomy, valid octochotomy and dependent octochotomy SSR paths. |
+| H3 order explanation | DONE | Q9.4 documents canonical H3 order in PRD without adding main-screen UI text. |
 | Aspect icons | TODO | Should follow stable aspect visual metadata. |
 | Dark theme | TODO | Should follow app state and design token decisions. |
 | English version | TODO | Should follow locale adapter and catalog split. |
@@ -32,7 +34,7 @@
 
 ## Recommended Next Step
 
-Continue with `C4.2` from `tasks.md`: add the multi-entry partition chooser with sequential trait selection, catalog list and visual pattern gallery.
+No further roadmap work is planned in this pass.
 
 ## Milestone Checklist
 
@@ -670,3 +672,165 @@ Continue with `C4.2` from `tasks.md`: add the multi-entry partition chooser with
   - none
 - Remaining:
   - C4.2 should add the multi-entry chooser UI over these catalogs.
+
+### 2026-06-15 - Task C4.2
+
+- Status: DONE
+- Changed files:
+  - `src/components/PartitionChooser.tsx`
+  - `src/App.tsx`
+  - `tests/e2e/app.spec.ts`
+  - `plans/roadmap/progress.md`
+- Summary:
+  - Added a shared Partition Explorer chooser for tetrachotomies and octochotomies.
+  - Added three entry modes over one canonical partition state: sequential trait selection, full catalog list and visual mini-pattern gallery.
+  - Wired chooser selection into the existing pattern/detail state with selected class fallback reset.
+  - Added e2e coverage for choosing tetra and octo partitions through all three entry modes.
+- Checks:
+  - `npm run lint`: passed
+  - `npm run smoke:render`: passed
+  - `npm run test:e2e`: passed
+  - `npm run validate`: not run because it performs a production build that can update generated `dist/`, which this task explicitly avoided.
+- Decisions:
+  - none
+- Remaining:
+  - C4.3 should add the tetrachotomy composition view.
+
+### 2026-06-15 - Task C4.3
+
+- Status: DONE
+- Changed files:
+  - `src/components/PartitionCompositionView.tsx`
+  - `src/App.tsx`
+  - `tests/e2e/app.spec.ts`
+  - `plans/roadmap/tasks.md`
+  - `plans/roadmap/progress.md`
+- Summary:
+  - Added a tetrachotomy composition view with two component dichotomy cards and one scoped final 4-class pattern.
+  - Component pole toggles select the existing partition class intersection through `selectedClassKey`; no hand-authored partition facts were added.
+  - Kept octochotomy on the existing pattern path for C4.5.
+  - Added scoped e2e locators for component cards and final pattern to avoid ambiguous `TypePatternCard` matches.
+- Checks:
+  - `npm run lint`: passed
+  - `npm run smoke:render`: passed
+  - `PLAYWRIGHT_EXTERNAL_SERVER=1 node node_modules/playwright/cli.js test tests/e2e/app.spec.ts -g "shows tetrachotomy composition"`: passed
+  - `npm run validate`: not run because it performs a production build that can update generated `dist/`, which this task explicitly avoided.
+- Decisions:
+  - The composition view derives component pole membership from the existing tetrachotomy partition view model.
+- Remaining:
+  - C4.4 should add the tetrachotomy detail view with 4 classes, selected-class type panel and Model A previews.
+
+### 2026-06-15 - Task C4.4
+
+- Status: DONE
+- Changed files:
+  - `src/components/TetrachotomyView.tsx`
+  - `src/App.tsx`
+  - `tests/e2e/app.spec.ts`
+  - `plans/roadmap/tasks.md`
+  - `plans/roadmap/progress.md`
+- Summary:
+  - Added a tetrachotomy detail wrapper that combines the existing component composition, four computed class buttons and the reusable selected-class types panel.
+  - Reused `PartitionTypesPanel` and `ModelAPreviewGrid`; no duplicate Model A preview logic or new domain facts were added.
+  - Derived preview highlight context deterministically from the first trait/pole of the selected class using that pole's first view.
+  - Added e2e coverage for the four class buttons and four selected-class Model A previews.
+- Checks:
+  - `npm run lint`: passed
+  - `npm run smoke:render`: passed
+  - `PLAYWRIGHT_EXTERNAL_SERVER=1 node node_modules/playwright/cli.js test tests/e2e/app.spec.ts --grep "shows tetrachotomy composition"`: passed on chromium desktop and mobile
+  - `npm run validate`: not run because it performs a production build that can update generated `dist/`, which this task explicitly avoided.
+- Decisions:
+  - The tetrachotomy detail preview uses the first selected class pole's first view as the minimal deterministic highlight source.
+- Remaining:
+  - C4.5 should add the octochotomy composition view.
+
+### 2026-06-15 - Task C4.5
+
+- Status: DONE
+- Changed files:
+  - `src/components/PartitionCompositionView.tsx`
+  - `src/App.tsx`
+  - `tests/e2e/app.spec.ts`
+  - `plans/roadmap/tasks.md`
+  - `plans/roadmap/progress.md`
+- Summary:
+  - Reused the existing partition composition view for octochotomy mode.
+  - Added three component dichotomy cards feeding the existing octochotomy `selectPartitionExplorerView` final pattern.
+  - Kept dependent-triple URL/parser diagnostics unchanged for C4.6, per scope.
+  - Added e2e coverage for component cards, 16-cell final pattern, two selected final cells and component-pole URL sync.
+- Checks:
+  - `npm run lint`: passed
+  - `npm run smoke:render`: passed
+  - `node scripts/e2e-dev.mjs tests/e2e/app.spec.ts --grep "shows octochotomy composition"`: passed; script ran the full desktop/mobile e2e suite.
+  - `npm run validate`: not run because it performs a production build that can update generated `dist/`, which this task explicitly avoided.
+- Decisions:
+  - No `OctochotomyView` was added; C4.5 only needs composition plus final pattern.
+- Remaining:
+  - C4.6 should add the octochotomy detail view and dependent URL diagnostic path.
+
+### 2026-06-15 - Task C4.6
+
+- Status: DONE
+- Changed files:
+  - `src/components/OctochotomyView.tsx`
+  - `src/components/PartitionDiagnostic.tsx`
+  - `src/components/TypePatternCard.tsx`
+  - `src/App.tsx`
+  - `src/appState.ts`
+  - `src/appState.test.ts`
+  - `tests/e2e/app.spec.ts`
+  - `plans/roadmap/tasks.md`
+  - `plans/roadmap/progress.md`
+- Summary:
+  - Added octochotomy detail with eight computed class buttons, selected class defaulting through the existing ILE class selector, and the reusable selected-class types panel with Model A previews.
+  - Added a reusable partition diagnostic component with explicit diagnostic data attributes.
+  - Preserved known unique dependent triples in URL state so selector diagnostics render instead of silently defaulting.
+  - Added e2e coverage for valid octochotomy detail and dependent-triple diagnostic URLs.
+- Checks:
+  - `npm run lint`: passed
+  - `npm test -- src/appState.test.ts`: passed
+  - `npm run smoke:render`: passed
+  - `node scripts/e2e-dev.mjs tests/e2e/app.spec.ts --grep "shows octochotomy"`: passed; script ran the full desktop/mobile e2e suite.
+  - `npm run validate`: not run because it performs production build/audit/dev-server checks and may update generated `dist/`; targeted checks covered this scoped change.
+- Decisions:
+  - Dependent diagnostics use the existing `buildPartition` and selector diagnostic path; no new domain facts were added.
+- Remaining:
+  - Next roadmap step can be G4L.1 for subgroup-lattice domain modeling; Q9.1 is also unblocked for smoke-render hardening.
+
+### 2026-06-15 - Task Q9.1
+
+- Status: DONE
+- Changed files:
+  - `scripts/render-smoke.tsx`
+  - `plans/roadmap/tasks.md`
+  - `plans/roadmap/progress.md`
+- Summary:
+  - Expanded SSR render smoke from the default trait path to a deterministic multi-case harness.
+  - Added URL-search SSR cases for valid tetrachotomy, valid octochotomy and a dependent octochotomy triple.
+  - Checked stable data attributes, class/component/model-preview counts, canonical Russian UI strings and diagnostic reason output without asserting URL mutation.
+- Checks:
+  - `npm run smoke:render`: passed
+  - `npm run lint`: passed
+  - `npm run validate`: not run because it performs a production build that can write generated `dist/`, which Q9.1 explicitly avoided.
+- Decisions:
+  - none
+- Remaining:
+  - none
+
+### 2026-06-16 - Task Q9.4
+
+- Status: DONE
+- Changed files:
+  - `plans/roadmap/PRD.md`
+  - `plans/roadmap/tasks.md`
+  - `plans/roadmap/progress.md`
+- Summary:
+  - Added a short PRD section explaining that aspecton, functionon and socion use the user-provided canonical H3 display order.
+  - Clarified that the order is part of domain data for trait vectors, partitions, Model A comparisons and regression tests, not a cosmetic UI sort.
+  - Kept the explanation out of the main screen and avoided adding new theoretical claims beyond existing roadmap decisions.
+- Checks:
+  - pending commit validation
+- Decisions:
+  - none
+- Remaining:
+  - none

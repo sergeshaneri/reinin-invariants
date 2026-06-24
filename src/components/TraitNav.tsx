@@ -21,15 +21,15 @@ export const TraitNav: React.FC<Props> = ({ selectedTraitIndex, onSelectTrait, o
 
   return (
     <section
-      className="bg-white/90 backdrop-blur-xl rounded-[28px] border border-slate-200/60 p-5"
+      className="shell-panel backdrop-blur-xl rounded-[28px] border p-5"
       style={{ boxShadow: '0 12px 30px -16px rgba(15, 23, 42, 0.1), inset 0 1px 0 rgba(255,255,255,0.6)' }}
     >
       <div className="flex items-center justify-between mb-5 px-1">
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 flex items-center gap-2">
-          <Layers className="w-3.5 h-3.5 text-indigo-500" strokeWidth={2} />
+        <h2 className="shell-heading text-[11px] font-semibold uppercase tracking-[0.18em] flex items-center gap-2">
+          <Layers className="shell-accent w-3.5 h-3.5" strokeWidth={2} />
           Признаки
         </h2>
-        <span className="text-[11px] font-medium text-slate-400 font-mono">{REININ_TRAITS.length}</span>
+        <span className="shell-subtle text-[11px] font-medium font-mono">{REININ_TRAITS.length}</span>
       </div>
       <div className="space-y-5 max-h-[640px] overflow-y-auto pr-1 custom-scrollbar">
         {grouped.map((group) => (
@@ -37,10 +37,10 @@ export const TraitNav: React.FC<Props> = ({ selectedTraitIndex, onSelectTrait, o
             <button
               type="button"
               onClick={() => onShowHelp(group.id)}
-              className="w-full flex items-center justify-between px-2 py-1 rounded-lg hover:bg-slate-50 transition-colors group"
+              className="w-full flex items-center justify-between px-2 py-1 rounded-lg hover:bg-[var(--color-shell-surface-muted)] transition-colors group"
             >
-              <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">{group.title}</span>
-              <Info className="w-3 h-3 text-slate-300 group-hover:text-indigo-500 transition-colors" strokeWidth={2} />
+              <span className="shell-heading text-[11px] font-semibold uppercase tracking-[0.16em]">{group.title}</span>
+              <Info className="shell-subtle group-hover:text-[var(--color-shell-accent)] w-3 h-3 transition-colors" strokeWidth={2} />
             </button>
             <div className="space-y-0.5">
               {group.traits.map(({ trait, idx }) => {
@@ -54,12 +54,12 @@ export const TraitNav: React.FC<Props> = ({ selectedTraitIndex, onSelectTrait, o
                     onClick={() => onSelectTrait(idx)}
                     className={`w-full text-left px-3 py-2.5 rounded-xl transition-colors flex items-start justify-between gap-2 group relative ${
                       isActive
-                        ? 'bg-slate-900 text-white'
-                        : 'hover:bg-slate-50 text-slate-700'
+                        ? 'bg-[var(--color-shell-active-fg)] text-[var(--color-shell-active-bg)]'
+                        : 'hover:bg-[var(--color-shell-surface-muted)] text-[var(--color-app-fg)]'
                     }`}
                   >
                     <span className="relative z-10 flex items-start gap-2.5 min-w-0">
-                      <span className={`mt-1.5 w-1 h-1 rounded-full shrink-0 ${isActive ? 'bg-indigo-300' : 'bg-slate-300'}`} />
+                      <span className={`mt-1.5 w-1 h-1 rounded-full shrink-0 ${isActive ? 'bg-[var(--color-shell-active-bg)]' : 'bg-[var(--color-shell-subtle)]'}`} />
                       <span className="text-[13px] font-medium leading-snug">{trait.name}</span>
                     </span>
                     <ChevronRight className={`mt-1 w-3 h-3 shrink-0 relative z-10 transition-transform ${isActive ? 'translate-x-0 opacity-90' : '-translate-x-1 opacity-0 group-hover:translate-x-0 group-hover:opacity-100'}`} strokeWidth={2} />

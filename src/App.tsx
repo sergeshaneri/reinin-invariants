@@ -8,6 +8,8 @@ import {
   serializeAppUrlState,
   type AppMode,
   type PartitionExplorerState,
+  type ThemeMode,
+  getThemeStorageKey,
 } from './appState';
 import { selectDichotomyTypesPanelView, selectPartitionExplorerView } from './data/selectors';
 import { DIAGRAMS, DEFAULT_DIAGRAM_ID } from './diagrams/registry';
@@ -15,6 +17,7 @@ import { HelpModal } from './components/HelpModal';
 import { Header } from './components/Header';
 import { ModeSelector } from './components/ModeSelector';
 import { AspectDisplayToggle } from './components/AspectDisplayToggle';
+import { ThemeToggle } from './components/ThemeToggle';
 import type { AspectDisplayMode } from './components/AspectGlyph';
 import { TraitNav } from './components/TraitNav';
 import { TypeSelector } from './components/TypeSelector';
@@ -41,6 +44,7 @@ import {
 const App: React.FC = () => {
   const initial = useRef(readInitialAppState()).current;
   const [mode, setMode] = useState(initial.mode);
+  const [theme, setTheme] = useState<ThemeMode>(initial.theme);
   const [selectedTraitIndex, setSelectedTraitIndex] = useState(initial.traitIdx);
   const [selectedPoleIndex, setSelectedPoleIndex] = useState(initial.poleIdx);
   const [activeViewIndex, setActiveViewIndex] = useState(initial.viewIdx);
@@ -102,6 +106,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const params = serializeAppUrlState({
       mode,
+      theme,
       traitIdx: selectedTraitIndex,
       poleIdx: selectedPoleIndex,
       viewIdx: activeViewIndex,
@@ -111,7 +116,17 @@ const App: React.FC = () => {
     const newSearch = params.toString();
     const newUrl = `${window.location.pathname}${newSearch ? '?' + newSearch : ''}`;
     window.history.replaceState(null, '', newUrl);
-  }, [mode, selectedTraitIndex, selectedPoleIndex, activeViewIndex, selectedTypeId, partition]);
+  }, [mode, theme, selectedTraitIndex, selectedPoleIndex, activeViewIndex, selectedTypeId, partition]);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+
+    try {
+      window.localStorage.setItem(getThemeStorageKey(), theme);
+    } catch {
+      // Ignore unavailable storage; URL state still carries explicit theme.
+    }
+  }, [theme]);
 
   // При смене признака/полюса — сбрасываем "пин" клеток.
   useEffect(() => {
@@ -124,15 +139,14 @@ const App: React.FC = () => {
 
   return (
     <div
-      className="min-h-[100dvh] bg-[#f8fafc] text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-900"
+      className="min-h-[100dvh] bg-[var(--color-app-bg)] text-[var(--color-app-fg)] font-sans selection:bg-[var(--color-selection-bg)] selection:text-[var(--color-selection-fg)]"
+      data-theme={theme}
       data-aspect-display-mode={aspectDisplayMode}
     >
       <HelpModal classId={helpClassId} onClose={() => setHelpClassId(null)} />
 
-      <div className="fixed inset-0 pointer-events-none overflow-hidden motion-reduce:hidden">
-        <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-indigo-100/50 rounded-full blur-[120px]" />
-        <div className="absolute top-[55%] -right-[10%] w-[35%] h-[35%] bg-emerald-100/40 rounded-full blur-[100px]" />
-      </div>
+      <div className="ambient-field fixed inset-0 pointer-events-none overflow-hidden motion-reduce:hidden" />
+      <div className="grain motion-reduce:hidden" />
 
       <Header />
 
@@ -142,6 +156,7 @@ const App: React.FC = () => {
           mode={aspectDisplayMode}
           onSelectMode={setAspectDisplayMode}
         />
+        <ThemeToggle theme={theme} onSelectTheme={setTheme} />
 
         <div className="lg:col-span-4">
           {mode === 'type' ? (

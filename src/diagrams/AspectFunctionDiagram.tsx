@@ -9,18 +9,19 @@ import {
 } from '../data/socionics';
 import type { DiagramComponent } from './types';
 import { DECORATORS } from '../decorators/registry';
+import { AspectIcon } from '../components/AspectIcon';
 
 const MAPPING_BG = [
-  'bg-blue-600 border-blue-700',
-  'bg-emerald-600 border-emerald-700',
-  'bg-rose-600 border-rose-700',
-  'bg-amber-600 border-amber-700',
-  'bg-violet-600 border-violet-700',
-  'bg-cyan-600 border-cyan-700',
-  'bg-pink-600 border-pink-700',
-  'bg-lime-600 border-lime-700',
+  'map-tone-0',
+  'map-tone-1',
+  'map-tone-2',
+  'map-tone-3',
+  'map-tone-4',
+  'map-tone-5',
+  'map-tone-6',
+  'map-tone-7',
 ];
-const INACTIVE = 'bg-slate-50 text-slate-300 border-slate-100';
+const INACTIVE = 'map-tone-inactive';
 
 const aspectById = new Map<AspectId, Aspect>(ASPECTS.map(a => [a.id, a]));
 const functionById = new Map<number, SocionicFunction>(FUNCTIONS.map(f => [f.id, f]));
@@ -128,7 +129,7 @@ export const AspectFunctionDiagram: DiagramComponent = ({
     if (highlight === 'hidden' || id === undefined) {
       return { color: INACTIVE, opacity: 'opacity-100', scale: 'scale-100' };
     }
-    const base = `${MAPPING_BG[id % MAPPING_BG.length]} text-white`;
+    const base = `${MAPPING_BG[id % MAPPING_BG.length]} text-[var(--color-map-fg)]`;
     return {
       color: base,
       opacity: highlight === 'dim' ? 'opacity-25' : 'opacity-100',
@@ -143,12 +144,11 @@ export const AspectFunctionDiagram: DiagramComponent = ({
 
   return (
     <div
-      className="bg-white rounded-[32px] border border-slate-200/60 p-8 md:p-10 relative"
-      style={{ boxShadow: '0 20px 40px -20px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255,255,255,0.6)' }}
+      className="glass-panel rounded-[32px] p-8 md:p-10 relative"
     >
       {isBlock && (
-        <div className="mb-7 flex items-start gap-2.5 p-3.5 bg-indigo-50/60 border border-indigo-100 rounded-2xl text-[12px] text-indigo-900/80 leading-relaxed">
-          <Shuffle className="w-4 h-4 mt-0.5 shrink-0 text-indigo-500" strokeWidth={2} />
+        <div className="mb-7 flex items-start gap-2.5 rounded-2xl border border-[var(--color-shell-border-strong)] bg-[var(--color-shell-accent-soft)] p-3.5 text-[12px] leading-relaxed text-[var(--color-shell-muted)]">
+          <Shuffle className="w-4 h-4 mt-0.5 shrink-0 text-[var(--color-shell-accent)]" strokeWidth={2} />
           <span>
             <span className="font-semibold">Блочный инвариант.</span> При наведении на аспект блоки функций перебираются по очереди: блок выбранного аспекта может оказаться в любом из блоков функций, но&nbsp;<span className="font-medium">блоки остаются нераздельными</span>. 4 блока аспектов переставляются в 4 блока функций без точной привязки друг к другу.
           </span>
@@ -159,9 +159,9 @@ export const AspectFunctionDiagram: DiagramComponent = ({
         {/* Аспектон */}
         <div className="w-full md:w-1/2">
           <div className="flex items-center justify-center gap-2 mb-6">
-            <div className="h-px flex-1 bg-slate-200/80" />
-            <h3 className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-500">Аспектон</h3>
-            <div className="h-px flex-1 bg-slate-200/80" />
+            <div className="hairline h-px flex-1" />
+            <h3 className="eyebrow text-center">Аспектон</h3>
+            <div className="hairline h-px flex-1" />
           </div>
           <div className="grid grid-cols-4 gap-2 md:gap-3">
             {ASPECTS.map((aspect) => {
@@ -172,7 +172,7 @@ export const AspectFunctionDiagram: DiagramComponent = ({
                 <motion.button
                   key={aspect.id}
                   type="button"
-                  title={`${aspect.name} — ${aspect.fullName}\n${formatAspectFeatures(aspect)}`}
+                  title={`${aspect.name}: ${aspect.fullName}\n${formatAspectFeatures(aspect)}`}
                   aria-label={`${aspect.fullName} (${aspect.name}). ${formatAspectFeatures(aspect)}`}
                   onMouseEnter={() => onAspectHover(aspect.id)}
                   onMouseLeave={() => onAspectHover(null)}
@@ -181,10 +181,13 @@ export const AspectFunctionDiagram: DiagramComponent = ({
                     relative h-20 rounded-xl border-2 flex items-center justify-center cursor-pointer
                     transition-[opacity,transform,background-color,border-color] duration-200
                     ${s.color} ${s.opacity} ${s.scale}
-                    ${activeAspect === aspect.id ? 'ring-4 ring-indigo-500/20 z-10' : ''}
+                    ${activeAspect === aspect.id ? 'ring-4 ring-[var(--color-shell-accent-soft)] z-10' : ''}
                   `}
                 >
-                  <span className="text-xl font-bold">{aspect.name}</span>
+                  <span className="flex flex-col items-center gap-1.5">
+                    <AspectIcon aspectId={aspect.id} size="sm" />
+                    <span className="text-sm font-bold leading-none">{aspect.name}</span>
+                  </span>
                 </motion.button>
               );
             })}
@@ -194,7 +197,7 @@ export const AspectFunctionDiagram: DiagramComponent = ({
         {/* Соединение: стрелка вниз на мобиле, вправо на десктопе */}
         <div className="flex flex-row md:flex-col items-center justify-center shrink-0">
           <div
-            className="w-10 h-10 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-shell-border-strong)] bg-[var(--color-shell-control)] text-[var(--color-shell-muted)]"
             aria-hidden="true"
           >
             <ArrowRight className="w-4 h-4 rotate-90 md:rotate-0" strokeWidth={2} />
@@ -204,9 +207,9 @@ export const AspectFunctionDiagram: DiagramComponent = ({
         {/* Функцион */}
         <div className="w-full md:w-1/3">
           <div className="flex items-center justify-center gap-2 mb-6">
-            <div className="h-px flex-1 bg-slate-200/80" />
-            <h3 className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-500">Функцион</h3>
-            <div className="h-px flex-1 bg-slate-200/80" />
+            <div className="hairline h-px flex-1" />
+            <h3 className="eyebrow text-center">Функцион</h3>
+            <div className="hairline h-px flex-1" />
           </div>
           <div className="grid grid-cols-2 gap-2 md:gap-3 relative">
             {MODEL_A_LAYOUT.map((fId, mapIdx) => {
@@ -223,7 +226,7 @@ export const AspectFunctionDiagram: DiagramComponent = ({
                   )}
                   <motion.button
                     type="button"
-                    title={`${func.id} — ${func.name}\n${formatFunctionFeatures(func)}`}
+                    title={`${func.id}: ${func.name}\n${formatFunctionFeatures(func)}`}
                     aria-label={`${func.id} ${func.name}. ${formatFunctionFeatures(func)}`}
                     onMouseEnter={() => onFunctionHover(func.id)}
                     onMouseLeave={() => onFunctionHover(null)}
@@ -232,7 +235,7 @@ export const AspectFunctionDiagram: DiagramComponent = ({
                       relative h-16 rounded-xl border-2 flex flex-col items-center justify-center cursor-pointer
                       transition-[opacity,transform,background-color,border-color] duration-200
                       ${s.color} ${s.opacity} ${s.scale}
-                      ${activeFunction === func.id ? 'ring-4 ring-indigo-500/20 z-10' : ''}
+                      ${activeFunction === func.id ? 'ring-4 ring-[var(--color-shell-accent-soft)] z-10' : ''}
                     `}
                   >
                     <span className="text-xl font-bold leading-none font-mono">{func.id}</span>
@@ -252,7 +255,7 @@ export const AspectFunctionDiagram: DiagramComponent = ({
       </div>
 
       {/* Легенда */}
-      <div className="mt-7 pt-5 border-t border-slate-100 grid gap-6 md:grid-cols-2">
+      <div className="mt-7 grid gap-6 border-t border-[var(--color-shell-border)] pt-5 md:grid-cols-2">
         <LegendColumn title="Группы аспектов" labels={aspectGroupLabels} />
         <LegendColumn title="Группы функций" labels={functionGroupLabels} />
       </div>
@@ -262,18 +265,18 @@ export const AspectFunctionDiagram: DiagramComponent = ({
 
 const LegendColumn: React.FC<{ title: string; labels: string[] }> = ({ title, labels }) => (
   <div>
-    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 mb-3">
+    <p className="eyebrow mb-3">
       {title}
     </p>
     <ul className="space-y-1.5">
       {labels.map((label, idx) => (
-        <li key={idx} className="flex items-center gap-2.5 text-[13px] text-slate-700">
+        <li key={idx} className="flex items-center gap-2.5 text-[13px] text-[var(--color-shell-muted)]">
           <span
             aria-hidden="true"
             className={`w-3.5 h-3.5 rounded shrink-0 ${MAPPING_BG[idx % MAPPING_BG.length]}`}
           />
           <span className="leading-tight">
-            {label || <span className="text-slate-400 italic">нет общих признаков</span>}
+            {label || <span className="text-[var(--color-shell-subtle)] italic">нет общих признаков</span>}
           </span>
         </li>
       ))}

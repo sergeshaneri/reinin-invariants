@@ -9,6 +9,7 @@ import {
 import { buildPartition, type PartitionKind } from './data/partitions';
 
 export type AppMode = 'trait' | 'type' | 'tetrachotomy' | 'octochotomy';
+export type ThemeMode = 'light' | 'dark';
 
 export interface PartitionExplorerState {
   kind: PartitionKind;
@@ -18,6 +19,7 @@ export interface PartitionExplorerState {
 
 export interface AppUrlState {
   mode: AppMode;
+  theme: ThemeMode;
   traitIdx: number;
   poleIdx: number;
   viewIdx: number;
@@ -26,6 +28,8 @@ export interface AppUrlState {
 }
 
 const DEFAULT_MODE: AppMode = 'trait';
+const DEFAULT_THEME: ThemeMode = 'light';
+const THEME_STORAGE_KEY = 'reinin-invariants-theme';
 
 const APP_MODES = new Set<AppMode>([
   'trait',
@@ -33,6 +37,8 @@ const APP_MODES = new Set<AppMode>([
   'tetrachotomy',
   'octochotomy',
 ]);
+
+const THEME_MODES = new Set<ThemeMode>(['light', 'dark']);
 
 const REININ_TRAIT_IDS = new Set<ReininTraitId>(
   REININ_TRAITS.map(trait => trait.id),
@@ -75,6 +81,28 @@ const parseTypeId = (value: string | null): SocionicTypeId => {
 
   return SOCIONIC_TYPE_ORDER[0];
 };
+
+const parseThemeMode = (value: string | null): ThemeMode | null => {
+  if (value && THEME_MODES.has(value as ThemeMode)) {
+    return value as ThemeMode;
+  }
+
+  return null;
+};
+
+const readStoredThemeMode = (): ThemeMode | null => {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  try {
+    return parseThemeMode(window.localStorage.getItem(THEME_STORAGE_KEY));
+  } catch {
+    return null;
+  }
+};
+
+export const getThemeStorageKey = (): string => THEME_STORAGE_KEY;
 
 export const getDefaultTraitPoleIndex = (traitId: ReininTraitId): PoleIndex => {
   const membership = TRAIT_TYPE_MEMBERSHIPS_BY_TRAIT_ID[traitId];
@@ -177,6 +205,7 @@ const parsePartitionState = (
 export const parseAppUrlState = (search: string | URLSearchParams): AppUrlState => {
   const params = typeof search === 'string' ? new URLSearchParams(search) : search;
   const mode = parseMode(params.get('mode'));
+  const theme = parseThemeMode(params.get('theme')) ?? readStoredThemeMode() ?? DEFAULT_THEME;
   const traitId = params.get('trait') as ReininTraitId | null;
   const traitIndex = traitId ? REININ_TRAITS.findIndex(trait => trait.id === traitId) : -1;
   const traitIdx = traitIndex >= 0 ? traitIndex : 0;
@@ -188,6 +217,7 @@ export const parseAppUrlState = (search: string | URLSearchParams): AppUrlState 
 
   return {
     mode,
+    theme,
     traitIdx,
     poleIdx,
     viewIdx,
@@ -205,6 +235,10 @@ export const serializeAppUrlState = (state: AppUrlState): URLSearchParams => {
 
   if (state.mode !== DEFAULT_MODE) {
     params.set('mode', state.mode);
+  }
+
+  if (state.theme !== DEFAULT_THEME) {
+    params.set('theme', state.theme);
   }
 
   if (state.mode === 'type') {
@@ -239,6 +273,7 @@ export const readInitialAppState = (): AppUrlState => {
   if (typeof window === 'undefined') {
     return {
       mode: DEFAULT_MODE,
+      theme: DEFAULT_THEME,
       traitIdx: 0,
       poleIdx: 0,
       viewIdx: 0,

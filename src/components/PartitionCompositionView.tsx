@@ -9,8 +9,8 @@ import type {
 import { TypePatternCard } from './TypePatternCard';
 
 const POLE_TONES = [
-  'border-sky-200 bg-sky-50 text-sky-950',
-  'border-rose-200 bg-rose-50 text-rose-950',
+  'map-tone-0 text-[var(--color-map-fg)]',
+  'map-tone-1 text-[var(--color-map-fg)]',
 ] as const;
 
 const getTypeCode = (type: TypeSummaryViewModel): string => type.aliases[0] ?? type.id;
@@ -67,22 +67,22 @@ export const PartitionCompositionView: React.FC<Props> = ({
       className="space-y-5 md:space-y-6"
       data-partition-composition={partition.kind}
     >
-      <div className="rounded-[28px] border border-slate-200/60 bg-white/90 p-5 shadow-sm backdrop-blur-xl">
+      <div className="glass-panel rounded-[28px] p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-              <GitMerge className="h-3.5 w-3.5 text-indigo-500" strokeWidth={2} />
+            <div className="eyebrow flex items-center gap-2">
+              <GitMerge className="h-3.5 w-3.5 text-[var(--color-shell-accent)]" strokeWidth={2} />
               Композиция
             </div>
-            <h2 className="mt-2 text-lg font-bold leading-tight text-slate-950">
+            <h2 className="mt-2 text-lg font-bold leading-tight text-[var(--color-app-fg)]">
               {partition.traits.map(trait => trait.name).join(' + ')}
             </h2>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-right">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+          <div className="glass-muted rounded-2xl px-3 py-2 text-right">
+            <div className="eyebrow">
               Пересечение
             </div>
-            <div className="mt-1 text-sm font-bold text-slate-800">
+            <div className="mt-1 text-sm font-bold text-[var(--color-app-fg)]">
               {selectedClass?.types.length ?? 0} типа
             </div>
           </div>
@@ -102,15 +102,15 @@ export const PartitionCompositionView: React.FC<Props> = ({
             return (
               <article
                 key={trait.id}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                className="glass-muted rounded-2xl p-4"
                 data-composition-component-index={traitIndex}
                 data-composition-component-trait={trait.id}
               >
-                <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-                  <SplitSquareHorizontal className="h-3.5 w-3.5 text-emerald-500" strokeWidth={2} />
+                <div className="eyebrow flex items-center gap-2">
+                  <SplitSquareHorizontal className="h-3.5 w-3.5 text-[var(--color-shell-accent)]" strokeWidth={2} />
                   Дихотомия
                 </div>
-                <h3 className="mt-2 text-sm font-bold leading-snug text-slate-950">
+                <h3 className="mt-2 text-sm font-bold leading-snug text-[var(--color-app-fg)]">
                   {trait.name}
                 </h3>
 
@@ -135,8 +135,8 @@ export const PartitionCompositionView: React.FC<Props> = ({
                         }}
                         className={`rounded-2xl border p-3 text-left transition-colors ${tone} ${
                           isSelected
-                            ? 'ring-2 ring-slate-900 ring-offset-2'
-                            : 'hover:border-slate-400'
+                            ? 'ring-2 ring-[var(--color-shell-accent)] ring-offset-2 ring-offset-[var(--color-app-bg)]'
+                            : 'hover:border-[var(--color-shell-hover-fg)]'
                         }`}
                       >
                         <span className="block text-sm font-bold leading-snug">
@@ -146,7 +146,7 @@ export const PartitionCompositionView: React.FC<Props> = ({
                           {poleTypes.map(type => (
                             <span
                               key={type.id}
-                              className="rounded-md bg-white/80 px-2 py-0.5 text-[10px] font-black text-slate-800"
+                              className="rounded-md bg-[rgb(255_255_255_/_0.22)] px-2 py-0.5 text-[10px] font-black text-current"
                               title={type.name}
                             >
                               {getTypeCode(type)}

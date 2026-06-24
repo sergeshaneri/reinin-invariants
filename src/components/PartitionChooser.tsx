@@ -12,14 +12,14 @@ import {
 import type { PartitionKind } from '../data/partitions';
 
 const CLASS_TONES = [
-  'border-sky-200 bg-sky-100 text-sky-950',
-  'border-emerald-200 bg-emerald-100 text-emerald-950',
-  'border-amber-200 bg-amber-100 text-amber-950',
-  'border-rose-200 bg-rose-100 text-rose-950',
-  'border-violet-200 bg-violet-100 text-violet-950',
-  'border-cyan-200 bg-cyan-100 text-cyan-950',
-  'border-lime-200 bg-lime-100 text-lime-950',
-  'border-fuchsia-200 bg-fuchsia-100 text-fuchsia-950',
+  'map-tone-0 text-[var(--color-map-fg)]',
+  'map-tone-1 text-[var(--color-map-fg)]',
+  'map-tone-2 text-[var(--color-map-fg)]',
+  'map-tone-3 text-[var(--color-map-fg)]',
+  'map-tone-4 text-[var(--color-map-fg)]',
+  'map-tone-5 text-[var(--color-map-fg)]',
+  'map-tone-6 text-[var(--color-map-fg)]',
+  'map-tone-7 text-[var(--color-map-fg)]',
 ] as const;
 
 const KIND_TITLES = {
@@ -83,7 +83,7 @@ export const PartitionChooser: React.FC<Props> = ({
       <span className="block truncate text-[13px] font-bold leading-snug">
         {entry.title}
       </span>
-      <span className="mt-1 block text-[11px] font-semibold text-slate-400">
+      <span className="mt-1 block text-[11px] font-semibold opacity-70">
         {entry.classCount} x {entry.classSize}
       </span>
     </span>
@@ -91,26 +91,26 @@ export const PartitionChooser: React.FC<Props> = ({
 
   return (
     <section
-      className="rounded-[28px] border border-slate-200/60 bg-white/90 p-5 shadow-sm backdrop-blur-xl"
+      className="glass-panel rounded-[28px] p-5"
       data-partition-chooser={kind}
     >
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+        <h2 className="eyebrow">
           {KIND_TITLES[kind]}
         </h2>
-        <span className="font-mono text-[11px] font-medium text-slate-400">{catalog.entries.length}</span>
+        <span className="font-mono text-[11px] font-medium text-[var(--color-shell-subtle)]">{catalog.entries.length}</span>
       </div>
 
       <div className="mt-5 space-y-4">
         <section data-partition-entry-mode="sequential">
-          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-            <MousePointer2 className="h-3.5 w-3.5 text-indigo-500" strokeWidth={2} />
+          <div className="eyebrow flex items-center gap-2">
+            <MousePointer2 className="h-3.5 w-3.5 text-[var(--color-shell-accent)]" strokeWidth={2} />
             По шагам
           </div>
           <div className="mt-3 space-y-3">
             {Array.from({ length: traitCount }, (_, slotIndex) => (
-              <div key={slotIndex} className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-                <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">
+              <div key={slotIndex} className="glass-muted rounded-2xl p-3">
+                <div className="eyebrow">
                   {slotIndex + 1}
                 </div>
                 <div className="mt-2 flex flex-wrap gap-1.5">
@@ -131,8 +131,8 @@ export const PartitionChooser: React.FC<Props> = ({
                         onClick={() => handleSequentialSelect(slotIndex, trait.id)}
                         className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors ${
                           isSelected
-                            ? 'border-slate-900 bg-slate-950 text-white'
-                            : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                            ? 'border-[var(--color-shell-active-bg)] bg-[var(--color-shell-active-bg)] text-[var(--color-shell-active-fg)]'
+                            : 'border-[var(--color-shell-border)] bg-[var(--color-shell-control)] text-[var(--color-shell-muted)] hover:border-[var(--color-shell-border-strong)] hover:text-[var(--color-shell-hover-fg)]'
                         } disabled:cursor-not-allowed disabled:opacity-35`}
                       >
                         {trait.name.split(' / ')[0]}
@@ -146,8 +146,8 @@ export const PartitionChooser: React.FC<Props> = ({
         </section>
 
         <section data-partition-entry-mode="catalog">
-          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-            <ListChecks className="h-3.5 w-3.5 text-indigo-500" strokeWidth={2} />
+          <div className="eyebrow flex items-center gap-2">
+            <ListChecks className="h-3.5 w-3.5 text-[var(--color-shell-accent)]" strokeWidth={2} />
             Каталог
           </div>
           <div className="mt-3 max-h-[260px] space-y-1.5 overflow-y-auto pr-1 custom-scrollbar">
@@ -163,8 +163,8 @@ export const PartitionChooser: React.FC<Props> = ({
                   onClick={() => onSelectTraitIds(entry.traitIds)}
                   className={`flex w-full items-center justify-between gap-3 rounded-2xl border px-3 py-2 text-left transition-colors ${
                     isSelected
-                      ? 'border-slate-900 bg-slate-950 text-white'
-                      : 'border-slate-200 bg-slate-50 text-slate-800 hover:border-slate-300 hover:bg-white'
+                      ? 'border-[var(--color-shell-active-bg)] bg-[var(--color-shell-active-bg)] text-[var(--color-shell-active-fg)]'
+                      : 'border-[var(--color-shell-border)] bg-[var(--color-shell-surface-muted)] text-[var(--color-app-fg)] hover:border-[var(--color-shell-border-strong)]'
                   }`}
                 >
                   {renderEntryLabel(entry)}
@@ -175,8 +175,8 @@ export const PartitionChooser: React.FC<Props> = ({
         </section>
 
         <section data-partition-entry-mode="gallery">
-          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-            <GalleryHorizontalEnd className="h-3.5 w-3.5 text-indigo-500" strokeWidth={2} />
+          <div className="eyebrow flex items-center gap-2">
+            <GalleryHorizontalEnd className="h-3.5 w-3.5 text-[var(--color-shell-accent)]" strokeWidth={2} />
             Паттерны
           </div>
           <div className="mt-3 flex gap-3 overflow-x-auto pb-2 pr-1 custom-scrollbar">
@@ -196,8 +196,8 @@ export const PartitionChooser: React.FC<Props> = ({
                   onClick={() => onSelectTraitIds(entry.traitIds)}
                   className={`w-[190px] flex-none rounded-2xl border p-3 text-left transition-colors ${
                     isSelected
-                      ? 'border-slate-900 bg-slate-950 text-white'
-                      : 'border-slate-200 bg-slate-50 text-slate-800 hover:border-slate-300 hover:bg-white'
+                      ? 'border-[var(--color-shell-active-bg)] bg-[var(--color-shell-active-bg)] text-[var(--color-shell-active-fg)]'
+                      : 'border-[var(--color-shell-border)] bg-[var(--color-shell-surface-muted)] text-[var(--color-app-fg)] hover:border-[var(--color-shell-border-strong)]'
                   }`}
                 >
                   {renderEntryLabel(entry)}
@@ -225,7 +225,7 @@ export const PartitionChooser: React.FC<Props> = ({
         </section>
 
         {selectedEntry ? (
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-600">
+          <div className="glass-muted rounded-2xl px-3 py-2 text-xs font-semibold text-[var(--color-shell-muted)]">
             {selectedEntry.title}
           </div>
         ) : null}

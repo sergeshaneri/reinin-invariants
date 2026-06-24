@@ -14,14 +14,14 @@ interface Props {
 const getTypeCode = (aliases: readonly string[], fallback: string): string => aliases[0] ?? fallback;
 
 const HIGHLIGHT_TONES = [
-  'bg-sky-100',
-  'bg-emerald-100',
-  'bg-amber-100',
-  'bg-rose-100',
-  'bg-violet-100',
-  'bg-cyan-100',
-  'bg-lime-100',
-  'bg-fuchsia-100',
+  'map-tone-0 text-[var(--color-map-fg)]',
+  'map-tone-1 text-[var(--color-map-fg)]',
+  'map-tone-2 text-[var(--color-map-fg)]',
+  'map-tone-3 text-[var(--color-map-fg)]',
+  'map-tone-4 text-[var(--color-map-fg)]',
+  'map-tone-5 text-[var(--color-map-fg)]',
+  'map-tone-6 text-[var(--color-map-fg)]',
+  'map-tone-7 text-[var(--color-map-fg)]',
 ] as const;
 
 const hasProcessCycleDecorator = (view: View): boolean => (
@@ -38,8 +38,8 @@ export const ModelAPreviewGrid: React.FC<Props> = ({
 
   return (
     <div className="mt-5" data-model-preview-grid>
-      <div className="mb-3 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-        <Grid2X2 className="h-3.5 w-3.5 text-indigo-500" strokeWidth={2} />
+      <div className="eyebrow mb-3 flex items-center gap-2">
+        <Grid2X2 className="h-3.5 w-3.5 text-[var(--color-shell-accent)]" strokeWidth={2} />
         Модель А
       </div>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -50,22 +50,22 @@ export const ModelAPreviewGrid: React.FC<Props> = ({
           return (
             <article
               key={preview.type.id}
-              className="rounded-2xl border border-slate-200 bg-slate-50 p-3"
+              className="rounded-2xl border border-[var(--color-shell-border)] bg-[var(--color-shell-surface-muted)] p-3"
               data-model-preview-type-id={preview.type.id}
             >
               <div className="relative">
                 {showProcessCycle ? <MiniProcessCycle /> : null}
-                <div className="grid grid-cols-2 border border-slate-900 bg-white">
+                <div className="grid grid-cols-2 border border-[var(--color-app-fg)] bg-[var(--color-shell-control)]">
                   {preview.assignments.map((assignment, assignmentIndex) => (
                     <React.Fragment key={assignment.functionId}>
                       {showProcessCycle && assignmentIndex === 4 ? (
-                        <div className="col-span-2 h-3 bg-white" aria-hidden="true" />
+                        <div className="col-span-2 h-3 bg-[var(--color-shell-control)]" aria-hidden="true" />
                       ) : null}
                       <div
-                        className={`flex aspect-square min-h-10 flex-col items-center justify-center border border-slate-900 text-slate-950 ${
+                        className={`flex aspect-square min-h-10 flex-col items-center justify-center border border-[var(--color-app-fg)] ${
                           assignment.highlightGroupIndex !== null
                             ? HIGHLIGHT_TONES[assignment.highlightGroupIndex % HIGHLIGHT_TONES.length]
-                            : 'bg-white'
+                            : 'bg-[var(--color-shell-control)] text-[var(--color-app-fg)]'
                         }`}
                         data-model-preview-function-id={assignment.functionId}
                         data-model-preview-aspect-id={assignment.aspectId}
@@ -85,10 +85,10 @@ export const ModelAPreviewGrid: React.FC<Props> = ({
                 </div>
               </div>
               <div className="mt-2 text-center">
-                <div className="text-[11px] font-black leading-tight text-slate-950">
+                <div className="text-[11px] font-black leading-tight text-[var(--color-app-fg)]">
                   {typeCode}
                 </div>
-                <div className="truncate text-[10px] font-semibold leading-tight text-slate-500" title={preview.type.name}>
+                <div className="truncate text-[10px] font-semibold leading-tight text-[var(--color-shell-muted)]" title={preview.type.name}>
                   {secondaryAlias ?? preview.type.name}
                 </div>
               </div>

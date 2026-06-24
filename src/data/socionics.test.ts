@@ -3,6 +3,8 @@ import { DECORATORS } from '../decorators/registry';
 import { DEFAULT_DIAGRAM_ID, DIAGRAMS } from '../diagrams/registry';
 import {
   ASPECTS,
+  ASPECT_VISUALS,
+  ASPECT_VISUAL_BY_ID,
   FUNCTIONS,
   MODEL_A_LAYOUT,
   REININ_TRAITS,
@@ -50,6 +52,21 @@ describe('socionics data', () => {
   it('defines unique aspect and function ids', () => {
     expectUnique(ASPECTS.map(aspect => aspect.id), 'aspect ids');
     expectUnique(FUNCTIONS.map(fn => fn.id), 'function ids');
+  });
+
+  it('keeps visual metadata complete for every aspect', () => {
+    expect(ASPECT_VISUALS).toHaveLength(ASPECTS.length);
+    expectUnique(ASPECT_VISUALS.map(visual => visual.aspectId), 'aspect visual ids');
+    expect(new Set(ASPECT_VISUALS.map(visual => visual.aspectId))).toEqual(aspectIds);
+
+    ASPECTS.forEach(aspect => {
+      const visual = ASPECT_VISUAL_BY_ID[aspect.id];
+
+      expect(visual, `${aspect.id} visual`).toBeDefined();
+      expect(visual.aspectId, `${aspect.id} visual id`).toBe(aspect.id);
+      expect(visual.iconKey.trim(), `${aspect.id} icon key`).not.toBe('');
+      expect(typeof visual.isFilled, `${aspect.id} fill flag`).toBe('boolean');
+    });
   });
 
   it('keeps the Model A layout aligned with registered functions', () => {

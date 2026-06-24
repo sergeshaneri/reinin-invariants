@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'Geist Mono', ui-monospace, 'JetBrains Mono', Menlo, monospace;
+  --font-sans: 'Plus Jakarta Sans', 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Geist Mono', ui-monospace, Menlo, monospace;
 
   /* Радиус-токены: переиспользуем как rounded-r-sm/-md/-lg */
   --radius-r-sm: 12px;
@@ -10,11 +10,186 @@
   --radius-r-lg: 32px;
 }
 
+:root {
+  color-scheme: light;
+  --color-app-bg: #edeae0;
+  --color-app-fg: #0f0d09;
+  --color-app-vignette: rgb(15 13 9 / 0.06);
+  --color-shell-surface: rgb(255 255 255 / 0.88);
+  --color-shell-surface-muted: rgb(249 247 241 / 0.92);
+  --color-shell-control: rgb(255 255 255 / 0.72);
+  --color-shell-border: rgb(15 13 9 / 0.18);
+  --color-shell-border-strong: rgb(15 13 9 / 0.3);
+  --color-shell-muted: rgb(15 13 9 / 0.68);
+  --color-shell-subtle: rgb(15 13 9 / 0.46);
+  --color-shell-accent: #6f5223;
+  --color-shell-accent-soft: rgb(111 82 35 / 0.12);
+  --color-shell-active-bg: #0f0d09;
+  --color-shell-active-fg: #f7f4ec;
+  --color-shell-hover-fg: #0f0d09;
+  --color-selection-bg: rgb(111 82 35 / 0.22);
+  --color-selection-fg: #0f0d09;
+  --color-scrollbar-thumb: rgb(15 13 9 / 0.22);
+  --color-scrollbar-thumb-hover: rgb(15 13 9 / 0.38);
+  --color-map-fg: #ffffff;
+  --color-map-empty-bg: #e5e2d8;
+  --color-map-empty-fg: rgb(15 13 9 / 0.42);
+  --color-map-empty-border: rgb(15 13 9 / 0.18);
+  --shadow-shell: inset 0 1px 0 rgb(255 255 255 / 0.75), 0 30px 60px -30px rgb(40 30 20 / 0.24), 0 8px 20px -8px rgb(40 30 20 / 0.14);
+  --shadow-raised: 0 28px 70px -36px rgb(40 30 20 / 0.28), inset 0 1px 0 rgb(255 255 255 / 0.72);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-app-bg: #0a0b0d;
+  --color-app-fg: #edeae3;
+  --color-app-vignette: rgb(237 234 227 / 0.04);
+  --color-shell-surface: rgb(14 16 20 / 0.86);
+  --color-shell-surface-muted: rgb(7 8 9 / 0.72);
+  --color-shell-control: rgb(237 234 227 / 0.035);
+  --color-shell-border: rgb(237 234 227 / 0.07);
+  --color-shell-border-strong: rgb(237 234 227 / 0.14);
+  --color-shell-muted: rgb(237 234 227 / 0.64);
+  --color-shell-subtle: rgb(237 234 227 / 0.36);
+  --color-shell-accent: #b89976;
+  --color-shell-accent-soft: rgb(184 153 118 / 0.16);
+  --color-shell-active-bg: #edeae3;
+  --color-shell-active-fg: #0a0b0d;
+  --color-shell-hover-fg: #ffffff;
+  --color-selection-bg: rgb(184 153 118 / 0.28);
+  --color-selection-fg: #fffaf1;
+  --color-scrollbar-thumb: rgb(237 234 227 / 0.18);
+  --color-scrollbar-thumb-hover: rgb(237 234 227 / 0.32);
+  --color-map-empty-bg: #353944;
+  --color-map-empty-fg: rgb(237 234 227 / 0.34);
+  --color-map-empty-border: rgb(237 234 227 / 0.12);
+  --shadow-shell: inset 0 1px 0 rgb(255 255 255 / 0.04), 0 50px 80px -46px rgb(0 0 0 / 0.75), 0 8px 20px -12px rgb(0 0 0 / 0.42);
+  --shadow-raised: 0 36px 80px -44px rgb(0 0 0 / 0.78), inset 0 1px 0 rgb(255 255 255 / 0.05);
+}
+
+body {
+  background: var(--color-app-bg);
+  color: var(--color-app-fg);
+  font-feature-settings: "ss01", "cv01", "cv04";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
 /* Универсальный focus-visible: видно с клавиатуры, не мешает мыши */
 :where(:focus-visible) {
   outline: 2px solid color-mix(in oklch, currentColor 50%, transparent);
   outline-offset: 2px;
   border-radius: 8px;
+}
+
+.shell-panel {
+  border-color: var(--color-shell-border);
+  background: var(--color-shell-surface);
+  color: var(--color-app-fg);
+  box-shadow: var(--shadow-shell);
+}
+
+.shell-panel-muted {
+  border-color: var(--color-shell-border-strong);
+  background: var(--color-shell-surface-muted);
+}
+
+.shell-control {
+  background: var(--color-shell-control);
+}
+
+.shell-heading {
+  color: var(--color-shell-muted);
+}
+
+.shell-subtle {
+  color: var(--color-shell-subtle);
+}
+
+.shell-accent {
+  color: var(--color-shell-accent);
+}
+
+.shell-tab {
+  color: var(--color-shell-muted);
+}
+
+.shell-tab:hover {
+  color: var(--color-shell-hover-fg);
+}
+
+.shell-tab-active {
+  background: var(--color-shell-active-bg);
+  color: var(--color-shell-active-fg);
+}
+
+.ambient-field {
+  background:
+    linear-gradient(115deg, transparent 0%, var(--color-app-vignette) 45%, transparent 72%),
+    repeating-linear-gradient(90deg, transparent 0 31px, var(--color-shell-border) 31px 32px),
+    repeating-linear-gradient(0deg, transparent 0 31px, var(--color-shell-border) 31px 32px);
+  mask-image: radial-gradient(ellipse at 50% 24%, black 0%, transparent 72%);
+  opacity: 0.45;
+}
+
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0.032;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.glass-panel {
+  border: 1px solid var(--color-shell-border);
+  background: var(--color-shell-surface);
+  box-shadow: var(--shadow-raised);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+}
+
+.glass-muted {
+  border: 1px solid var(--color-shell-border-strong);
+  background: var(--color-shell-surface-muted);
+}
+
+.eyebrow {
+  color: var(--color-shell-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.hairline {
+  background: var(--color-shell-border-strong);
+}
+
+.map-tone-0 { background: #2e91a6; border-color: color-mix(in oklab, #2e91a6 72%, black); }
+.map-tone-1 { background: #b7484e; border-color: color-mix(in oklab, #b7484e 72%, black); }
+.map-tone-2 { background: #a77529; border-color: color-mix(in oklab, #a77529 72%, black); }
+.map-tone-3 { background: #4d8c52; border-color: color-mix(in oklab, #4d8c52 72%, black); }
+.map-tone-4 { background: #7766c6; border-color: color-mix(in oklab, #7766c6 72%, black); }
+.map-tone-5 { background: #2b9aa2; border-color: color-mix(in oklab, #2b9aa2 72%, black); }
+.map-tone-6 { background: #b15f94; border-color: color-mix(in oklab, #b15f94 72%, black); }
+.map-tone-7 { background: #6f9637; border-color: color-mix(in oklab, #6f9637 72%, black); }
+
+:root[data-theme='dark'] .map-tone-0 { background: #78bfc9; border-color: color-mix(in oklab, #78bfc9 70%, black); }
+:root[data-theme='dark'] .map-tone-1 { background: #d98a8c; border-color: color-mix(in oklab, #d98a8c 70%, black); }
+:root[data-theme='dark'] .map-tone-2 { background: #cda870; border-color: color-mix(in oklab, #cda870 70%, black); }
+:root[data-theme='dark'] .map-tone-3 { background: #8fb58e; border-color: color-mix(in oklab, #8fb58e 70%, black); }
+:root[data-theme='dark'] .map-tone-4 { background: #a89fe4; border-color: color-mix(in oklab, #a89fe4 70%, black); }
+:root[data-theme='dark'] .map-tone-5 { background: #72c6c5; border-color: color-mix(in oklab, #72c6c5 70%, black); }
+:root[data-theme='dark'] .map-tone-6 { background: #d492bd; border-color: color-mix(in oklab, #d492bd 70%, black); }
+:root[data-theme='dark'] .map-tone-7 { background: #a9c878; border-color: color-mix(in oklab, #a9c878 70%, black); }
+
+.map-tone-inactive {
+  background: var(--color-map-empty-bg);
+  border-color: var(--color-map-empty-border);
+  color: var(--color-map-empty-fg);
 }
 
 /* Уважаем prefers-reduced-motion */
@@ -46,9 +221,9 @@
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #e2e8f0;
+  background: var(--color-scrollbar-thumb);
   border-radius: 10px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #cbd5e1;
+  background: var(--color-scrollbar-thumb-hover);
 }

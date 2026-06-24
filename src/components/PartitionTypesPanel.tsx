@@ -24,26 +24,26 @@ export const PartitionTypesPanel: React.FC<Props> = ({
   aspectDisplayMode,
 }) => (
   <section
-    className="rounded-[28px] border border-slate-200/60 bg-white/90 p-5 shadow-sm backdrop-blur-xl"
+    className="glass-panel rounded-[28px] p-5"
     aria-label={`Типы выбранного класса: ${view.title}`}
     data-partition-types-panel={view.kind}
     data-selected-class-key={view.classKey ?? ''}
   >
     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div>
-        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-          <UsersRound className="h-3.5 w-3.5 text-emerald-500" strokeWidth={2} />
+        <div className="eyebrow flex items-center gap-2">
+          <UsersRound className="h-3.5 w-3.5 text-[var(--color-shell-accent)]" strokeWidth={2} />
           Типы полюса
         </div>
-        <h2 className="mt-2 text-lg font-bold leading-tight text-slate-950">
+        <h2 className="mt-2 text-lg font-bold leading-tight text-[var(--color-app-fg)]">
           {view.title}
         </h2>
       </div>
-      <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-right">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+      <div className="glass-muted rounded-2xl px-3 py-2 text-right">
+        <div className="eyebrow">
           {KIND_LABELS[view.kind]}
         </div>
-        <div className="mt-1 text-sm font-bold text-slate-800">
+        <div className="mt-1 text-sm font-bold text-[var(--color-app-fg)]">
           {view.types.length} ТИМов
         </div>
       </div>
@@ -54,7 +54,7 @@ export const PartitionTypesPanel: React.FC<Props> = ({
         {view.poles.map(pole => (
           <span
             key={`${pole.trait.id}:${pole.poleIndex}`}
-            className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700"
+            className="rounded-full border border-[var(--color-shell-border)] bg-[var(--color-shell-control)] px-3 py-1 text-xs font-semibold text-[var(--color-shell-muted)]"
           >
             {pole.poleName}
           </span>

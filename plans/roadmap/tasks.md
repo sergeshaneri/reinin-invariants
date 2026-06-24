@@ -70,17 +70,17 @@
 
 | ID | Depends | Status | Цель | Вероятные файлы | Проверки | Риски |
 |---|---|---:|---|---|---|---|
-| V5.1 | D1.1 | TODO | Определить icon metadata для всех аспектов без React в domain records. | `src/data/aspectVisuals.ts`, `src/data/socionics.ts`, tests | Tests: every `AspectId` has visual metadata | Спорные icon metaphors для аспектов. |
-| V5.2 | V5.1 | TODO | Создать UI registry, который мапит `iconKey` в lucide/custom icon. | `src/components/AspectIcon.tsx`, `src/diagrams/AspectFunctionDiagram.tsx`, `src/diagrams/TypeModelDiagram.tsx` | `npm run lint`, render smoke | Bundle size и визуальная неоднозначность. |
-| V5.3 | V5.2 | TODO | Расширить настройку compact display после D3.4: icon, symbol, icon+symbol, persistence if needed. | `src/components/AspectDisplayToggle.tsx`, `src/App.tsx` | e2e toggle, accessibility labels | Persisted preference может конфликтовать с language/theme params. |
+| V5.1 | D1.1 | DONE | Определить icon metadata для всех аспектов без React в domain records. | `src/data/aspectVisuals.ts`, `src/data/socionics.ts`, tests | Tests: every `AspectId` has visual metadata | Спорные icon metaphors для аспектов. |
+| V5.2 | V5.1 | DONE | Создать UI registry, который мапит `iconKey` в lucide/custom icon. | `src/components/AspectIcon.tsx`, `src/diagrams/AspectFunctionDiagram.tsx`, `src/diagrams/TypeModelDiagram.tsx` | `npm run lint`, render smoke | Bundle size и визуальная неоднозначность. |
+| V5.3 | V5.2 | DONE | Расширить настройку compact display после D3.4: icon, symbol, icon+symbol, persistence if needed. | `src/components/AspectDisplayToggle.tsx`, `src/App.tsx` | e2e toggle, accessibility labels | Persisted preference может конфликтовать с language/theme params. |
 
 ## Phase 6: Dark Theme
 
 | ID | Depends | Status | Цель | Вероятные файлы | Проверки | Риски |
 |---|---|---:|---|---|---|---|
-| H6.1 | U2.1 | TODO | Ввести theme state, URL/localStorage policy и `ThemeToggle`. | `src/App.tsx`, `src/components/ThemeToggle.tsx`, tests | Unit tests for preference resolution, e2e toggle | SSR/render smoke без `window` должен остаться стабильным. |
-| H6.2 | H6.1 | TODO | Добавить CSS variables/design tokens для базовых цветов. | `src/index.css` или global CSS, `tailwind` usage | `npm run build`, screenshot/e2e | Ручная миграция hardcoded классов может быть неполной. |
-| H6.3 | H6.2 | TODO | Перевести shell components на tokens. | `src/App.tsx`, `Header`, `TraitNav`, `PoleSelector`, `ViewSelector`, `Footer`, `HelpModal` | e2e light/dark desktop/mobile | Контраст и focus states. |
+| H6.1 | U2.1 | DONE | Ввести theme state, URL/localStorage policy и `ThemeToggle`. | `src/App.tsx`, `src/components/ThemeToggle.tsx`, tests | Unit tests for preference resolution, e2e toggle | SSR/render smoke без `window` должен остаться стабильным. |
+| H6.2 | H6.1 | DONE | Добавить CSS variables/design tokens для базовых цветов. | `src/index.css` или global CSS, `tailwind` usage | `npm run build`, screenshot/e2e | Ручная миграция hardcoded классов может быть неполной. |
+| H6.3 | H6.2 | DONE | Перевести shell components на tokens. | `src/App.tsx`, `Header`, `TraitNav`, `PoleSelector`, `ViewSelector`, `Footer`, `HelpModal` | e2e light/dark desktop/mobile | Контраст и focus states. |
 | H6.4 | H6.2 | TODO | Перевести diagrams and formula panels на tokens. | `src/diagrams/*`, `src/components/FormulaPanel.tsx` | canvas/screenshot style review, e2e | Цвета групп должны оставаться различимыми в dark mode. |
 
 ## Phase 7: English Version

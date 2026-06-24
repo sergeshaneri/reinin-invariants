@@ -1,5 +1,7 @@
 export type AspectId = 'Ne' | 'Si' | 'Fe' | 'Ti' | 'Te' | 'Fi' | 'Se' | 'Ni';
 
+export * from './localization';
+export * from './aspectVisuals';
 export * from './types';
 export * from './memberships';
 export * from './partitions';

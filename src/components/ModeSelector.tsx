@@ -43,12 +43,12 @@ interface Props {
 
 export const ModeSelector: React.FC<Props> = ({ mode, onSelectMode }) => (
   <section className="lg:col-span-12">
-    <div className="flex flex-col gap-3 rounded-2xl border border-slate-200/70 bg-white/80 px-4 py-3 shadow-sm backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between">
-      <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+    <div className="shell-panel flex flex-col gap-3 rounded-2xl border px-4 py-3 shadow-sm backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between">
+      <h2 className="shell-heading text-[11px] font-semibold uppercase tracking-[0.18em]">
         Режим
       </h2>
       <div
-        className="grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1 md:grid-cols-4"
+        className="shell-control grid grid-cols-2 gap-1 rounded-xl p-1 md:grid-cols-4"
         role="tablist"
         aria-label="Режим просмотра"
       >
@@ -65,8 +65,8 @@ export const ModeSelector: React.FC<Props> = ({ mode, onSelectMode }) => (
               onClick={() => onSelectMode(id)}
               className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-3 py-2 text-[12px] font-semibold leading-tight transition-colors ${
                 isActive
-                  ? 'bg-white text-indigo-600 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-800'
+                  ? 'shell-tab-active shadow-sm'
+                  : 'shell-tab'
               }`}
             >
               <Icon className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />

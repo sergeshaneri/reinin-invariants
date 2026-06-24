@@ -41,6 +41,7 @@ describe('app URL state', () => {
   it('keeps the existing trait/pole/view URL contract as the default mode', () => {
     expect(parseAppUrlState('?trait=democracy&pole=1&view=2')).toEqual({
       mode: 'trait',
+      theme: 'light',
       traitIdx: traitIndex('democracy'),
       poleIdx: 1,
       viewIdx: 2,
@@ -50,6 +51,7 @@ describe('app URL state', () => {
 
     const state: AppUrlState = {
       mode: 'trait',
+      theme: 'light',
       traitIdx: traitIndex('democracy'),
       poleIdx: 1,
       viewIdx: 2,
@@ -63,6 +65,7 @@ describe('app URL state', () => {
   it('parses supported modes while preserving default trait selection fallbacks', () => {
     expect(parseAppUrlState('?mode=type&trait=carefree')).toEqual({
       mode: 'type',
+      theme: 'light',
       traitIdx: traitIndex('carefree'),
       poleIdx: 0,
       viewIdx: 0,
@@ -86,6 +89,7 @@ describe('app URL state', () => {
   it('parses and serializes selected type IDs without trait state in type URLs', () => {
     expect(parseAppUrlState('?mode=type&type=LSI&trait=democracy')).toEqual({
       mode: 'type',
+      theme: 'light',
       traitIdx: traitIndex('democracy'),
       poleIdx: 0,
       viewIdx: 0,
@@ -95,12 +99,34 @@ describe('app URL state', () => {
 
     expect(serializeAppUrlState({
       mode: 'type',
+      theme: 'light',
       traitIdx: 0,
       poleIdx: 0,
       viewIdx: 0,
       typeId: 'LSI',
       partition: defaultDichotomyPartition,
     }).toString()).toBe('mode=type&type=LSI');
+  });
+
+  it('parses and serializes non-default theme URLs', () => {
+    expect(parseAppUrlState('?theme=dark')).toMatchObject({
+      mode: 'trait',
+      theme: 'dark',
+    });
+
+    expect(parseAppUrlState('?theme=unknown')).toMatchObject({
+      theme: 'light',
+    });
+
+    expect(serializeAppUrlState({
+      mode: 'trait',
+      theme: 'dark',
+      traitIdx: 0,
+      poleIdx: 0,
+      viewIdx: 0,
+      typeId: 'ILE',
+      partition: defaultDichotomyPartition,
+    }).toString()).toBe('theme=dark&trait=vertness');
   });
 
   it('parses and serializes partition explorer state for tetrachotomies', () => {
@@ -117,6 +143,7 @@ describe('app URL state', () => {
 
     expect(serializeAppUrlState({
       mode: 'tetrachotomy',
+      theme: 'light',
       traitIdx: 0,
       poleIdx: 1,
       viewIdx: 1,
@@ -181,6 +208,7 @@ describe('app URL state', () => {
   it('falls back predictably for invalid URL values', () => {
     expect(parseAppUrlState('?mode=unknown&trait=missing&type=UNKNOWN&pole=99&view=-2')).toEqual({
       mode: 'trait',
+      theme: 'light',
       traitIdx: 0,
       poleIdx: 1,
       viewIdx: 0,
@@ -192,6 +220,7 @@ describe('app URL state', () => {
   it('serializes non-default modes without adding mode to default trait URLs', () => {
     expect(serializeAppUrlState({
       mode: 'type',
+      theme: 'light',
       traitIdx: 0,
       poleIdx: 0,
       viewIdx: 0,
@@ -201,6 +230,7 @@ describe('app URL state', () => {
 
     expect(serializeAppUrlState({
       mode: 'tetrachotomy',
+      theme: 'light',
       traitIdx: 0,
       poleIdx: 1,
       viewIdx: 1,
@@ -212,6 +242,7 @@ describe('app URL state', () => {
 
     expect(serializeAppUrlState({
       mode: 'trait',
+      theme: 'light',
       traitIdx: 0,
       poleIdx: 0,
       viewIdx: 0,

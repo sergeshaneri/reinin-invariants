@@ -9,8 +9,8 @@ interface Props {
 }
 
 const POLE_TONES = [
-  'border-sky-200 bg-sky-100 text-sky-950',
-  'border-emerald-200 bg-emerald-100 text-emerald-950',
+  'map-tone-0 text-[var(--color-map-fg)]',
+  'map-tone-1 text-[var(--color-map-fg)]',
 ] as const;
 
 const getTypeCode = (aliases: readonly string[], fallback: string): string => aliases[0] ?? fallback;
@@ -26,13 +26,13 @@ export const DichotomyGallery: React.FC<Props> = ({ selectedTraitIndex, onSelect
   );
 
   return (
-    <section className="rounded-[28px] border border-slate-200/60 bg-white/90 p-5 shadow-sm backdrop-blur-xl">
+    <section className="glass-panel rounded-[28px] p-5">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-          <Grid2X2 className="h-3.5 w-3.5 text-indigo-500" strokeWidth={2} />
+        <h2 className="eyebrow flex items-center gap-2">
+          <Grid2X2 className="h-3.5 w-3.5 text-[var(--color-shell-accent)]" strokeWidth={2} />
           Паттерны дихотомий
         </h2>
-        <span className="font-mono text-[11px] font-medium text-slate-400">{items.length}</span>
+        <span className="font-mono text-[11px] font-medium text-[var(--color-shell-subtle)]">{items.length}</span>
       </div>
 
       <div className="mt-4 flex gap-3 overflow-x-auto pb-2 pr-1 custom-scrollbar" aria-label="Галерея дихотомий">
@@ -50,8 +50,8 @@ export const DichotomyGallery: React.FC<Props> = ({ selectedTraitIndex, onSelect
               onClick={() => onSelectTrait(index)}
               className={`w-[220px] flex-none rounded-2xl border p-3 text-left transition-colors ${
                 isActive
-                  ? 'border-slate-900 bg-slate-950 text-white shadow-sm'
-                  : 'border-slate-200 bg-slate-50 text-slate-800 hover:border-slate-300 hover:bg-white'
+                  ? 'border-[var(--color-shell-active-bg)] bg-[var(--color-shell-active-bg)] text-[var(--color-shell-active-fg)] shadow-sm'
+                  : 'border-[var(--color-shell-border)] bg-[var(--color-shell-surface-muted)] text-[var(--color-app-fg)] hover:border-[var(--color-shell-border-strong)]'
               }`}
             >
               <span className="block min-h-10 text-[13px] font-bold leading-snug">
@@ -97,7 +97,7 @@ export const DichotomyGallery: React.FC<Props> = ({ selectedTraitIndex, onSelect
                   </span>
                 </>
               ) : (
-                <span className="mt-3 block rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700">
+                <span className="mt-3 block rounded-xl border border-[var(--color-shell-border-strong)] bg-[var(--color-shell-accent-soft)] px-3 py-2 text-xs font-semibold text-[var(--color-shell-accent)]">
                   {partition.message}
                 </span>
               )}

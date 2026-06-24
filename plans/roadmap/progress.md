@@ -3,8 +3,8 @@
 ## Snapshot
 
 - Created: 2026-06-12.
-- Scope of this pass: Partition Explorer hardening through Q9.4.
-- Source changes in this pass: Q9.1 render smoke covers partition detail modes and dependent diagnostics; Q9.4 documents H3 display order.
+- Scope of this pass: Partition Explorer hardening through dark-theme visual migration.
+- Source changes in this pass: Q9.1 render smoke covers partition detail modes and dependent diagnostics; Q9.4 documents H3 display order; H6.4 migrates diagram, formula and partition surfaces toward the reference visual style.
 - Existing dirty workspace changes were observed before planning and left untouched.
 - Validation: `npm run smoke:render` and `npm run lint` passed; `npm run validate` was not run for Q9.1 because it can write generated `dist/`.
 
@@ -27,14 +27,14 @@
 | Octochotomies | DONE | C4.6 shows eight classes, selected-class types, Model A previews and dependent URL diagnostics. |
 | Render smoke hardening | DONE | Q9.1 covers default dichotomy, valid tetrachotomy, valid octochotomy and dependent octochotomy SSR paths. |
 | H3 order explanation | DONE | Q9.4 documents canonical H3 order in PRD without adding main-screen UI text. |
-| Aspect icons | TODO | Should follow stable aspect visual metadata. |
-| Dark theme | TODO | Should follow app state and design token decisions. |
+| Aspect icons | DONE | V5.1 visual metadata, V5.2 UI registry and V5.3 icon/symbol/combined compact display are complete. |
+| Dark theme | DONE | H6.1 theme state, H6.2 base tokens, H6.3 shell token migration and H6.4 diagram/formula surface migration are complete. |
 | English version | TODO | Should follow locale adapter and catalog split. |
 | Semantic interpretations | TODO | Should follow stable target IDs and localization foundation. |
 
 ## Recommended Next Step
 
-No further roadmap work is planned in this pass.
+Continue with L7.1: introduce locale primitives and fallback helpers before the English version.
 
 ## Milestone Checklist
 
@@ -690,6 +690,7 @@ No further roadmap work is planned in this pass.
   - `npm run lint`: passed
   - `npm run smoke:render`: passed
   - `npm run test:e2e`: passed
+  - `npm run validate`: passed
   - `npm run validate`: not run because it performs a production build that can update generated `dist/`, which this task explicitly avoided.
 - Decisions:
   - none
@@ -832,5 +833,186 @@ No further roadmap work is planned in this pass.
   - pending commit validation
 - Decisions:
   - none
+- Remaining:
+  - none
+
+### 2026-06-16 - Task V5.1
+
+- Status: DONE
+- Changed files:
+  - `src/data/aspectVisuals.ts`
+  - `src/data/socionics.ts`
+  - `src/data/socionics.test.ts`
+  - `src/components/AspectGlyph.tsx`
+  - `plans/roadmap/tasks.md`
+  - `plans/roadmap/progress.md`
+- Summary:
+  - Added serializable aspect visual metadata keyed by `AspectId`, with `iconKey` and fill state kept outside React components.
+  - Re-exported the metadata through the domain barrel.
+  - Updated `AspectGlyph` to consume the shared metadata instead of maintaining duplicate shape/fill tables.
+  - Added a domain invariant test requiring visual metadata for every registered aspect.
+- Checks:
+  - `npm test -- src/data/socionics.test.ts`: passed
+  - `npm run lint`: passed
+- Decisions:
+  - V5.1 keeps rendering SVG paths in the existing UI component; V5.2 should introduce a dedicated UI registry for richer icon mapping.
+- Remaining:
+  - V5.2
+
+### 2026-06-16 - Task V5.2
+
+- Status: DONE
+- Changed files:
+  - `src/components/AspectIcon.tsx`
+  - `src/components/AspectGlyph.tsx`
+  - `src/diagrams/AspectFunctionDiagram.tsx`
+  - `plans/roadmap/tasks.md`
+  - `plans/roadmap/progress.md`
+- Summary:
+  - Added a reusable UI registry that maps domain `iconKey` values to custom SVG aspect icons.
+  - Kept `AspectGlyph` as the public icon/abbreviation switch while delegating icon rendering to `AspectIcon`.
+  - Reused `AspectIcon` in the aspect-function grid while leaving compact formula chips width-stable.
+  - Preserved existing `data-aspect-glyph-mode` compatibility for icon-mode glyphs.
+- Checks:
+  - `npm run lint`: passed
+  - `npm run smoke:render`: passed
+  - `npm run test:e2e`: passed
+- Decisions:
+  - Aspect symbols stay as custom SVG shapes because lucide does not provide the classical socionics aspect mark set.
+- Remaining:
+  - V5.3
+
+### 2026-06-16 - Task V5.3
+
+- Status: DONE
+- Changed files:
+  - `src/components/AspectDisplayToggle.tsx`
+  - `src/components/AspectGlyph.tsx`
+  - `src/components/AspectIcon.tsx`
+  - `tests/e2e/app.spec.ts`
+  - `plans/roadmap/tasks.md`
+  - `plans/roadmap/progress.md`
+- Summary:
+  - Expanded aspect display mode from two options to `icon`, `symbol` and `icon-symbol`.
+  - Kept the visible abbreviation label while renaming the internal mode to `symbol`.
+  - Added combined icon+symbol rendering for compact Model A glyphs.
+  - Left persistence unchanged because the existing aspect display toggle is local visual state, not URL state.
+  - Added e2e coverage for symbol-only and combined modes.
+- Checks:
+  - `npm run lint`: passed
+  - `npm run smoke:render`: passed
+  - `npm run test:e2e`: passed
+- Decisions:
+  - No URL/localStorage persistence was added for V5.3; the current app convention treats this toggle as a visual preference only.
+- Remaining:
+  - none
+
+### 2026-06-16 - Task H6.1
+
+- Status: DONE
+- Changed files:
+  - `src/appState.ts`
+  - `src/appState.test.ts`
+  - `src/App.tsx`
+  - `src/components/ThemeToggle.tsx`
+  - `tests/e2e/app.spec.ts`
+  - `plans/roadmap/tasks.md`
+  - `plans/roadmap/progress.md`
+- Summary:
+  - Added `ThemeMode` with URL-first, localStorage-second, default-light policy.
+  - Serialized non-default `theme=dark` while omitting default light theme URLs.
+  - Added a guarded localStorage write and `html`/app-root `data-theme` sync.
+  - Added a fixed-position `ThemeToggle` so the new control does not change existing page snapshot height.
+  - Added e2e coverage for URL, localStorage and root theme state.
+- Checks:
+  - `npm run lint`: passed
+  - `npm test -- src/appState.test.ts`: passed
+  - `npm run smoke:render`: passed
+  - `npm run test:e2e`: passed
+- Decisions:
+  - No `system` theme option in H6.1; that would require separate resolved-theme policy.
+- Remaining:
+  - H6.2
+
+### 2026-06-16 - Task H6.2
+
+- Status: DONE
+- Changed files:
+  - `src/index.css`
+  - `src/App.tsx`
+  - `plans/roadmap/tasks.md`
+  - `plans/roadmap/progress.md`
+- Summary:
+  - Added light/dark base CSS variables for app background, foreground, selection and scrollbar colors.
+  - Bound the app root background/text/selection to the new variables.
+  - Updated custom scrollbar colors to use the same token layer.
+- Checks:
+  - `npm run build`: passed
+  - `npm run smoke:render`: passed
+  - `npm run lint`: passed after rerun; the first parallel lint collided with a simultaneous build changing `dist` assets.
+- Decisions:
+  - H6.2 only adds base tokens; migration of shell components remains H6.3.
+- Remaining:
+  - H6.3
+
+### 2026-06-16 - Task H6.3
+
+- Status: DONE
+- Changed files:
+  - `src/index.css`
+  - `src/components/ModeSelector.tsx`
+  - `src/components/AspectDisplayToggle.tsx`
+  - `src/components/ThemeToggle.tsx`
+  - `src/components/TraitNav.tsx`
+  - `src/components/TypeSelector.tsx`
+  - `src/components/PoleSelector.tsx`
+  - `src/components/ViewSelector.tsx`
+  - `src/components/Footer.tsx`
+  - `src/components/HelpModal.tsx`
+  - `plans/roadmap/tasks.md`
+  - `plans/roadmap/progress.md`
+- Summary:
+  - Added shared shell token utility classes for panels, controls, tabs, headings, muted text, accents and active states.
+  - Migrated primary shell selectors and panels to those token utilities.
+  - Preserved existing snapshot dimensions while making shell controls theme-aware.
+- Checks:
+  - `npm run lint`: passed
+  - `npm run smoke:render`: passed
+  - `npm run test:e2e`: passed
+- Decisions:
+  - Diagram and formula surfaces remain separate H6.4 scope.
+- Remaining:
+  - H6.4
+
+### 2026-06-24 - Task H6.4
+
+- Status: DONE
+- Changed files:
+  - `src/index.css`
+  - `src/App.tsx`
+  - `src/components/Header.tsx`
+  - `src/components/DichotomyGallery.tsx`
+  - `src/components/PartitionChooser.tsx`
+  - `src/components/PartitionCompositionView.tsx`
+  - `src/components/PartitionDiagnostic.tsx`
+  - `src/components/PartitionTypesPanel.tsx`
+  - `src/components/TetrachotomyView.tsx`
+  - `src/components/OctochotomyView.tsx`
+  - `src/components/TypePatternCard.tsx`
+  - `src/components/ModelAPreviewGrid.tsx`
+  - `src/components/FormulaPanel.tsx`
+  - `src/diagrams/AspectFunctionDiagram.tsx`
+  - `src/diagrams/TypeModelDiagram.tsx`
+  - `tests/e2e/app.spec.ts-snapshots/*.png`
+- Summary:
+  - Ported the reference project's OLED editorial glass visual language into the current app through shared CSS tokens, glass panels, grain and a subtle ambient grid.
+  - Migrated diagram, formula, Model A preview, partition pattern, chooser and class-detail surfaces away from hardcoded white/slate styling to theme-aware tokens.
+  - Kept URL/domain behavior unchanged and updated the intentional desktop/mobile e2e snapshots for the visual redesign.
+- Checks:
+  - `npm run lint`: passed
+  - `npm run smoke:render`: passed
+  - `npm run test:e2e`: passed
+- Decisions:
+  - The reference style was adapted as a local token system rather than copied wholesale; no new package dependency or external font request was added.
 - Remaining:
   - none

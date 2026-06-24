@@ -7,10 +7,10 @@ import { PartitionCompositionView } from './PartitionCompositionView';
 import { PartitionTypesPanel } from './PartitionTypesPanel';
 
 const CLASS_TONES = [
-  'border-sky-200 bg-sky-50 text-sky-950',
-  'border-emerald-200 bg-emerald-50 text-emerald-950',
-  'border-amber-200 bg-amber-50 text-amber-950',
-  'border-rose-200 bg-rose-50 text-rose-950',
+  'map-tone-0 text-[var(--color-map-fg)]',
+  'map-tone-1 text-[var(--color-map-fg)]',
+  'map-tone-2 text-[var(--color-map-fg)]',
+  'map-tone-3 text-[var(--color-map-fg)]',
 ] as const;
 
 const getTypeCode = (aliases: readonly string[], fallback: string): string => aliases[0] ?? fallback;
@@ -65,22 +65,22 @@ export const TetrachotomyView: React.FC<Props> = ({
         onSelectClass={onSelectClass}
       />
 
-      <div className="rounded-[28px] border border-slate-200/60 bg-white/90 p-5 shadow-sm backdrop-blur-xl">
+      <div className="glass-panel rounded-[28px] p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-              <Layers3 className="h-3.5 w-3.5 text-indigo-500" strokeWidth={2} />
+            <div className="eyebrow flex items-center gap-2">
+              <Layers3 className="h-3.5 w-3.5 text-[var(--color-shell-accent)]" strokeWidth={2} />
               Классы тетрахотомии
             </div>
-            <h2 className="mt-2 text-lg font-bold leading-tight text-slate-950">
+            <h2 className="mt-2 text-lg font-bold leading-tight text-[var(--color-app-fg)]">
               {partition.traits.map(trait => trait.name).join(' + ')}
             </h2>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-right">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+          <div className="glass-muted rounded-2xl px-3 py-2 text-right">
+            <div className="eyebrow">
               Классы
             </div>
-            <div className="mt-1 text-sm font-bold text-slate-800">
+            <div className="mt-1 text-sm font-bold text-[var(--color-app-fg)]">
               {partition.classes.length} x {partition.classes[0]?.types.length ?? 0}
             </div>
           </div>
@@ -100,8 +100,8 @@ export const TetrachotomyView: React.FC<Props> = ({
                 onClick={() => onSelectClass(partitionClass.key)}
                 className={`rounded-2xl border p-4 text-left transition-colors ${tone} ${
                   isSelected
-                    ? 'ring-2 ring-slate-900 ring-offset-2'
-                    : 'hover:border-slate-400'
+                    ? 'ring-2 ring-[var(--color-shell-accent)] ring-offset-2 ring-offset-[var(--color-app-bg)]'
+                    : 'hover:border-[var(--color-shell-hover-fg)]'
                 }`}
               >
                 <span className="block text-sm font-bold leading-snug">
@@ -111,7 +111,7 @@ export const TetrachotomyView: React.FC<Props> = ({
                   {partitionClass.types.map(type => (
                     <span
                       key={type.id}
-                      className="rounded-md bg-white/80 px-2 py-0.5 text-[10px] font-black text-slate-800"
+                      className="rounded-md bg-[rgb(255_255_255_/_0.22)] px-2 py-0.5 text-[10px] font-black text-current"
                       title={type.name}
                     >
                       {getTypeCode(type.aliases, type.id)}

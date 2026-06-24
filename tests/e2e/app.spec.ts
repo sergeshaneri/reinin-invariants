@@ -23,7 +23,7 @@ test('renders the app and key diagram controls', async ({ page }) => {
 
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Инварианты');
   await expect(page.getByRole('tab', { name: 'Признак' })).toHaveAttribute('aria-selected', 'true');
-  await expect(page.getByRole('tab', { name: 'Пиктограммы' })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('tab', { name: 'Пикто' })).toHaveAttribute('aria-selected', 'true');
   await expect(page.getByRole('tab', { name: 'Тип' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Признаки' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Аспектон' })).toBeVisible();
@@ -163,8 +163,13 @@ test('switches app modes through the URL state', async ({ page }) => {
 
   await page.getByRole('tab', { name: 'Аббр.' }).click();
   await expect(page.getByRole('tab', { name: 'Аббр.' })).toHaveAttribute('aria-selected', 'true');
-  await expect(page.locator('[data-aspect-display-mode="abbrev"]')).toBeVisible();
-  await expect(page.locator('[data-aspect-glyph-mode="abbrev"]')).toHaveCount(8);
+  await expect(page.locator('[data-aspect-display-mode="symbol"]')).toBeVisible();
+  await expect(page.locator('[data-aspect-glyph-mode="symbol"]')).toHaveCount(8);
+
+  await page.getByRole('tab', { name: 'Оба' }).click();
+  await expect(page.getByRole('tab', { name: 'Оба' })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.locator('[data-aspect-display-mode="icon-symbol"]')).toBeVisible();
+  await expect(page.locator('[data-aspect-glyph-mode="icon-symbol"]')).toHaveCount(8);
 
   await page.getByRole('tab', { name: 'Тетрахотомия' }).click();
   await expect(page.getByRole('tab', { name: 'Тетрахотомия' })).toHaveAttribute('aria-selected', 'true');
@@ -190,6 +195,28 @@ test('switches app modes through the URL state', async ({ page }) => {
   await expect(page).toHaveURL(/trait=democracy/);
 
   expect(errors).toEqual([]);
+});
+
+test('syncs theme toggle with URL and local storage', async ({ page }) => {
+  await page.goto('/?theme=dark');
+
+  await expect(page.locator('#root > [data-theme="dark"]')).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await expect(page.getByRole('tab', { name: 'Темная' })).toHaveAttribute('aria-selected', 'true');
+  await expect(page).toHaveURL(/theme=dark/);
+
+  await page.getByRole('tab', { name: 'Светлая' }).click();
+
+  await expect(page.locator('#root > [data-theme="light"]')).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await expect(page).not.toHaveURL(/theme=dark/);
+  expect(await page.evaluate(() => localStorage.getItem('reinin-invariants-theme'))).toBe('light');
+
+  await page.getByRole('tab', { name: 'Темная' }).click();
+
+  await expect(page.locator('#root > [data-theme="dark"]')).toBeVisible();
+  await expect(page).toHaveURL(/theme=dark/);
+  expect(await page.evaluate(() => localStorage.getItem('reinin-invariants-theme'))).toBe('dark');
 });
 
 test('chooses tetra and octo partitions through sequential trait selection', async ({ page }) => {

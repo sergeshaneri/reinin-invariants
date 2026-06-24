@@ -224,10 +224,12 @@ test('chooses tetra and octo partitions through sequential trait selection', asy
 
   await page.goto('/?mode=tetrachotomy');
   await expect(page.locator('[data-partition-chooser="tetrachotomy"]')).toBeVisible();
+  await expect(page.locator('[data-partition-catalog-count="tetrachotomy"]')).toHaveText('35');
+  await expect(page.locator('[data-partition-structural-count="tetrachotomy"]')).toHaveText('105');
 
   await page.locator('[data-partition-sequential-slot="1"][data-partition-sequential-trait="talness"]').click();
   await expect(page.locator('[data-partition-pattern="tetrachotomy"]')).toBeVisible();
-  await expect(page.locator('[data-partition-catalog-entry="vertness+talness"]')).toHaveAttribute('aria-current', 'true');
+  await expect(page.locator('[data-partition-structural-entry="vertness+talness"]')).toHaveAttribute('aria-current', 'true');
   await expect(page).toHaveURL(/mode=tetrachotomy/);
   await expect(page).toHaveURL(/traits=vertness%2Ctalness/);
 
@@ -246,9 +248,13 @@ test('chooses tetra and octo partitions through catalog entries', async ({ page 
   const errors = collectPageErrors(page);
 
   await page.goto('/?mode=tetrachotomy');
-  await page.locator('[data-partition-catalog-entry="asking+process"]').click();
-  await expect(page.locator('[data-partition-catalog-entry="asking+process"]')).toHaveAttribute('aria-current', 'true');
+  await page.locator('[data-partition-catalog-entry="tetra-35"]').click();
+  await expect(page.locator('[data-partition-catalog-entry="tetra-35"]')).toHaveAttribute('aria-current', 'true');
   await expect(page.locator('[data-partition-pattern="tetrachotomy"] [role="gridcell"]')).toHaveCount(16);
+  await expect(page).toHaveURL(/traits=asking%2Cjudicious/);
+
+  await page.locator('[data-partition-structural-entry="asking+process"]').click();
+  await expect(page.locator('[data-partition-structural-entry="asking+process"]')).toHaveAttribute('aria-current', 'true');
   await expect(page).toHaveURL(/traits=asking%2Cprocess/);
 
   await page.getByRole('tab', { name: 'Октохотомия' }).click();
@@ -264,10 +270,10 @@ test('chooses tetra and octo partitions through visual pattern gallery', async (
   const errors = collectPageErrors(page);
 
   await page.goto('/?mode=tetrachotomy');
-  await page.locator('[data-partition-gallery-entry="vertness+talness"]').click();
-  await expect(page.locator('[data-partition-gallery-entry="vertness+talness"]')).toHaveAttribute('aria-current', 'true');
-  await expect(page.locator('[data-partition-catalog-entry="vertness+talness"]')).toHaveAttribute('aria-current', 'true');
-  await expect(page).toHaveURL(/traits=vertness%2Ctalness/);
+  await page.locator('[data-partition-gallery-entry="tetra-07"]').click();
+  await expect(page.locator('[data-partition-gallery-entry="tetra-07"]')).toHaveAttribute('aria-current', 'true');
+  await expect(page.locator('[data-partition-catalog-entry="tetra-07"]')).toHaveAttribute('aria-current', 'true');
+  await expect(page).toHaveURL(/traits=nalness%2Ctalness/);
 
   await page.getByRole('tab', { name: 'Октохотомия' }).click();
   await page.locator('[data-partition-gallery-entry="vertness+talness+carefree"]').click();

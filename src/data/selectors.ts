@@ -22,6 +22,10 @@ import {
   type LocalizedText,
   type SocionicTypeId,
 } from './types';
+import {
+  TETRACHOTOMY_FORMULAS,
+  type TetrachotomyFormulaRecord,
+} from './tetrachotomies';
 
 export type Locale = 'ru' | 'en';
 
@@ -130,6 +134,13 @@ export interface PartitionCatalogEntryViewModel {
   classCount: number;
   classSize: number;
   partition: PartitionViewModel;
+  sourceFormula?: {
+    id: string;
+    formulaText: string;
+    targetTrait: TraitSummaryViewModel;
+    status: TetrachotomyFormulaRecord['status'];
+    sourceTableNumber: number;
+  };
 }
 
 export interface PartitionCatalogViewModel {
@@ -323,6 +334,40 @@ const selectPartitionCatalog = (
   };
 };
 
+const selectTetrachotomySourceCatalog = (
+  locale: Locale,
+): PartitionCatalogViewModel => {
+  const entries = TETRACHOTOMY_FORMULAS.map(formula => {
+    const partition = selectPartition(buildPartition(formula.basisTraitIds), locale);
+
+    if (!partition.ok || partition.kind !== 'tetrachotomy') {
+      throw new Error(`Tetrachotomy formula ${formula.id} does not compute a tetrachotomy`);
+    }
+
+    return {
+      key: formula.id,
+      traitIds: formula.basisTraitIds,
+      title: formula.source.formulaText,
+      traits: partition.traits,
+      classCount: partition.classes.length,
+      classSize: partition.classes[0]?.types.length ?? 0,
+      partition,
+      sourceFormula: {
+        id: formula.id,
+        formulaText: formula.source.formulaText,
+        targetTrait: selectTraitSummary(formula.targetTraitId),
+        status: formula.status,
+        sourceTableNumber: formula.source.tableNumber,
+      },
+    };
+  });
+
+  return {
+    kind: 'tetrachotomy',
+    entries,
+  };
+};
+
 export function selectTypeModelView(
   typeId: SocionicTypeId,
   locale: Locale = 'ru',
@@ -429,6 +474,12 @@ export function selectOctochotomyView(
 }
 
 export function selectTetrachotomyCatalog(
+  locale: Locale = 'ru',
+): PartitionCatalogViewModel {
+  return selectTetrachotomySourceCatalog(locale);
+}
+
+export function selectStructuralTetrachotomyCatalog(
   locale: Locale = 'ru',
 ): PartitionCatalogViewModel {
   return selectPartitionCatalog('tetrachotomy', locale);

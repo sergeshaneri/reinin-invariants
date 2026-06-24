@@ -6,6 +6,7 @@ import {
 } from '../data/socionics';
 import {
   selectOctochotomyCatalog,
+  selectStructuralTetrachotomyCatalog,
   selectTetrachotomyCatalog,
   type PartitionCatalogEntryViewModel,
 } from '../data/selectors';
@@ -25,6 +26,11 @@ const CLASS_TONES = [
 const KIND_TITLES = {
   tetrachotomy: 'Тетрахотомии',
   octochotomy: 'Октохотомии',
+} as const;
+
+const CATALOG_LABELS = {
+  tetrachotomy: 'Источник',
+  octochotomy: 'Каталог',
 } as const;
 
 const getTypeCode = (aliases: readonly string[], fallback: string): string => aliases[0] ?? fallback;
@@ -57,11 +63,18 @@ export const PartitionChooser: React.FC<Props> = ({
   onSelectTraitIds,
 }) => {
   const catalog = useMemo(() => getCatalog(kind), [kind]);
+  const structuralCatalog = useMemo(() => (
+    kind === 'tetrachotomy' ? selectStructuralTetrachotomyCatalog() : null
+  ), [kind]);
   const selectedKey = selectedTraitIds.join('+');
   const selectedEntry = catalog.entries.find(entry => entry.key === selectedKey)
     ?? catalog.entries.find(entry => hasSameTraits(entry.traitIds, selectedTraitIds))
     ?? null;
+  const selectedStructuralEntry = structuralCatalog?.entries.find(entry => (
+    entry.key === selectedKey || hasSameTraits(entry.traitIds, selectedTraitIds)
+  )) ?? null;
   const activeEntryKey = selectedEntry?.key ?? selectedKey;
+  const activeStructuralEntryKey = selectedStructuralEntry?.key ?? selectedKey;
   const traitCount = getTraitCount(kind);
   const visibleEntries = catalog.entries.slice(0, kind === 'tetrachotomy' ? 24 : 30);
 
@@ -84,7 +97,9 @@ export const PartitionChooser: React.FC<Props> = ({
         {entry.title}
       </span>
       <span className="mt-1 block text-[11px] font-semibold opacity-70">
-        {entry.classCount} x {entry.classSize}
+        {entry.sourceFormula
+          ? `${entry.sourceFormula.targetTrait.name} · ${entry.classCount} x ${entry.classSize}`
+          : `${entry.classCount} x ${entry.classSize}`}
       </span>
     </span>
   );
@@ -98,7 +113,12 @@ export const PartitionChooser: React.FC<Props> = ({
         <h2 className="eyebrow">
           {KIND_TITLES[kind]}
         </h2>
-        <span className="font-mono text-[11px] font-medium text-[var(--color-shell-subtle)]">{catalog.entries.length}</span>
+        <span
+          className="font-mono text-[11px] font-medium text-[var(--color-shell-subtle)]"
+          data-partition-catalog-count={kind}
+        >
+          {catalog.entries.length}
+        </span>
       </div>
 
       <div className="mt-5 space-y-4">
@@ -148,7 +168,7 @@ export const PartitionChooser: React.FC<Props> = ({
         <section data-partition-entry-mode="catalog">
           <div className="eyebrow flex items-center gap-2">
             <ListChecks className="h-3.5 w-3.5 text-[var(--color-shell-accent)]" strokeWidth={2} />
-            Каталог
+            {CATALOG_LABELS[kind]}
           </div>
           <div className="mt-3 max-h-[260px] space-y-1.5 overflow-y-auto pr-1 custom-scrollbar">
             {catalog.entries.map(entry => {
@@ -173,6 +193,42 @@ export const PartitionChooser: React.FC<Props> = ({
             })}
           </div>
         </section>
+
+        {structuralCatalog ? (
+          <section data-partition-entry-mode="structural">
+            <div className="eyebrow flex items-center justify-between gap-2">
+              <span>Структурные пары</span>
+              <span
+                className="font-mono text-[11px] font-medium text-[var(--color-shell-subtle)]"
+                data-partition-structural-count="tetrachotomy"
+              >
+                {structuralCatalog.entries.length}
+              </span>
+            </div>
+            <div className="mt-3 max-h-[180px] space-y-1.5 overflow-y-auto pr-1 custom-scrollbar">
+              {structuralCatalog.entries.map(entry => {
+                const isSelected = entry.key === activeStructuralEntryKey;
+
+                return (
+                  <button
+                    key={entry.key}
+                    type="button"
+                    aria-current={isSelected ? 'true' : undefined}
+                    data-partition-structural-entry={entry.key}
+                    onClick={() => onSelectTraitIds(entry.traitIds)}
+                    className={`flex w-full items-center justify-between gap-3 rounded-2xl border px-3 py-2 text-left transition-colors ${
+                      isSelected
+                        ? 'border-[var(--color-shell-active-bg)] bg-[var(--color-shell-active-bg)] text-[var(--color-shell-active-fg)]'
+                        : 'border-[var(--color-shell-border)] bg-[var(--color-shell-surface-muted)] text-[var(--color-app-fg)] hover:border-[var(--color-shell-border-strong)]'
+                    }`}
+                  >
+                    {renderEntryLabel(entry)}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        ) : null}
 
         <section data-partition-entry-mode="gallery">
           <div className="eyebrow flex items-center gap-2">

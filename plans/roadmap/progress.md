@@ -23,9 +23,9 @@
 | Type Model A diagram | DONE | U2.4 renders selected TIM Model A in type mode. |
 | Type invariant highlight | DONE/SUPERSEDED | U2.5 works technically but is no longer the desired UX direction. |
 | Partition Explorer UX | DONE | Structural partition UI is complete: C4.1 catalogs, C4.2 multi-entry chooser, C4.3 tetrachotomy composition, C4.4 tetrachotomy detail, C4.5 octochotomy composition and C4.6 octochotomy detail. |
-| Tetrachotomies | PARTIAL | Structural view works, but the canonical 35 source formulas from `tetrachotomy-doc-extract.json` still need a domain schema, verification and UI catalog pass. |
+| Tetrachotomies | DONE | Structural view works and the canonical 35 source formulas now drive the default tetra catalog; 105 structural pairs remain an advanced path. |
 | Octochotomies | PARTIAL | Structural independent triples work, but source-derived octochotomy formulas are still draft/incomplete until the user finishes and confirms the source. |
-| Formula ground truth | IN PROGRESS | F4.1-F4.3 split source-derived tetra/octo formula catalogs from computed partition structure and verify the 35 extracted tetras. |
+| Formula ground truth | IN PROGRESS | F4.1-F4.4 split source-derived tetra/octo formula catalogs from computed partition structure, verify the 35 extracted tetras and use them in the default tetra UI. |
 | Render smoke hardening | DONE | Q9.1 covers default dichotomy, valid tetrachotomy, valid octochotomy and dependent octochotomy SSR paths. |
 | H3 order explanation | DONE | Q9.4 documents canonical H3 order in PRD without adding main-screen UI text. |
 | Aspect icons | DONE | V5.1 visual metadata, V5.2 UI registry and V5.3 icon/symbol/combined compact display are complete. |
@@ -35,7 +35,7 @@
 
 ## Recommended Next Step
 
-Continue with F4.4: separate the tetrachotomy UI/catalog path so the 35 verified source formulas are not confused with the broader 105 structural pairs. Then do F4.5-F4.7 for octochotomy drafts after the user confirms the remaining source text.
+Continue with F4.5: introduce the source-derived octochotomy draft schema with explicit `draft`, `incomplete` or `verified` status. F4.6-F4.7 still require user confirmation of the remaining source text before treating octochotomy records as verified.
 
 ## Milestone Checklist
 
@@ -1067,5 +1067,29 @@ Continue with F4.4: separate the tetrachotomy UI/catalog path so the 35 verified
 - Decisions:
   - `DEC-009` refined: source formulas are canonical records; broader structural pairs remain separate unless explicitly verified.
 - Remaining:
-  - F4.4 should separate canonical source formulas from structural pair exploration in selectors/UI.
   - F4.5-F4.7 should handle octochotomy source records after user confirmation of the final source.
+
+### 2026-06-24 - Task F4.4
+
+- Status: DONE
+- Changed files:
+  - `src/data/selectors.ts`
+  - `src/data/selectors.test.ts`
+  - `src/components/PartitionChooser.tsx`
+  - `tests/e2e/app.spec.ts`
+  - `plans/roadmap/tasks.md`
+  - `plans/roadmap/progress.md`
+- Summary:
+  - Switched the default tetrachotomy catalog selector and chooser path from all 105 structural pairs to the 35 source-derived formula records.
+  - Added `selectStructuralTetrachotomyCatalog()` so the broader computed pair explorer remains available as a separate advanced/basis path.
+  - Added source formula metadata to catalog entries without changing the existing URL contract, which still stores selected basis `traits`.
+  - Updated e2e coverage for canonical formula selection, canonical count 35, structural count 105 and structural pair selection.
+- Checks:
+  - `npm test -- src/data/selectors.test.ts src/data/tetrachotomies.test.ts`: passed
+  - `npm run lint`: passed
+  - `npm run smoke:render`: passed
+  - `npm run test:e2e`: passed
+- Decisions:
+  - Formula identity is not persisted as `formulaId` in F4.4 because the 35 canonical basis pairs are unique; URLs keep the current `traits` parameter.
+- Remaining:
+  - F4.5 should introduce source-derived octochotomy draft records with explicit status.

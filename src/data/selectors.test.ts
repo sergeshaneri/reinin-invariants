@@ -8,6 +8,7 @@ import {
   selectOctochotomyView,
   selectPartitionExplorerView,
   selectPartitionTypesPanelView,
+  selectStructuralTetrachotomyCatalog,
   selectTetrachotomyCatalog,
   selectTetrachotomyView,
   selectTypeModelPreviews,
@@ -115,16 +116,22 @@ describe('domain selectors', () => {
     expect(view.classes.every(partitionClass => partitionClass.types.length === 2)).toBe(true);
   });
 
-  it('selects a catalog of every valid tetrachotomy pair with preview pattern data', () => {
+  it('selects the canonical source tetrachotomy formula catalog with preview pattern data', () => {
     const catalog = selectTetrachotomyCatalog();
 
     expect(catalog.kind).toBe('tetrachotomy');
-    expect(catalog.entries).toHaveLength(105);
+    expect(catalog.entries).toHaveLength(35);
     expect(catalog.entries[0]).toMatchObject({
-      key: 'vertness+nalness',
-      traitIds: ['vertness', 'nalness'],
+      key: 'tetra-01',
+      traitIds: ['carefree', 'intuition'],
+      title: 'Верт = Бс/Пр Х Ит/Сн (1,а)',
       classCount: 4,
       classSize: 4,
+      sourceFormula: {
+        id: 'tetra-01',
+        targetTrait: { id: 'vertness' },
+        status: 'extracted',
+      },
       partition: {
         ok: true,
         kind: 'tetrachotomy',
@@ -132,17 +139,35 @@ describe('domain selectors', () => {
     });
     expect(catalog.entries[0].partition.patternCells[0]).toMatchObject({
       type: { id: 'ILE' },
-      classKey: 'vertness:0|nalness:0',
+      classKey: 'carefree:0|intuition:0',
     });
     expect(catalog.entries.at(-1)).toMatchObject({
-      key: 'asking+process',
-      traitIds: ['asking', 'process'],
+      key: 'tetra-35',
+      traitIds: ['asking', 'judicious'],
     });
+    expect(new Set(catalog.entries.map(entry => entry.traitIds.join('+'))).size).toBe(35);
     expect(catalog.entries.every(entry => (
       entry.partition.classes.length === 4
       && entry.partition.classes.every(partitionClass => partitionClass.types.length === 4)
       && entry.partition.patternCells.length === 16
+      && entry.sourceFormula !== undefined
     ))).toBe(true);
+  });
+
+  it('keeps the broader structural tetrachotomy pair catalog separate', () => {
+    const catalog = selectStructuralTetrachotomyCatalog();
+
+    expect(catalog.kind).toBe('tetrachotomy');
+    expect(catalog.entries).toHaveLength(105);
+    expect(catalog.entries[0]).toMatchObject({
+      key: 'vertness+nalness',
+      traitIds: ['vertness', 'nalness'],
+    });
+    expect(catalog.entries[0].sourceFormula).toBeUndefined();
+    expect(catalog.entries.at(-1)).toMatchObject({
+      key: 'asking+process',
+      traitIds: ['asking', 'process'],
+    });
   });
 
   it('selects a catalog of independent octochotomy triples and excludes dependent triples', () => {

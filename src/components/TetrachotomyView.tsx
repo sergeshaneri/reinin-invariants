@@ -75,6 +75,22 @@ export const TetrachotomyView: React.FC<Props> = ({
             <h2 className="mt-2 text-lg font-bold leading-tight text-[var(--color-app-fg)]">
               {partition.traits.map(trait => trait.name).join(' + ')}
             </h2>
+            {view.sourceFormula ? (
+              <div
+                className="mt-3 glass-muted rounded-2xl px-3 py-2"
+                data-tetrachotomy-source-formula={view.sourceFormula.id}
+              >
+                <div className="eyebrow">
+                  Формула из источника
+                </div>
+                <div className="mt-1 text-sm font-bold leading-snug text-[var(--color-app-fg)]">
+                  {view.sourceFormula.formulaText}
+                </div>
+                <div className="mt-1 text-xs font-semibold text-[var(--color-shell-muted)]">
+                  Таблица {view.sourceFormula.sourceTableNumber} · {view.sourceFormula.targetTrait.name}
+                </div>
+              </div>
+            ) : null}
           </div>
           <div className="glass-muted rounded-2xl px-3 py-2 text-right">
             <div className="eyebrow">

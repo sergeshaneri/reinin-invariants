@@ -225,13 +225,13 @@ test('chooses tetra and octo partitions through sequential trait selection', asy
   await page.goto('/?mode=tetrachotomy');
   await expect(page.locator('[data-partition-chooser="tetrachotomy"]')).toBeVisible();
   await expect(page.locator('[data-partition-catalog-count="tetrachotomy"]')).toHaveText('35');
-  await expect(page.locator('[data-partition-structural-count="tetrachotomy"]')).toHaveText('105');
+  await expect(page.locator('[data-partition-entry-mode="structural"]')).toHaveCount(0);
 
-  await page.locator('[data-partition-sequential-slot="1"][data-partition-sequential-trait="talness"]').click();
+  await page.locator('[data-partition-sequential-slot="0"][data-partition-sequential-trait="talness"]').click();
   await expect(page.locator('[data-partition-pattern="tetrachotomy"]')).toBeVisible();
-  await expect(page.locator('[data-partition-structural-entry="vertness+talness"]')).toHaveAttribute('aria-current', 'true');
+  await expect(page.locator('[data-partition-catalog-entry="tetra-07"]')).toHaveAttribute('aria-current', 'true');
   await expect(page).toHaveURL(/mode=tetrachotomy/);
-  await expect(page).toHaveURL(/traits=vertness%2Ctalness/);
+  await expect(page).toHaveURL(/traits=nalness%2Ctalness/);
 
   await page.getByRole('tab', { name: 'Октохотомия' }).click();
   await expect(page.locator('[data-partition-chooser="octochotomy"]')).toBeVisible();
@@ -251,11 +251,8 @@ test('chooses tetra and octo partitions through catalog entries', async ({ page 
   await page.locator('[data-partition-catalog-entry="tetra-35"]').click();
   await expect(page.locator('[data-partition-catalog-entry="tetra-35"]')).toHaveAttribute('aria-current', 'true');
   await expect(page.locator('[data-partition-pattern="tetrachotomy"] [role="gridcell"]')).toHaveCount(16);
+  await expect(page.locator('[data-tetrachotomy-source-formula="tetra-35"]')).toContainText('Лг/Эт = ?/! Х Рс/Рш');
   await expect(page).toHaveURL(/traits=asking%2Cjudicious/);
-
-  await page.locator('[data-partition-structural-entry="asking+process"]').click();
-  await expect(page.locator('[data-partition-structural-entry="asking+process"]')).toHaveAttribute('aria-current', 'true');
-  await expect(page).toHaveURL(/traits=asking%2Cprocess/);
 
   await page.getByRole('tab', { name: 'Октохотомия' }).click();
   await page.locator('[data-partition-catalog-entry="vertness+nalness+asking"]').click();

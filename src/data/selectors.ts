@@ -115,6 +115,7 @@ export interface PartitionExplorerViewModel {
   partition: PartitionViewModel | PartitionDiagnosticViewModel;
   selectedClassKey: string | null;
   selectedClass: PartitionClassViewModel | null;
+  sourceFormula?: PartitionCatalogEntryViewModel['sourceFormula'];
 }
 
 export interface PartitionTypesPanelViewModel {
@@ -368,6 +369,27 @@ const selectTetrachotomySourceCatalog = (
   };
 };
 
+const findTetrachotomySourceFormula = (
+  traitIds: readonly ReininTraitId[],
+  locale: Locale,
+): PartitionCatalogEntryViewModel['sourceFormula'] | undefined => {
+  if (traitIds.length !== 2) {
+    return undefined;
+  }
+
+  return selectTetrachotomySourceCatalog(locale).entries.find(entry => (
+    hasSameTraits(entry.traitIds, traitIds)
+  ))?.sourceFormula;
+};
+
+const hasSameTraits = (
+  left: readonly ReininTraitId[],
+  right: readonly ReininTraitId[],
+): boolean => (
+  left.length === right.length
+  && left.every(traitId => right.includes(traitId))
+);
+
 export function selectTypeModelView(
   typeId: SocionicTypeId,
   locale: Locale = 'ru',
@@ -549,6 +571,9 @@ export function selectPartitionExplorerView(
       partition,
       selectedClassKey: null,
       selectedClass: null,
+      sourceFormula: traitIds.length === 2
+        ? findTetrachotomySourceFormula(traitIds, locale)
+        : undefined,
     };
   }
 
@@ -561,5 +586,8 @@ export function selectPartitionExplorerView(
     partition,
     selectedClassKey: selectedClass?.key ?? null,
     selectedClass,
+    sourceFormula: partition.kind === 'tetrachotomy'
+      ? findTetrachotomySourceFormula(traitIds, locale)
+      : undefined,
   };
 }

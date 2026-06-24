@@ -355,21 +355,19 @@ describe('domain selectors', () => {
 
   it('selects the requested partition explorer class', () => {
     const view = selectPartitionExplorerView(
-      ['vertness', 'nalness'],
-      'vertness:1|nalness:0',
+      ['carefree', 'intuition'],
+      'carefree:1|intuition:0',
     );
 
     expect(view).toMatchObject({
       kind: 'tetrachotomy',
-      selectedClassKey: 'vertness:1|nalness:0',
+      selectedClassKey: 'carefree:1|intuition:0',
       selectedClass: {
-        key: 'vertness:1|nalness:0',
-        types: [
-          { id: 'SEI' },
-          { id: 'IEI' },
-          { id: 'ILI' },
-          { id: 'SLI' },
-        ],
+        key: 'carefree:1|intuition:0',
+      },
+      sourceFormula: {
+        id: 'tetra-01',
+        formulaText: 'Верт = Бс/Пр Х Ит/Сн (1,а)',
       },
     });
   });

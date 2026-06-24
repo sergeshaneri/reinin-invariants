@@ -155,6 +155,58 @@ Rules:
 - `isValidTetrachotomy(traitIds): boolean`;
 - `isValidOctochotomy(traitIds): boolean`.
 
+### Source Formula Catalogs
+
+Computed partitions are structural: they prove that selected trait vectors produce 2, 4 or 8 equal classes. They do not prove that the author's tetrachotomy or octochotomy formulas have been fully transferred from `harness/theory/` and `plans/roadmap/tetrachotomy-doc-extract.json`.
+
+Formula catalogs are a separate source-derived domain layer:
+
+```ts
+export type FormulaSourceStatus = 'extracted' | 'draft' | 'incomplete' | 'verified';
+
+export interface TetrachotomyFormulaRecord {
+  id: string;
+  source: {
+    document: string;
+    tableNumber: number;
+    formulaText: string;
+    relationText?: string;
+    nearbyLabel?: string;
+  };
+  targetTraitId: ReininTraitId;
+  basisTraitIds: readonly [ReininTraitId, ReininTraitId];
+  status: FormulaSourceStatus;
+  groups: ReadonlyArray<{
+    sourceColor?: string;
+    typeIds: readonly SocionicTypeId[];
+  }>;
+}
+
+export interface OctochotomyFormulaRecord {
+  id: string;
+  source: {
+    document: string;
+    sectionTitle?: string;
+    formulaText?: string;
+    sourceTextRange?: string;
+  };
+  basisTraitIds: readonly [ReininTraitId, ReininTraitId, ReininTraitId];
+  status: FormulaSourceStatus;
+  classes: ReadonlyArray<{
+    label?: string;
+    typeIds: readonly [SocionicTypeId, SocionicTypeId];
+  }>;
+}
+```
+
+Rules:
+
+- Tetrachotomy formula records must be verified against computed partitions before they become the canonical UI catalog.
+- `tetrachotomy-doc-extract.json` contains 35 extracted source tables. Current pair-based exploration has 105 unordered trait pairs; only the 35 source basis pairs are canonical formula records until additional aliases are explicitly verified.
+- Selector tests should assert 35 canonical formulas and keep any non-source structural pairs separate from the source formula catalog.
+- Octochotomy records stay `draft` or `incomplete` until the user confirms the finished source text. Structural independent triples remain useful diagnostics, but are not the same thing as a verified author formula catalog.
+- UI must distinguish "verified source formula" from "computed structural partition" when both entry modes are available.
+
 ### SemanticInterpretation
 
 Интерпретации должны быть отдельным контентом:

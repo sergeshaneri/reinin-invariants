@@ -60,11 +60,23 @@
 | C4.5 | C4.2 | DONE | Добавить composition view для октохотомий: 3 component dichotomy cards -> final 8-class pattern. | `src/components/PartitionCompositionView.tsx`, selectors | e2e component/final highlight modes | Нужна хорошая diagnostic для dependent triples. |
 | C4.6 | C4.5 | DONE | Добавить detail октохотомии: 8 classes, selected class default = class ИЛЭ, types panel, Model A previews. | `src/components/OctochotomyView.tsx`, `src/components/PartitionDiagnostic.tsx` | e2e valid and invalid triple | 8 classes должны быть readable без card-heavy перегруза. |
 
+## Phase 4F: Formula Ground Truth for Tetrachotomies and Octochotomies
+
+| ID | Depends | Status | Цель | Вероятные файлы | Проверки | Риски |
+|---|---|---:|---|---|---|---|
+| F4.1 | C4.6 | DONE | Зафиксировать различие между structural partitions и авторскими formula catalogs: текущий UI строит разбиения, но не доказывает перенос всех формул тетра/окто. | `plans/roadmap/PRD.md`, `plans/roadmap/domain-model.md`, `plans/roadmap/decisions.md`, `plans/roadmap/progress.md` | docs review | Нельзя пометить tetra/octo formula слой DONE только потому, что structural partition UI работает. |
+| F4.2 | F4.1 | DONE | Ввести доменную schema для source-derived тетрахотомий: formula id, source table, left trait, basis traits, relation, class groups, extraction status. | `src/data/tetrachotomies.ts`, `src/data/tetrachotomies.test.ts`, `src/data/socionics.ts` | Unit tests: 35 source records, stable IDs, registered trait IDs, 4 groups x 4 types | Нужно не потерять source metadata из `tetrachotomy-doc-extract.json`. |
+| F4.3 | F4.2 | DONE | Сверить 35 тетра-формул из extract с вычисляемыми partitions и зафиксировать mismatch diagnostics. | `src/data/tetrachotomies.test.ts`, maybe extraction fixture under `src/data/fixtures/` | Tests: each source formula class set equals computed partition class set, mismatches fail explicitly | Возможны реальные расхождения extraction/кодирования, их нельзя тихо нормализовать. |
+| F4.4 | F4.3 | TODO | Перевести tetra catalog UI с "все пары признаков" на canonical 35 source formulas, сохранив остальные structural pairs как advanced/basis path. | `src/data/selectors.ts`, `src/components/PartitionChooser.tsx`, tests | Selector tests, e2e choose canonical tetra formula | 105 вычисляемых пар не равны 35 source formulas; UI должен объяснять canonical vs structural. |
+| F4.5 | F4.1 | TODO | Ввести draft schema для source-derived октохотомий с явным status: `draft`, `incomplete`, `verified`. | `src/data/octochotomies.ts`, `src/data/octochotomies.test.ts`, `harness/theory/Октохотомии.md` | Unit tests: records link to valid type pairs/classes and status is explicit | Исходник окт ещё дописывается; нельзя выдавать все independent triples за авторский каталог. |
+| F4.6 | F4.5 | TODO | Доделать/занести недостающие окто-формулы после пользовательского подтверждения source text. | `src/data/octochotomies.ts`, `src/data/octochotomies.test.ts` | Tests: verified octo formulas have 8 classes x 2 types and match computed partitions | Требуется пользовательский ground truth; web sources не использовать. |
+| F4.7 | F4.6 | TODO | Перевести octo catalog UI на verified/draft source records, а structural independent triples оставить как diagnostic/advanced режим. | `src/data/selectors.ts`, `src/components/PartitionChooser.tsx`, `src/components/OctochotomyView.tsx`, tests | Selector tests, e2e verified/draft labels | Риск смешать "математически возможное" и "авторски описанное". |
+
 ## Phase 4L: Future Subgroup Lattice
 
 | ID | Depends | Status | Цель | Вероятные файлы | Проверки | Риски |
 |---|---|---:|---|---|---|---|
-| G4L.1 | C4.6 | TODO | Зафиксировать domain model для решетки подгрупп/подпространств группы признаков. | `plans/roadmap/domain-model.md`, possible `src/data/lattice.ts` | domain review, no UI required | Дальняя фаза: не блокировать ближний Partition Explorer. |
+| G4L.1 | F4.7 | TODO | Зафиксировать domain model для решетки подгрупп/подпространств группы признаков. | `plans/roadmap/domain-model.md`, possible `src/data/lattice.ts` | domain review, no UI required | Дальняя фаза: не блокировать formula-ground-truth слой. |
 | G4L.2 | G4L.1 | TODO | Прототип визуализации включений: дихотомии -> тетрахотомии -> октохотомии. | `src/components/LatticeView.tsx` or docs prototype | visual smoke only | Риск сделать математически красиво, но непонятно для целевого сценария. |
 ## Phase 5: Aspect Icons
 
@@ -81,7 +93,7 @@
 | H6.1 | U2.1 | DONE | Ввести theme state, URL/localStorage policy и `ThemeToggle`. | `src/App.tsx`, `src/components/ThemeToggle.tsx`, tests | Unit tests for preference resolution, e2e toggle | SSR/render smoke без `window` должен остаться стабильным. |
 | H6.2 | H6.1 | DONE | Добавить CSS variables/design tokens для базовых цветов. | `src/index.css` или global CSS, `tailwind` usage | `npm run build`, screenshot/e2e | Ручная миграция hardcoded классов может быть неполной. |
 | H6.3 | H6.2 | DONE | Перевести shell components на tokens. | `src/App.tsx`, `Header`, `TraitNav`, `PoleSelector`, `ViewSelector`, `Footer`, `HelpModal` | e2e light/dark desktop/mobile | Контраст и focus states. |
-| H6.4 | H6.2 | TODO | Перевести diagrams and formula panels на tokens. | `src/diagrams/*`, `src/components/FormulaPanel.tsx` | canvas/screenshot style review, e2e | Цвета групп должны оставаться различимыми в dark mode. |
+| H6.4 | H6.2 | DONE | Перевести diagrams and formula panels на tokens. | `src/diagrams/*`, `src/components/FormulaPanel.tsx` | canvas/screenshot style review, e2e | Цвета групп должны оставаться различимыми в dark mode. |
 
 ## Phase 7: English Version
 

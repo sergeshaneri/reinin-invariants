@@ -3,8 +3,8 @@
 ## Snapshot
 
 - Created: 2026-06-12.
-- Scope of this pass: Partition Explorer hardening through dark-theme visual migration.
-- Source changes in this pass: Q9.1 render smoke covers partition detail modes and dependent diagnostics; Q9.4 documents H3 display order; H6.4 migrates diagram, formula and partition surfaces toward the reference visual style.
+- Scope of this pass: Partition Explorer hardening through dark-theme visual migration, then roadmap correction for formula-ground-truth coverage.
+- Source changes in this pass: Q9.1 render smoke covers partition detail modes and dependent diagnostics; Q9.4 documents H3 display order; H6.4 migrates diagram, formula and partition surfaces toward the reference visual style; F4.1 records that tetra/octo formula catalogs are not complete just because structural partitions work.
 - Existing dirty workspace changes were observed before planning and left untouched.
 - Validation: `npm run smoke:render` and `npm run lint` passed; `npm run validate` was not run for Q9.1 because it can write generated `dist/`.
 
@@ -22,9 +22,10 @@
 | Type selector | DONE | U2.3 added canonical 16-type selection and `type` URL state in type mode. |
 | Type Model A diagram | DONE | U2.4 renders selected TIM Model A in type mode. |
 | Type invariant highlight | DONE/SUPERSEDED | U2.5 works technically but is no longer the desired UX direction. |
-| Partition Explorer UX | DONE | C4.1 catalogs, C4.2 multi-entry chooser, C4.3 tetrachotomy composition, C4.4 tetrachotomy detail, C4.5 octochotomy composition and C4.6 octochotomy detail are complete. |
-| Tetrachotomies | DONE | C4.4 shows four classes, selected-class types and Model A previews. |
-| Octochotomies | DONE | C4.6 shows eight classes, selected-class types, Model A previews and dependent URL diagnostics. |
+| Partition Explorer UX | DONE | Structural partition UI is complete: C4.1 catalogs, C4.2 multi-entry chooser, C4.3 tetrachotomy composition, C4.4 tetrachotomy detail, C4.5 octochotomy composition and C4.6 octochotomy detail. |
+| Tetrachotomies | PARTIAL | Structural view works, but the canonical 35 source formulas from `tetrachotomy-doc-extract.json` still need a domain schema, verification and UI catalog pass. |
+| Octochotomies | PARTIAL | Structural independent triples work, but source-derived octochotomy formulas are still draft/incomplete until the user finishes and confirms the source. |
+| Formula ground truth | IN PROGRESS | F4.1-F4.3 split source-derived tetra/octo formula catalogs from computed partition structure and verify the 35 extracted tetras. |
 | Render smoke hardening | DONE | Q9.1 covers default dichotomy, valid tetrachotomy, valid octochotomy and dependent octochotomy SSR paths. |
 | H3 order explanation | DONE | Q9.4 documents canonical H3 order in PRD without adding main-screen UI text. |
 | Aspect icons | DONE | V5.1 visual metadata, V5.2 UI registry and V5.3 icon/symbol/combined compact display are complete. |
@@ -34,7 +35,7 @@
 
 ## Recommended Next Step
 
-Continue with L7.1: introduce locale primitives and fallback helpers before the English version.
+Continue with F4.4: separate the tetrachotomy UI/catalog path so the 35 verified source formulas are not confused with the broader 105 structural pairs. Then do F4.5-F4.7 for octochotomy drafts after the user confirms the remaining source text.
 
 ## Milestone Checklist
 
@@ -1016,3 +1017,55 @@ Continue with L7.1: introduce locale primitives and fallback helpers before the 
   - The reference style was adapted as a local token system rather than copied wholesale; no new package dependency or external font request was added.
 - Remaining:
   - none
+
+### 2026-06-24 - Task F4.1 planning correction
+
+- Status: DONE
+- Changed files:
+  - `plans/roadmap/PRD.md`
+  - `plans/roadmap/domain-model.md`
+  - `plans/roadmap/decisions.md`
+  - `plans/roadmap/tasks.md`
+  - `plans/roadmap/progress.md`
+- Summary:
+  - Split computed structural partitions from source-derived formula catalogs.
+  - Added Phase 4F for tetrachotomy and octochotomy formula ground truth before localization and semantic interpretation work.
+  - Recorded that current tetrachotomy exploration enumerates 105 structural trait pairs, while the source extract contains 35 canonical formulas.
+  - Recorded that current octochotomy exploration enumerates structural independent triples, while author octochotomy records must stay `draft`, `incomplete` or `verified` until the source text is finished and confirmed.
+  - Added `DEC-009` so future agents do not mark tetra/octo formula transfer complete based only on working partition UI.
+- Checks:
+  - Docs-only change; deterministic app validation not run.
+- Decisions:
+  - `DEC-009`
+- Remaining:
+  - F4.2 should add source-derived tetrachotomy formula records.
+  - F4.3 should verify all 35 formulas against computed partitions.
+  - F4.5-F4.7 should handle source-derived octochotomy records after user confirmation of the final source.
+
+### 2026-06-24 - Tasks F4.2-F4.3
+
+- Status: DONE
+- Changed files:
+  - `tsconfig.json`
+  - `src/data/socionics.ts`
+  - `src/data/tetrachotomies.ts`
+  - `src/data/tetrachotomies.test.ts`
+  - `plans/roadmap/PRD.md`
+  - `plans/roadmap/domain-model.md`
+  - `plans/roadmap/decisions.md`
+  - `plans/roadmap/tasks.md`
+  - `plans/roadmap/progress.md`
+- Summary:
+  - Added a source-derived tetrachotomy formula adapter over `plans/roadmap/tetrachotomy-doc-extract.json`.
+  - Parsed source formula labels into stable `ReininTraitId` target and basis traits.
+  - Preserved source metadata: source document, tetra number, source table number, formula text, relation text, nearby label, source colors and type groups.
+  - Added tests for 35 records, stable IDs, registered trait labels, 4x4 groups, rank-2 basis traits and equality between source groups and computed tetrachotomy partition classes.
+  - Removed the unverified roadmap claim that every source formula is one of three aliases in a rank-2 triple; tests showed source groups match computed basis partitions, but target trait rank is not always dependent in the current vector model.
+- Checks:
+  - `npm test -- src/data/tetrachotomies.test.ts`: passed
+  - `npm run lint`: passed
+- Decisions:
+  - `DEC-009` refined: source formulas are canonical records; broader structural pairs remain separate unless explicitly verified.
+- Remaining:
+  - F4.4 should separate canonical source formulas from structural pair exploration in selectors/UI.
+  - F4.5-F4.7 should handle octochotomy source records after user confirmation of the final source.

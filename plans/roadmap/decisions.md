@@ -182,3 +182,30 @@ Tetra/octo screens should show how the final invariant is composed from componen
 ### Consequences
 
 The next implementation step is X2.1, not the old U2.6. U2.5 remains a completed technical experiment but is superseded as UX direction. New partition UI work must converge all entry methods into one canonical state and avoid separate hidden states per chooser.
+
+## DEC-009: Source formula catalogs are separate from structural partitions
+
+- Status: Accepted
+- Date: 2026-06-24
+- Owner: user/orchestrator
+- Related tasks: F4.1, F4.2, F4.3, F4.4, F4.5, F4.6, F4.7
+
+### Context
+
+The current app can compute structural tetrachotomy and octochotomy partitions from Reinin trait vectors. That proves class sizes and selected-trait intersections, but it does not prove that the author's source formulas have been transferred.
+
+The current tetrachotomy selector enumerates 105 unordered trait pairs. The source extract contains 35 tetrachotomy formulas with source basis pairs. The current octochotomy selector enumerates structural independent triples, while `harness/theory/Октохотомии.md` is still a source text with draft/incomplete formula coverage until the user finishes it.
+
+### Decision
+
+Keep `buildPartition` and structural selectors as the low-level computed layer. Add separate source-derived formula catalogs above it:
+
+- tetrachotomy formula catalog: 35 canonical records from `plans/roadmap/tetrachotomy-doc-extract.json`;
+- structural tetrachotomy explorer: any non-source computed pairs remain separate from the 35 canonical records unless explicitly verified;
+- octochotomy formula catalog: source-derived records with explicit `draft`, `incomplete` or `verified` status until the user confirms the final source.
+
+Structural independent triples must not be labelled as verified author octochotomies. UI may expose them as an advanced/diagnostic mode, but verified formula catalogs must come from user-confirmed source records.
+
+### Consequences
+
+Future formula tasks must validate source records against computed partitions without moving formula metadata into `buildPartition`. Tests should assert source counts, source group equality with computed classes, separation from broader structural catalogs, and explicit source status. Localization and semantic interpretation work should wait until the formula-ground-truth layer is no longer confused with the structural explorer.

@@ -17,8 +17,8 @@
 
 1. Дать пользователю альтернативные значки аспектов без потери текущих русских обозначений.
 2. Добавить все 16 моделей А типов и позволить смотреть инварианты признаков Рейнина на конкретных типах.
-3. Добавить тетрахотомии как пересечение двух признаков Рейнина: 4 класса по 4 типа.
-4. Добавить октохотомии как пересечение трех независимых признаков Рейнина: 8 классов по 2 типа.
+3. Добавить тетрахотомии как пересечение двух признаков Рейнина: 4 класса по 4 типа, затем свернуть вычислительные пары в 35 авторских формул из source extract.
+4. Добавить октохотомии как пересечение трех независимых признаков Рейнина: 8 классов по 2 типа, затем отделить verified author catalog от draft/incomplete source records.
 5. Добавить темную тему с сохранением выбранной темы.
 6. Добавить английскую версию без смешивания переводов с доменной логикой.
 7. Добавить семантические интерпретации как отдельный контентный слой.
@@ -51,6 +51,9 @@
 - Тетрахотомия строится только из двух разных признаков; результат должен давать 4 непустых класса по 4 типа.
 - Октохотомия строится только из трех линейно независимых признаков; результат должен давать 8 непустых классов по 2 типа.
 - Зависимые тройки признаков должны определяться доменной проверкой и не попадать в валидные октохотомии.
+- Structural partitions and author formula catalogs are separate readiness layers. A computed pair/triple proves class structure, but does not prove that the source formula has been transferred and verified.
+- Canonical tetrachotomy catalog must be based on the 35 source formulas in `tetrachotomy-doc-extract.json`; the 105 unordered trait pairs are a broader structural explorer and must not be presented as 105 source formulas.
+- Octochotomy catalog entries must carry readiness status (`draft`, `incomplete`, `verified`) until the source in `harness/theory/Октохотомии.md` is finished and confirmed by the user.
 - Семантические интерпретации должны ссылаться на domain IDs и иметь статус источника: `draft`, `reviewed`, `canonical` или аналогичный.
 
 ### H3-порядок
@@ -73,6 +76,8 @@
 - `npm run validate` проходит после каждого implementation milestone.
 - Доменная модель типов покрыта тестами на полноту, уникальность и согласованность.
 - Partition helpers покрыты тестами на размеры классов и обработку зависимых октохотомий.
+- Tetrachotomy formula layer is covered by tests for 35 canonical source formulas and source group equality with computed partition classes; any broader structural pairs stay separate unless explicitly verified.
+- Octochotomy formula layer never labels structural independent triples as verified source formulas without user-confirmed source records.
 - UI не содержит доменных вычислений, которые нельзя проверить unit-тестами.
 - Русская версия сохраняет текущие тексты и не ломает кодировку.
 - Английская версия доступна через явный переключатель и URL-состояние.
@@ -82,8 +87,8 @@
 
 1. Foundation: ввести проверяемую модель 16 типов, membership признаков и helpers для partitions.
 2. Type examples: добавить просмотр модели А типа и подсветку текущих инвариантов на типах.
-3. Tetrachotomies: добавить доменную сборку и UI пересечения двух признаков.
-4. Octochotomies: добавить проверку независимости тройки и UI октохотомий.
+3. Structural Partition Explorer: добавить доменную сборку и UI пересечения двух/трех признаков.
+4. Formula ground truth: перенести и проверить 35 тетрахотомий, затем занести verified/draft октохотомии после завершения source.
 5. Visual polish: значки аспектов и темная тема.
 6. Localization: вынести строки и добавить английскую версию.
 7. Interpretations: добавить контентную модель и панели смысловых интерпретаций.

@@ -25,7 +25,7 @@
 | Partition Explorer UX | DONE | Structural partition UI is complete: C4.1 catalogs, C4.2 multi-entry chooser, C4.3 tetrachotomy composition, C4.4 tetrachotomy detail, C4.5 octochotomy composition and C4.6 octochotomy detail. |
 | Tetrachotomies | DONE | Structural view works and the canonical 35 source formulas now drive the default tetra catalog; 105 structural pairs remain an advanced path. |
 | Octochotomies | PARTIAL | Structural independent triples work, but source-derived octochotomy formulas are still draft/incomplete until the user finishes and confirms the source. |
-| Formula ground truth | IN PROGRESS | F4.1-F4.4 split source-derived tetra/octo formula catalogs from computed partition structure, verify the 35 extracted tetras and use them in the default tetra UI. |
+| Formula ground truth | IN PROGRESS | F4.1-F4.5 split source-derived tetra/octo formula catalogs from computed partition structure, verify the 35 extracted tetras, use them in the default tetra UI and add explicit draft/incomplete/verified octochotomy schema. |
 | Render smoke hardening | DONE | Q9.1 covers default dichotomy, valid tetrachotomy, valid octochotomy and dependent octochotomy SSR paths. |
 | H3 order explanation | DONE | Q9.4 documents canonical H3 order in PRD without adding main-screen UI text. |
 | Aspect icons | DONE | V5.1 visual metadata, V5.2 UI registry and V5.3 icon/symbol/combined compact display are complete. |
@@ -35,7 +35,7 @@
 
 ## Recommended Next Step
 
-Continue with F4.5: introduce the source-derived octochotomy draft schema with explicit `draft`, `incomplete` or `verified` status. F4.6-F4.7 still require user confirmation of the remaining source text before treating octochotomy records as verified.
+Continue with F4.6: finish or extend source-derived octochotomy formulas only after user confirmation of the remaining source text. F4.7 should keep verified/draft source records separate from structural independent triples.
 
 ## Milestone Checklist
 
@@ -1093,3 +1093,25 @@ Continue with F4.5: introduce the source-derived octochotomy draft schema with e
   - Formula identity is not persisted as `formulaId` in F4.4 because the 35 canonical basis pairs are unique; URLs keep the current `traits` parameter.
 - Remaining:
   - F4.5 should introduce source-derived octochotomy draft records with explicit status.
+
+### 2026-06-24 - Task F4.5
+
+- Status: DONE
+- Changed files:
+  - `src/data/octochotomies.ts`
+  - `src/data/octochotomies.test.ts`
+  - `src/data/socionics.ts`
+  - `plans/roadmap/tasks.md`
+  - `plans/roadmap/progress.md`
+- Summary:
+  - Added source-derived octochotomy draft schema with explicit `draft`, `incomplete` and `verified` statuses.
+  - Registered visible source type-pair classes from `harness/theory/Октохотомии.md` without marking any record as verified.
+  - Made verified records require a three-trait basis and 8 classes x 2 types, while draft/incomplete records can remain partial.
+  - Re-exported octochotomy data through the domain barrel.
+- Checks:
+  - `npm test -- src/data/octochotomies.test.ts`: passed
+  - `npm run lint`: passed
+- Decisions:
+  - No verified octochotomy records were added because the source text does not yet provide fully checkable formulas/basis traits in this task scope.
+- Remaining:
+  - F4.6 should add or verify missing octochotomy formulas only after user confirmation of source ground truth.

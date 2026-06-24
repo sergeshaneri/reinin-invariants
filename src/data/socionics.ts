@@ -5,6 +5,7 @@ export * from './aspectVisuals';
 export * from './types';
 export * from './memberships';
 export * from './partitions';
+export * from './octochotomies';
 
 // Признаки Аспектов — 7 бинарных дихотомий, образующих нетривиальные столбцы матрицы Адамара H₃.
 // Тривиальный столбец «Сущ» (все +) опущен — он не различает группы.

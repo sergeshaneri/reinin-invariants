@@ -11,10 +11,12 @@ import {
   selectStructuralTetrachotomyCatalog,
   selectTetrachotomyCatalog,
   selectTetrachotomyView,
+  selectTypeModelPreviewsForSourceRows,
   selectTypeModelPreviews,
   selectTypeModelView,
   selectTypeTraitExample,
 } from './selectors';
+import { getTetrachotomyFormulaById } from './tetrachotomies';
 
 describe('domain selectors', () => {
   it('selects a type model in Model A layout order', () => {
@@ -147,6 +149,13 @@ describe('domain selectors', () => {
       sourceColor: '4a86e8',
       typeIds: ['ILE', 'EIE', 'LIE', 'IEE'],
     });
+    expect(catalog.entries[0].sourceFormula?.sourceBlocks).toHaveLength(4);
+    expect(catalog.entries[0].sourceFormula?.sourceBlocks?.map(block => block.labels)).toEqual([
+      ['Рыцари', 'Уникальность'],
+      ['Благосостояние'],
+      ['Статус'],
+      ['Целостность опыта'],
+    ]);
     expect(catalog.entries[0].sourceFormula?.sourceBlocks?.[0]).toMatchObject({
       typeIds: ['ILE', 'EIE', 'LIE', 'IEE'],
       labels: ['Рыцари', 'Уникальность'],
@@ -324,6 +333,25 @@ describe('domain selectors', () => {
     });
   });
 
+  it('selects compact model previews from tetrachotomy source rows with dim block partners', () => {
+    const sourceBlock = getTetrachotomyFormulaById('tetra-01')?.sourceBlocks?.[0];
+    expect(sourceBlock).toBeDefined();
+    if (!sourceBlock) return;
+
+    const previews = selectTypeModelPreviewsForSourceRows(['ILE'], sourceBlock.rows);
+
+    expect(previews[0].assignments).toEqual([
+      expect.objectContaining({ functionId: 1, aspectId: 'Ne', highlightGroupIndex: 0, highlightIntensity: 'primary' }),
+      expect.objectContaining({ functionId: 2, aspectId: 'Ti', highlightGroupIndex: 1, highlightIntensity: 'secondary' }),
+      expect.objectContaining({ functionId: 4, aspectId: 'Fi', highlightGroupIndex: 3, highlightIntensity: 'secondary' }),
+      expect.objectContaining({ functionId: 3, aspectId: 'Se', highlightGroupIndex: 2, highlightIntensity: 'primary' }),
+      expect.objectContaining({ functionId: 6, aspectId: 'Fe', highlightGroupIndex: 2, highlightIntensity: 'secondary' }),
+      expect.objectContaining({ functionId: 5, aspectId: 'Si', highlightGroupIndex: 3, highlightIntensity: 'primary' }),
+      expect.objectContaining({ functionId: 7, aspectId: 'Ni', highlightGroupIndex: 1, highlightIntensity: 'primary' }),
+      expect.objectContaining({ functionId: 8, aspectId: 'Te', highlightGroupIndex: 0, highlightIntensity: 'secondary' }),
+    ]);
+  });
+
   it('highlights compact model previews by aspect block for block-permutation views', () => {
     const democracy = REININ_TRAITS.find(trait => trait.id === 'democracy');
     expect(democracy).toBeDefined();
@@ -408,14 +436,15 @@ describe('domain selectors', () => {
       sourceFormula: {
         id: 'tetra-01',
         formulaText: 'Верт = Бс/Пр Х Ит/Сн (1,а)',
-        sourceBlocks: [
-          {
-            typeIds: ['ILE', 'EIE', 'LIE', 'IEE'],
-            labels: ['Рыцари', 'Уникальность'],
-          },
-        ],
       },
     });
+    expect(view.sourceFormula?.sourceBlocks).toHaveLength(4);
+    expect(view.sourceFormula?.sourceBlocks?.map(block => block.labels)).toEqual([
+      ['Рыцари', 'Уникальность'],
+      ['Благосостояние'],
+      ['Статус'],
+      ['Целостность опыта'],
+    ]);
   });
 
   it('defaults partition explorer class selection to the class containing ILE', () => {

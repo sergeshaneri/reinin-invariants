@@ -115,8 +115,8 @@ assert(
   'tetrachotomy should render 4 class buttons',
 );
 assert(
-  countOccurrences(tetrachotomyHtml, 'data-type-id=') === 16,
-  'tetrachotomy should render one 16-type final pattern',
+  countOccurrences(tetrachotomyHtml, 'data-type-id=') === 32,
+  'tetrachotomy should render one main 16-type pattern and one composition pattern in extra materials',
 );
 assert(
   countOccurrences(tetrachotomyHtml, 'data-model-preview-type-id=') === 4,

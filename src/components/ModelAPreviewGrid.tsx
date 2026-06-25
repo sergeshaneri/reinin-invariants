@@ -1,14 +1,19 @@
 import React from 'react';
 import { Grid2X2 } from 'lucide-react';
 import type { View } from '../data/socionics';
-import { selectTypeModelPreviews } from '../data/selectors';
+import { selectTypeModelPreviews, selectTypeModelPreviewsForSourceRows } from '../data/selectors';
+import type { PartitionExplorerViewModel } from '../data/selectors';
 import type { SocionicTypeId } from '../data/types';
 import { AspectGlyph, type AspectDisplayMode } from './AspectGlyph';
+
+type SourceFormulaViewModel = NonNullable<PartitionExplorerViewModel['sourceFormula']>;
+type SourceFormulaBlock = NonNullable<SourceFormulaViewModel['sourceBlocks']>[number];
 
 interface Props {
   typeIds: readonly SocionicTypeId[];
   view: View;
   aspectDisplayMode: AspectDisplayMode;
+  sourceBlock?: SourceFormulaBlock | null;
 }
 
 const getTypeCode = (aliases: readonly string[], fallback: string): string => aliases[0] ?? fallback;
@@ -32,8 +37,11 @@ export const ModelAPreviewGrid: React.FC<Props> = ({
   typeIds,
   view,
   aspectDisplayMode,
+  sourceBlock,
 }) => {
-  const previews = selectTypeModelPreviews(typeIds, view);
+  const previews = sourceBlock
+    ? selectTypeModelPreviewsForSourceRows(typeIds, sourceBlock.rows)
+    : selectTypeModelPreviews(typeIds, view);
   const showProcessCycle = hasProcessCycleDecorator(view);
 
   return (
@@ -66,11 +74,12 @@ export const ModelAPreviewGrid: React.FC<Props> = ({
                           assignment.highlightGroupIndex !== null
                             ? HIGHLIGHT_TONES[assignment.highlightGroupIndex % HIGHLIGHT_TONES.length]
                             : 'bg-[var(--color-shell-control)] text-[var(--color-app-fg)]'
-                        }`}
+                        } ${assignment.highlightIntensity === 'secondary' ? 'opacity-45' : 'opacity-100'}`}
                         data-model-preview-function-id={assignment.functionId}
                         data-model-preview-aspect-id={assignment.aspectId}
                         data-model-preview-highlighted={assignment.isHighlighted ? 'true' : 'false'}
                         data-model-preview-highlight-group={assignment.highlightGroupIndex ?? ''}
+                        data-model-preview-highlight-intensity={assignment.highlightIntensity ?? ''}
                         title={`${assignment.functionId}: ${assignment.aspectFullName}`}
                       >
                         <AspectGlyph

@@ -1,10 +1,13 @@
 import React from 'react';
 import { UsersRound } from 'lucide-react';
 import type { View } from '../data/socionics';
-import type { PartitionTypesPanelViewModel } from '../data/selectors';
+import type { PartitionExplorerViewModel, PartitionTypesPanelViewModel } from '../data/selectors';
 import type { SocionicTypeId } from '../data/types';
 import type { AspectDisplayMode } from './AspectGlyph';
 import { ModelAPreviewGrid } from './ModelAPreviewGrid';
+
+type SourceFormulaViewModel = NonNullable<PartitionExplorerViewModel['sourceFormula']>;
+type SourceFormulaBlock = NonNullable<SourceFormulaViewModel['sourceBlocks']>[number];
 
 const KIND_LABELS = {
   dichotomy: 'Дихотомия',
@@ -16,16 +19,37 @@ interface Props {
   view: PartitionTypesPanelViewModel;
   activeView: View;
   aspectDisplayMode: AspectDisplayMode;
+  sourceBlock?: SourceFormulaBlock | null;
+  extraPoles?: readonly {
+    traitId: string;
+    poleIndex: number;
+    poleName: string;
+  }[];
 }
 
 export const PartitionTypesPanel: React.FC<Props> = ({
   view,
   activeView,
   aspectDisplayMode,
-}) => (
+  sourceBlock,
+  extraPoles = [],
+}) => {
+  const displayPoles = [
+    ...extraPoles,
+    ...view.poles.map(pole => ({
+      traitId: pole.trait.id,
+      poleIndex: pole.poleIndex,
+      poleName: pole.poleName,
+    })),
+  ];
+  const displayTitle = displayPoles.length > 0
+    ? displayPoles.map(pole => pole.poleName).join(' + ')
+    : view.title;
+
+  return (
   <section
     className="glass-panel rounded-[28px] p-5"
-    aria-label={`Типы выбранного класса: ${view.title}`}
+    aria-label={`Типы выбранного класса: ${displayTitle}`}
     data-partition-types-panel={view.kind}
     data-selected-class-key={view.classKey ?? ''}
   >
@@ -36,7 +60,7 @@ export const PartitionTypesPanel: React.FC<Props> = ({
           Типы полюса
         </div>
         <h2 className="mt-2 text-lg font-bold leading-tight text-[var(--color-app-fg)]">
-          {view.title}
+          {displayTitle}
         </h2>
       </div>
       <div className="glass-muted rounded-2xl px-3 py-2 text-right">
@@ -49,11 +73,11 @@ export const PartitionTypesPanel: React.FC<Props> = ({
       </div>
     </div>
 
-    {view.poles.length > 1 ? (
+    {displayPoles.length > 1 ? (
       <div className="mt-4 flex flex-wrap gap-2">
-        {view.poles.map(pole => (
+        {displayPoles.map(pole => (
           <span
-            key={`${pole.trait.id}:${pole.poleIndex}`}
+            key={`${pole.traitId}:${pole.poleIndex}`}
             className="rounded-full border border-[var(--color-shell-border)] bg-[var(--color-shell-control)] px-3 py-1 text-xs font-semibold text-[var(--color-shell-muted)]"
           >
             {pole.poleName}
@@ -66,6 +90,8 @@ export const PartitionTypesPanel: React.FC<Props> = ({
       typeIds={view.types.map(type => type.id as SocionicTypeId)}
       view={activeView}
       aspectDisplayMode={aspectDisplayMode}
+      sourceBlock={sourceBlock}
     />
   </section>
-);
+  );
+};

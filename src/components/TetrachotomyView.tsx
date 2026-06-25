@@ -1,12 +1,15 @@
 import React from 'react';
 import { ChevronDown, Layers3 } from 'lucide-react';
-import { REININ_TRAITS, type View } from '../data/socionics';
+import { REININ_TRAITS, type ReininTraitId, type View } from '../data/socionics';
+import { TRAIT_TYPE_MEMBERSHIPS_BY_TRAIT_ID, type PoleIndex } from '../data/memberships';
 import { selectPartitionTypesPanelView, type PartitionExplorerViewModel, type PartitionViewModel } from '../data/selectors';
+import type { SocionicTypeId } from '../data/types';
 import type { AspectDisplayMode } from './AspectGlyph';
 import { PartitionCompositionView } from './PartitionCompositionView';
 import { PartitionTypesPanel } from './PartitionTypesPanel';
 import { TetrachotomyAspectFunctionPanel } from './TetrachotomyAspectFunctionPanel';
 import { TetrachotomyFormulaPanel } from './TetrachotomyFormulaPanel';
+import { TypePatternCard } from './TypePatternCard';
 
 const CLASS_TONES = [
   'map-tone-0 text-[var(--color-map-fg)]',
@@ -16,6 +19,54 @@ const CLASS_TONES = [
 ] as const;
 
 const getTypeCode = (aliases: readonly string[], fallback: string): string => aliases[0] ?? fallback;
+
+type SourceFormulaViewModel = NonNullable<PartitionExplorerViewModel['sourceFormula']>;
+type SourceFormulaBlock = NonNullable<SourceFormulaViewModel['sourceBlocks']>[number];
+
+const sortedTypeKey = (typeIds: readonly SocionicTypeId[]): string => (
+  [...typeIds].sort().join('|')
+);
+
+const findSelectedSourceBlock = (
+  sourceFormula: SourceFormulaViewModel | undefined,
+  selectedClass: PartitionExplorerViewModel['selectedClass'],
+): SourceFormulaBlock | null => {
+  if (!sourceFormula?.sourceBlocks || !selectedClass) {
+    return null;
+  }
+
+  const selectedKey = sortedTypeKey(selectedClass.types.map(type => type.id));
+
+  return sourceFormula.sourceBlocks.find(block => (
+    sortedTypeKey(block.typeIds) === selectedKey
+  )) ?? null;
+};
+
+const getCommonTargetPole = (
+  traitId: ReininTraitId | undefined,
+  selectedClass: PartitionExplorerViewModel['selectedClass'],
+): { traitId: ReininTraitId; poleIndex: PoleIndex; poleName: string } | null => {
+  if (!traitId || !selectedClass) {
+    return null;
+  }
+
+  const trait = REININ_TRAITS.find(candidate => candidate.id === traitId);
+  const membership = TRAIT_TYPE_MEMBERSHIPS_BY_TRAIT_ID[traitId];
+  const firstTypeId = selectedClass.types[0]?.id;
+  const pole = membership.poles.find(candidate => (
+    firstTypeId ? candidate.typeIds.includes(firstTypeId) : false
+  ));
+
+  if (!trait || !pole || !selectedClass.types.every(type => pole.typeIds.includes(type.id))) {
+    return null;
+  }
+
+  return {
+    traitId,
+    poleIndex: pole.poleIndex,
+    poleName: trait.poles[pole.poleIndex].name,
+  };
+};
 
 const getFirstClassPoleView = (view: PartitionExplorerViewModel): View | null => {
   const firstPole = view.selectedClass?.poles[0];
@@ -41,6 +92,11 @@ export const TetrachotomyView: React.FC<Props> = ({
 }) => {
   const { partition, selectedClassKey } = view;
   const activeView = getFirstClassPoleView(view);
+  const sourceBlock = findSelectedSourceBlock(view.sourceFormula, view.selectedClass);
+  const sourceTargetPole = getCommonTargetPole(
+    view.sourceFormula?.targetTrait.id,
+    view.selectedClass,
+  );
 
   if (!partition.ok || partition.kind !== 'tetrachotomy') {
     return (
@@ -63,7 +119,7 @@ export const TetrachotomyView: React.FC<Props> = ({
       data-tetrachotomy-detail
       data-selected-class-key={selectedClassKey ?? ''}
     >
-      <TetrachotomyFormulaPanel
+      <TypePatternCard
         view={view}
         onSelectClass={onSelectClass}
       />
@@ -72,6 +128,16 @@ export const TetrachotomyView: React.FC<Props> = ({
         view={view}
         aspectDisplayMode={aspectDisplayMode}
       />
+
+      {activeView ? (
+        <PartitionTypesPanel
+          view={typesPanelView}
+          activeView={activeView}
+          aspectDisplayMode={aspectDisplayMode}
+          sourceBlock={sourceBlock}
+          extraPoles={sourceTargetPole ? [sourceTargetPole] : []}
+        />
+      ) : null}
 
       <details
         className="glass-panel rounded-[28px] p-0"
@@ -85,6 +151,11 @@ export const TetrachotomyView: React.FC<Props> = ({
         </summary>
 
         <div className="space-y-5 border-t border-[var(--color-shell-border)] p-5 md:space-y-6">
+          <TetrachotomyFormulaPanel
+            view={view}
+            onSelectClass={onSelectClass}
+          />
+
           <PartitionCompositionView
             view={view}
             onSelectClass={onSelectClass}
@@ -95,14 +166,6 @@ export const TetrachotomyView: React.FC<Props> = ({
             selectedClassKey={selectedClassKey}
             onSelectClass={onSelectClass}
           />
-
-          {activeView ? (
-            <PartitionTypesPanel
-              view={typesPanelView}
-              activeView={activeView}
-              aspectDisplayMode={aspectDisplayMode}
-            />
-          ) : null}
         </div>
       </details>
     </section>

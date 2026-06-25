@@ -1,6 +1,9 @@
 import React from 'react';
 import { Grid3X3 } from 'lucide-react';
 import type { PartitionExplorerViewModel } from '../data/selectors';
+import { TRAIT_TYPE_MEMBERSHIPS_BY_TRAIT_ID, type PoleIndex } from '../data/memberships';
+import { REININ_TRAITS, type ReininTraitId } from '../data/socionics';
+import type { SocionicTypeId } from '../data/types';
 import { PartitionDiagnostic } from './PartitionDiagnostic';
 
 const CLASS_TONES = [
@@ -22,13 +25,32 @@ const KIND_LABELS = {
 
 const getTypeCode = (aliases: readonly string[], fallback: string): string => aliases[0] ?? fallback;
 
+const getTargetPoleName = (
+  traitId: ReininTraitId | undefined,
+  typeIds: readonly SocionicTypeId[],
+): string | null => {
+  if (!traitId || typeIds.length === 0) {
+    return null;
+  }
+
+  const trait = REININ_TRAITS.find(candidate => candidate.id === traitId);
+  const membership = TRAIT_TYPE_MEMBERSHIPS_BY_TRAIT_ID[traitId];
+  const pole = membership.poles.find(candidate => candidate.typeIds.includes(typeIds[0]));
+
+  if (!trait || !pole || !typeIds.every(typeId => pole.typeIds.includes(typeId))) {
+    return null;
+  }
+
+  return trait.poles[pole.poleIndex as PoleIndex].name;
+};
+
 interface Props {
   view: PartitionExplorerViewModel;
   onSelectClass?: (classKey: string) => void;
 }
 
 export const TypePatternCard: React.FC<Props> = ({ view, onSelectClass }) => {
-  const { partition, selectedClassKey, selectedClass } = view;
+  const { partition, selectedClassKey, selectedClass, sourceFormula } = view;
 
   if (!partition.ok) {
     return <PartitionDiagnostic view={view} />;
@@ -40,6 +62,10 @@ export const TypePatternCard: React.FC<Props> = ({ view, onSelectClass }) => {
       CLASS_TONES[index % CLASS_TONES.length],
     ]),
   );
+  const displayedTraits = sourceFormula
+    ? [sourceFormula.targetTrait, ...sourceFormula.basisTraits]
+    : partition.traits;
+  const targetTraitId = sourceFormula?.targetTrait.id;
 
   return (
     <section
@@ -54,7 +80,7 @@ export const TypePatternCard: React.FC<Props> = ({ view, onSelectClass }) => {
             {KIND_LABELS[partition.kind]}
           </div>
           <h2 className="mt-2 text-lg font-bold leading-tight text-[var(--color-app-fg)]">
-            {partition.traits.map(trait => trait.name).join(' + ')}
+            {displayedTraits.map(trait => trait.name).join(' + ')}
           </h2>
         </div>
         <div className="glass-muted rounded-2xl px-3 py-2 text-right">
@@ -72,6 +98,10 @@ export const TypePatternCard: React.FC<Props> = ({ view, onSelectClass }) => {
           const isSelected = cell.classKey === selectedClassKey;
           const tone = toneByClassKey.get(cell.classKey) ?? CLASS_TONES[0];
           const typeCode = getTypeCode(cell.type.aliases, cell.type.id);
+          const targetPoleName = getTargetPoleName(targetTraitId, [cell.type.id]);
+          const poleNames = targetPoleName
+            ? [targetPoleName, ...cell.poleNames]
+            : cell.poleNames;
 
           return (
             <button
@@ -81,8 +111,8 @@ export const TypePatternCard: React.FC<Props> = ({ view, onSelectClass }) => {
               data-type-id={cell.type.id}
               data-class-key={cell.classKey}
               aria-pressed={isSelected}
-              aria-label={`${typeCode}: ${cell.classLabel}`}
-              title={`${cell.type.name}: ${cell.classLabel}`}
+              aria-label={`${typeCode}: ${poleNames.join(' + ')}`}
+              title={`${cell.type.name}: ${poleNames.join(' + ')}`}
               onClick={() => onSelectClass?.(cell.classKey)}
               className={`min-h-14 rounded-2xl border px-2 py-2 text-center transition-colors ${tone} ${
                 isSelected
@@ -92,7 +122,7 @@ export const TypePatternCard: React.FC<Props> = ({ view, onSelectClass }) => {
             >
               <span className="block text-[15px] font-black leading-none tracking-normal">{typeCode}</span>
               <span className="mt-1 block truncate text-[10px] font-semibold opacity-75">
-                {cell.poleNames.map(name => name.slice(0, 3)).join(' / ')}
+                {poleNames.map(name => name.slice(0, 3)).join(' / ')}
               </span>
             </button>
           );
@@ -105,6 +135,13 @@ export const TypePatternCard: React.FC<Props> = ({ view, onSelectClass }) => {
             Выбранный класс
           </div>
           <div className="mt-2 flex flex-wrap gap-2">
+            {getTargetPoleName(targetTraitId, selectedClass.types.map(type => type.id)) ? (
+              <span
+                className="rounded-full border border-[var(--color-shell-border)] bg-[var(--color-shell-control)] px-3 py-1 text-xs font-semibold text-[var(--color-shell-muted)]"
+              >
+                {getTargetPoleName(targetTraitId, selectedClass.types.map(type => type.id))}
+              </span>
+            ) : null}
             {selectedClass.poles.map(pole => (
               <span
                 key={`${pole.trait.id}:${pole.poleIndex}`}

@@ -75,7 +75,13 @@ describe('tetrachotomy source formulas', () => {
   it('keeps the first direct source aspect-function block as extracted DOCX rows', () => {
     const formula = getTetrachotomyFormulaById('tetra-01');
 
-    expect(formula?.sourceBlocks).toHaveLength(1);
+    expect(formula?.sourceBlocks).toHaveLength(4);
+    expect(formula?.sourceBlocks?.map(block => block.labels)).toEqual([
+      ['Рыцари', 'Уникальность'],
+      ['Благосостояние'],
+      ['Статус'],
+      ['Целостность опыта'],
+    ]);
     expect(formula?.sourceBlocks?.[0]).toMatchObject({
       typeIds: ['ILE', 'EIE', 'LIE', 'IEE'],
       labels: ['Рыцари', 'Уникальность'],
@@ -106,6 +112,12 @@ describe('tetrachotomy source formulas', () => {
         functionBlockLabel: 'мерность 1',
         functionIds: [4, 5],
       }),
+    ]);
+    expect(formula?.sourceBlocks?.map(block => block.rows.map(row => row.aspectText))).toEqual([
+      ['ЧИ', 'БИ', 'ЧС', 'БС'],
+      ['БС', 'ЧС', 'БИ', 'ЧИ'],
+      ['ЧС', 'БС', 'ЧИ', 'БИ'],
+      ['БИ', 'ЧИ', 'БС', 'ЧС'],
     ]);
   });
 

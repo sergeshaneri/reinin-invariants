@@ -25,6 +25,7 @@ import {
 import {
   TETRACHOTOMY_FORMULAS,
   type TetrachotomyFormulaRecord,
+  type TetrachotomySourceFormulaRow,
 } from './tetrachotomies';
 
 export type Locale = 'ru' | 'en';
@@ -57,6 +58,7 @@ export interface TypeModelViewModel {
 export interface TypeModelPreviewAssignmentViewModel extends TypeModelAssignmentViewModel {
   isHighlighted: boolean;
   highlightGroupIndex: number | null;
+  highlightIntensity?: 'primary' | 'secondary';
 }
 
 export interface TypeModelPreviewViewModel {
@@ -497,6 +499,36 @@ export function selectTypeModelPreviews(
           ...assignment,
           isHighlighted: highlightGroupIndex !== null,
           highlightGroupIndex,
+        };
+      }),
+    };
+  });
+}
+
+export function selectTypeModelPreviewsForSourceRows(
+  typeIds: readonly SocionicTypeId[],
+  rows: readonly TetrachotomySourceFormulaRow[],
+  locale: Locale = 'ru',
+): readonly TypeModelPreviewViewModel[] {
+  return typeIds.map(typeId => {
+    const model = selectTypeModelView(typeId, locale);
+
+    return {
+      type: model.type,
+      assignments: model.assignments.map(assignment => {
+        const highlightGroupIndex = rows.findIndex(row => (
+          row.functionIds.includes(assignment.functionId)
+        ));
+        const sourceRow = highlightGroupIndex >= 0 ? rows[highlightGroupIndex] : null;
+        const isSourceAspect = sourceRow?.aspectIds.includes(assignment.aspectId) === true;
+
+        return {
+          ...assignment,
+          isHighlighted: highlightGroupIndex !== -1,
+          highlightGroupIndex: highlightGroupIndex !== -1 ? highlightGroupIndex : null,
+          highlightIntensity: highlightGroupIndex === -1
+            ? undefined
+            : isSourceAspect ? 'primary' : 'secondary',
         };
       }),
     };

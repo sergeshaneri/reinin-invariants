@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { ArrowRight, Route } from 'lucide-react';
-import { FUNCTIONS } from '../data/socionics';
+import { ASPECTS, FUNCTIONS, MODEL_A_LAYOUT } from '../data/socionics';
 import type {
   PartitionClassViewModel,
   PartitionExplorerViewModel,
@@ -34,6 +34,26 @@ const getFunctionName = (functionId: number): string => (
   FUNCTIONS.find(candidate => candidate.id === functionId)?.name ?? `Функция ${functionId}`
 );
 
+const MAPPING_BG = [
+  'map-tone-0',
+  'map-tone-1',
+  'map-tone-2',
+  'map-tone-3',
+  'map-tone-4',
+  'map-tone-5',
+  'map-tone-6',
+  'map-tone-7',
+] as const;
+
+const INACTIVE = 'map-tone-inactive';
+
+type ActiveSourceCell =
+  | { kind: 'aspect'; id: string; rowIndex: number }
+  | { kind: 'function'; id: number; rowIndex: number }
+  | null;
+
+type Highlight = 'full' | 'dim' | 'hidden';
+
 interface Props {
   view: PartitionExplorerViewModel;
   aspectDisplayMode: AspectDisplayMode;
@@ -44,10 +64,48 @@ export const TetrachotomyAspectFunctionPanel: React.FC<Props> = ({
   aspectDisplayMode,
 }) => {
   const { selectedClass, sourceFormula } = view;
+  const [activeCell, setActiveCell] = useState<ActiveSourceCell>(null);
 
   const sourceBlock = sourceFormula
     ? findSelectedSourceBlock(sourceFormula, selectedClass)
     : null;
+
+  const { aspectToRow, functionToRow } = useMemo(() => {
+    const aspects = new Map<string, number>();
+    const functions = new Map<number, number>();
+
+    sourceBlock?.rows.forEach((row, rowIndex) => {
+      row.aspectIds.forEach(aspectId => aspects.set(aspectId, rowIndex));
+      row.functionIds.forEach(functionId => functions.set(functionId, rowIndex));
+    });
+
+    return {
+      aspectToRow: aspects,
+      functionToRow: functions,
+    };
+  }, [sourceBlock]);
+
+  const getHighlight = (rowIndex: number | undefined): Highlight => {
+    if (rowIndex === undefined) {
+      return 'hidden';
+    }
+
+    if (activeCell && activeCell.rowIndex !== rowIndex) {
+      return 'dim';
+    }
+
+    return 'full';
+  };
+
+  const styleFor = (rowIndex: number | undefined, highlight: Highlight): string => {
+    if (highlight === 'hidden' || rowIndex === undefined) {
+      return `${INACTIVE} opacity-100 scale-100`;
+    }
+
+    const tone = `${MAPPING_BG[rowIndex % MAPPING_BG.length]} text-[var(--color-map-fg)]`;
+
+    return `${tone} ${highlight === 'dim' ? 'opacity-25 scale-95' : 'opacity-100 scale-100'}`;
+  };
 
   return (
     <section
@@ -89,68 +147,162 @@ export const TetrachotomyAspectFunctionPanel: React.FC<Props> = ({
       </div>
 
       {sourceBlock ? (
-        <div className="mt-5 grid gap-3" data-tetrachotomy-source-block={sortedTypeKey(sourceBlock.typeIds)}>
-          {sourceBlock.rows.map(row => (
-            <div
-              key={`${row.aspectText}-${row.functionBlockLabel}`}
-              className="grid gap-3 rounded-2xl border border-[var(--color-shell-border)] bg-[var(--color-shell-control)] p-4 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1.08fr)] lg:items-stretch"
-              data-tetrachotomy-aspect-function-row={row.aspectText}
-            >
-              <div className="min-w-0 rounded-xl border border-[var(--color-shell-border)] bg-[var(--color-shell-surface-muted)] p-3">
-                <div className="eyebrow">
-                  Аспект
-                </div>
-                <div className="mt-3 flex items-start gap-3">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[var(--color-shell-border-strong)] bg-[var(--color-shell-active-bg)] text-[var(--color-shell-active-fg)]">
-                    {row.aspectIds.map(aspectId => (
-                      <AspectGlyph
-                        key={aspectId}
-                        aspectId={aspectId}
-                        label={row.aspectText}
-                        mode={aspectDisplayMode}
-                        size="lg"
-                      />
-                    ))}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-sm font-black text-[var(--color-app-fg)]">
-                      {row.aspectText}
-                    </div>
-                    <div className="mt-1 text-xs font-semibold leading-relaxed text-[var(--color-shell-muted)]">
-                      {row.aspectFeaturesText}
-                    </div>
-                  </div>
-                </div>
+        <div
+          className="mt-5"
+          data-tetrachotomy-source-block={sortedTypeKey(sourceBlock.typeIds)}
+          onMouseLeave={() => setActiveCell(null)}
+        >
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,0.72fr)] lg:items-start">
+            <div>
+              <div className="mb-4 flex items-center justify-center gap-2">
+                <div className="hairline h-px flex-1" />
+                <h3 className="eyebrow text-center">Аспектон</h3>
+                <div className="hairline h-px flex-1" />
               </div>
+              <div className="grid grid-cols-4 gap-2 md:gap-3">
+                {ASPECTS.map(aspect => {
+                  const rowIndex = aspectToRow.get(aspect.id);
+                  const highlight = getHighlight(rowIndex);
 
-              <div className="flex items-center justify-center text-[var(--color-shell-accent)]">
-                <ArrowRight className="h-5 w-5 rotate-90 lg:rotate-0" strokeWidth={2.5} />
-              </div>
-
-              <div className="min-w-0 rounded-xl border border-[var(--color-shell-border)] bg-[var(--color-shell-surface-muted)] p-3">
-                <div className="eyebrow">
-                  Функциональный блок
-                </div>
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <span className="rounded-full border border-[var(--color-shell-border-strong)] bg-[var(--color-shell-active-bg)] px-3 py-1 text-xs font-black text-[var(--color-shell-active-fg)]">
-                    {row.functionBlockLabel}
-                  </span>
-                  {row.functionIds.map(functionId => (
-                    <span
-                      key={functionId}
-                      className="rounded-full border border-[var(--color-shell-border)] bg-[var(--color-shell-control)] px-2.5 py-1 text-xs font-bold text-[var(--color-app-fg)]"
-                      title={getFunctionName(functionId)}
+                  return (
+                    <button
+                      key={aspect.id}
+                      type="button"
+                      title={`${aspect.name}: ${aspect.fullName}`}
+                      aria-label={`${aspect.fullName}. ${sourceBlock.rows[rowIndex ?? -1]?.aspectFeaturesText ?? 'не входит в source-разбор'}`}
+                      onMouseEnter={() => {
+                        if (rowIndex !== undefined) {
+                          setActiveCell({ kind: 'aspect', id: aspect.id, rowIndex });
+                        }
+                      }}
+                      onFocus={() => {
+                        if (rowIndex !== undefined) {
+                          setActiveCell({ kind: 'aspect', id: aspect.id, rowIndex });
+                        }
+                      }}
+                      onBlur={() => setActiveCell(null)}
+                      className={`relative flex h-20 cursor-pointer items-center justify-center rounded-xl border-2 transition-[opacity,transform,background-color,border-color] duration-200 ${styleFor(rowIndex, highlight)}`}
+                      data-tetrachotomy-source-aspect={aspect.name}
+                      data-source-row-index={rowIndex ?? ''}
                     >
-                      {functionId} · {getFunctionName(functionId)}
-                    </span>
-                  ))}
-                </div>
-                <div className="mt-3 text-xs font-semibold leading-relaxed text-[var(--color-shell-muted)]">
-                  {row.functionFeaturesText}
-                </div>
+                      <span className="flex flex-col items-center gap-1.5">
+                        <AspectGlyph
+                          aspectId={aspect.id}
+                          label={aspect.name}
+                          mode={aspectDisplayMode}
+                          size="sm"
+                        />
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
-          ))}
+
+            <div className="flex items-center justify-center text-[var(--color-shell-accent)] lg:min-h-[132px]">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-shell-border-strong)] bg-[var(--color-shell-control)]">
+                <ArrowRight className="h-4 w-4 rotate-90 lg:rotate-0" strokeWidth={2.5} />
+              </span>
+            </div>
+
+            <div>
+              <div className="mb-4 flex items-center justify-center gap-2">
+                <div className="hairline h-px flex-1" />
+                <h3 className="eyebrow text-center">Функцион</h3>
+                <div className="hairline h-px flex-1" />
+              </div>
+              <div className="grid grid-cols-2 gap-2 md:gap-3">
+                {MODEL_A_LAYOUT.map(functionId => {
+                  const rowIndex = functionToRow.get(functionId);
+                  const functionName = getFunctionName(functionId);
+                  const highlight = getHighlight(rowIndex);
+
+                  return (
+                    <button
+                      key={functionId}
+                      type="button"
+                      title={`${functionId}: ${functionName}`}
+                      aria-label={`${functionId} ${functionName}. ${sourceBlock.rows[rowIndex ?? -1]?.functionFeaturesText ?? 'не входит в source-разбор'}`}
+                      onMouseEnter={() => {
+                        if (rowIndex !== undefined) {
+                          setActiveCell({ kind: 'function', id: functionId, rowIndex });
+                        }
+                      }}
+                      onFocus={() => {
+                        if (rowIndex !== undefined) {
+                          setActiveCell({ kind: 'function', id: functionId, rowIndex });
+                        }
+                      }}
+                      onBlur={() => setActiveCell(null)}
+                      className={`relative flex h-16 cursor-pointer flex-col items-center justify-center rounded-xl border-2 transition-[opacity,transform,background-color,border-color] duration-200 ${styleFor(rowIndex, highlight)}`}
+                      data-tetrachotomy-source-function={functionId}
+                      data-source-row-index={rowIndex ?? ''}
+                    >
+                      <span className="font-mono text-xl font-bold leading-none">{functionId}</span>
+                      <span className="mt-1 text-[10px] font-medium leading-none opacity-80">{functionName}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-3 border-t border-[var(--color-shell-border)] pt-5">
+            {sourceBlock.rows.map((row, rowIndex) => (
+              <div
+                key={`${row.aspectText}-${row.functionBlockLabel}`}
+                className="grid gap-3 rounded-2xl border border-[var(--color-shell-border)] bg-[var(--color-shell-surface-muted)] p-4 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-center"
+                data-tetrachotomy-aspect-function-row={row.aspectText}
+              >
+                <div className="min-w-0">
+                  <div className="mb-2 flex items-center gap-2">
+                    <span
+                      aria-hidden="true"
+                      className={`h-3.5 w-3.5 shrink-0 rounded ${MAPPING_BG[rowIndex % MAPPING_BG.length]}`}
+                    />
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {row.aspectIds.map(aspectId => (
+                        <AspectGlyph
+                          key={aspectId}
+                          aspectId={aspectId}
+                          label={row.aspectText}
+                          mode={aspectDisplayMode}
+                          size="sm"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="text-xs font-semibold leading-relaxed text-[var(--color-shell-muted)]">
+                    {row.aspectFeaturesText}
+                  </div>
+                </div>
+
+                <div className="hidden text-[var(--color-shell-subtle)] lg:block">
+                  <ArrowRight className="h-4 w-4" strokeWidth={2.25} />
+                </div>
+
+                <div className="min-w-0">
+                  <div className="mb-2 flex flex-wrap items-center gap-2">
+                    <span className="rounded-full border border-[var(--color-shell-border-strong)] bg-[var(--color-shell-active-bg)] px-3 py-1 text-xs font-black text-[var(--color-shell-active-fg)]">
+                      {row.functionBlockLabel}
+                    </span>
+                    {row.functionIds.map(functionId => (
+                      <span
+                        key={functionId}
+                        className="rounded-lg border border-[var(--color-shell-border)] bg-[var(--color-shell-control)] px-2.5 py-1 font-mono text-xs font-bold text-[var(--color-app-fg)]"
+                        title={getFunctionName(functionId)}
+                      >
+                        {functionId}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="text-xs font-semibold leading-relaxed text-[var(--color-shell-muted)]">
+                    {row.functionFeaturesText}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       ) : (
         <div

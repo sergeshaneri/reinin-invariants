@@ -53,8 +53,8 @@ export const AspectIcon: React.FC<Props> = ({
 }) => {
   const { iconKey, isFilled } = getAspectVisual(aspectId);
   const Icon = ASPECT_ICON_REGISTRY[iconKey];
-  const fill = isFilled ? 'currentColor' : 'none';
-  const stroke = 'currentColor';
+  const fill = isFilled ? '#050505' : '#ffffff';
+  const stroke = '#050505';
   const strokeWidth = size === 'sm' || size === 'xs' ? 2.1 : 1.9;
 
   return (

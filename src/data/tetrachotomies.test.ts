@@ -72,6 +72,43 @@ describe('tetrachotomy source formulas', () => {
     });
   });
 
+  it('keeps the first direct source aspect-function block as extracted DOCX rows', () => {
+    const formula = getTetrachotomyFormulaById('tetra-01');
+
+    expect(formula?.sourceBlocks).toHaveLength(1);
+    expect(formula?.sourceBlocks?.[0]).toMatchObject({
+      typeIds: ['ILE', 'EIE', 'LIE', 'IEE'],
+      labels: ['Рыцари', 'Уникальность'],
+      status: 'extracted',
+    });
+    expect(formula?.sourceBlocks?.[0].rows).toEqual([
+      expect.objectContaining({
+        aspectIds: ['Ne'],
+        aspectText: 'ЧИ',
+        functionBlockLabel: 'мерность 4',
+        functionIds: [1, 8],
+      }),
+      expect.objectContaining({
+        aspectIds: ['Ni'],
+        aspectText: 'БИ',
+        functionBlockLabel: 'мерность 3',
+        functionIds: [2, 7],
+      }),
+      expect.objectContaining({
+        aspectIds: ['Se'],
+        aspectText: 'ЧС',
+        functionBlockLabel: 'мерность 2',
+        functionIds: [3, 6],
+      }),
+      expect.objectContaining({
+        aspectIds: ['Si'],
+        aspectText: 'БС',
+        functionBlockLabel: 'мерность 1',
+        functionIds: [4, 5],
+      }),
+    ]);
+  });
+
   it('treats every source formula as a rank-2 tetrachotomy basis', () => {
     TETRACHOTOMY_FORMULAS.forEach(formula => {
       expect(formula.basisTraitIds).not.toContain(formula.targetTraitId);

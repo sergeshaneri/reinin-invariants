@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { GalleryHorizontalEnd, ListChecks, MousePointer2 } from 'lucide-react';
+import { ChevronDown, GalleryHorizontalEnd, ListChecks, MousePointer2 } from 'lucide-react';
 import {
   REININ_TRAITS,
   type ReininTraitId,
@@ -114,48 +114,13 @@ export const PartitionChooser: React.FC<Props> = ({
       </div>
 
       <div className="mt-5 space-y-4">
-        <section data-partition-entry-mode="sequential">
-          <div className="eyebrow flex items-center gap-2">
-            <MousePointer2 className="h-3.5 w-3.5 text-[var(--color-shell-accent)]" strokeWidth={2} />
-            По шагам
-          </div>
-          <div className="mt-3 space-y-3">
-            {Array.from({ length: traitCount }, (_, slotIndex) => (
-              <div key={slotIndex} className="glass-muted rounded-2xl p-3">
-                <div className="eyebrow">
-                  {slotIndex + 1}
-                </div>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {REININ_TRAITS.map(trait => {
-                    const isSelected = selectedTraitIds[slotIndex] === trait.id;
-                    const isDuplicate = selectedTraitIds.some((selectedTraitId, index) => (
-                      index !== slotIndex && selectedTraitId === trait.id
-                    ));
-
-                    return (
-                      <button
-                        key={trait.id}
-                        type="button"
-                        aria-pressed={isSelected}
-                        disabled={isDuplicate}
-                        data-partition-sequential-trait={trait.id}
-                        data-partition-sequential-slot={slotIndex}
-                        onClick={() => handleSequentialSelect(slotIndex, trait.id)}
-                        className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors ${
-                          isSelected
-                            ? 'border-[var(--color-shell-active-bg)] bg-[var(--color-shell-active-bg)] text-[var(--color-shell-active-fg)]'
-                            : 'border-[var(--color-shell-border)] bg-[var(--color-shell-control)] text-[var(--color-shell-muted)] hover:border-[var(--color-shell-border-strong)] hover:text-[var(--color-shell-hover-fg)]'
-                        } disabled:cursor-not-allowed disabled:opacity-35`}
-                      >
-                        {trait.name.split(' / ')[0]}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+        {kind === 'tetrachotomy' ? null : (
+          <SequentialSelector
+            traitCount={traitCount}
+            selectedTraitIds={selectedTraitIds}
+            onSelect={handleSequentialSelect}
+          />
+        )}
 
         <section data-partition-entry-mode="catalog">
           <div className="eyebrow flex items-center gap-2">
@@ -186,57 +151,41 @@ export const PartitionChooser: React.FC<Props> = ({
           </div>
         </section>
 
-        <section data-partition-entry-mode="gallery">
-          <div className="eyebrow flex items-center gap-2">
-            <GalleryHorizontalEnd className="h-3.5 w-3.5 text-[var(--color-shell-accent)]" strokeWidth={2} />
-            Паттерны
-          </div>
-          <div className="mt-3 flex gap-3 overflow-x-auto pb-2 pr-1 custom-scrollbar">
-            {visibleEntries.map(entry => {
-              const isSelected = entry.key === activeEntryKey;
-              const classIndexByKey = new Map(
-                entry.partition.classes.map((partitionClass, index) => [partitionClass.key, index]),
-              );
+        {kind === 'tetrachotomy' ? (
+          <details
+            className="rounded-2xl border border-[var(--color-shell-border)] bg-[var(--color-shell-surface-muted)]"
+            data-partition-advanced-entry-modes="tetrachotomy"
+          >
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-left">
+              <span className="eyebrow">
+                По шагам и паттерны
+              </span>
+              <ChevronDown className="h-4 w-4 text-[var(--color-shell-subtle)]" strokeWidth={2} />
+            </summary>
+            <div className="space-y-4 border-t border-[var(--color-shell-border)] p-3">
+              <SequentialSelector
+                traitCount={traitCount}
+                selectedTraitIds={selectedTraitIds}
+                onSelect={handleSequentialSelect}
+              />
+              <PatternGallery
+                entries={visibleEntries}
+                activeEntryKey={activeEntryKey}
+                onSelectTraitIds={onSelectTraitIds}
+                renderEntryLabel={renderEntryLabel}
+              />
+            </div>
+          </details>
+        ) : (
+          <PatternGallery
+            entries={visibleEntries}
+            activeEntryKey={activeEntryKey}
+            onSelectTraitIds={onSelectTraitIds}
+            renderEntryLabel={renderEntryLabel}
+          />
+        )}
 
-              return (
-                <button
-                  key={entry.key}
-                  type="button"
-                  aria-current={isSelected ? 'true' : undefined}
-                  aria-label={entry.title}
-                  data-partition-gallery-entry={entry.key}
-                  onClick={() => onSelectTraitIds(entry.traitIds)}
-                  className={`w-[190px] flex-none rounded-2xl border p-3 text-left transition-colors ${
-                    isSelected
-                      ? 'border-[var(--color-shell-active-bg)] bg-[var(--color-shell-active-bg)] text-[var(--color-shell-active-fg)]'
-                      : 'border-[var(--color-shell-border)] bg-[var(--color-shell-surface-muted)] text-[var(--color-app-fg)] hover:border-[var(--color-shell-border-strong)]'
-                  }`}
-                >
-                  {renderEntryLabel(entry)}
-                  <span className="mt-3 grid grid-cols-4 gap-1" aria-hidden="true">
-                    {entry.partition.patternCells.map(cell => {
-                      const classIndex = classIndexByKey.get(cell.classKey) ?? 0;
-                      const tone = CLASS_TONES[classIndex % CLASS_TONES.length];
-                      const typeCode = getTypeCode(cell.type.aliases, cell.type.id);
-
-                      return (
-                        <span
-                          key={cell.type.id}
-                          className={`flex aspect-square items-center justify-center rounded-md border text-[9px] font-black leading-none ${tone}`}
-                          title={`${typeCode}: ${cell.classLabel}`}
-                        >
-                          {typeCode}
-                        </span>
-                      );
-                    })}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
-        {selectedEntry ? (
+        {selectedEntry && kind !== 'tetrachotomy' ? (
           <div className="glass-muted rounded-2xl px-3 py-2 text-xs font-semibold text-[var(--color-shell-muted)]">
             <span className="block text-[10px] uppercase tracking-[0.18em] opacity-70">
               {selectedEntry.sourceFormula ? 'Формула источника' : 'Выбрано'}
@@ -250,3 +199,122 @@ export const PartitionChooser: React.FC<Props> = ({
     </section>
   );
 };
+
+interface SequentialSelectorProps {
+  traitCount: number;
+  selectedTraitIds: readonly ReininTraitId[];
+  onSelect: (slotIndex: number, traitId: ReininTraitId) => void;
+}
+
+const SequentialSelector: React.FC<SequentialSelectorProps> = ({
+  traitCount,
+  selectedTraitIds,
+  onSelect,
+}) => (
+  <section data-partition-entry-mode="sequential">
+    <div className="eyebrow flex items-center gap-2">
+      <MousePointer2 className="h-3.5 w-3.5 text-[var(--color-shell-accent)]" strokeWidth={2} />
+      По шагам
+    </div>
+    <div className="mt-3 space-y-3">
+      {Array.from({ length: traitCount }, (_, slotIndex) => (
+        <div key={slotIndex} className="glass-muted rounded-2xl p-3">
+          <div className="eyebrow">
+            {slotIndex + 1}
+          </div>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {REININ_TRAITS.map(trait => {
+              const isSelected = selectedTraitIds[slotIndex] === trait.id;
+              const isDuplicate = selectedTraitIds.some((selectedTraitId, index) => (
+                index !== slotIndex && selectedTraitId === trait.id
+              ));
+
+              return (
+                <button
+                  key={trait.id}
+                  type="button"
+                  aria-pressed={isSelected}
+                  disabled={isDuplicate}
+                  data-partition-sequential-trait={trait.id}
+                  data-partition-sequential-slot={slotIndex}
+                  onClick={() => onSelect(slotIndex, trait.id)}
+                  className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors ${
+                    isSelected
+                      ? 'border-[var(--color-shell-active-bg)] bg-[var(--color-shell-active-bg)] text-[var(--color-shell-active-fg)]'
+                      : 'border-[var(--color-shell-border)] bg-[var(--color-shell-control)] text-[var(--color-shell-muted)] hover:border-[var(--color-shell-border-strong)] hover:text-[var(--color-shell-hover-fg)]'
+                  } disabled:cursor-not-allowed disabled:opacity-35`}
+                >
+                  {trait.name.split(' / ')[0]}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+);
+
+interface PatternGalleryProps {
+  entries: readonly PartitionCatalogEntryViewModel[];
+  activeEntryKey: string;
+  onSelectTraitIds: (traitIds: readonly ReininTraitId[]) => void;
+  renderEntryLabel: (entry: PartitionCatalogEntryViewModel) => React.ReactNode;
+}
+
+const PatternGallery: React.FC<PatternGalleryProps> = ({
+  entries,
+  activeEntryKey,
+  onSelectTraitIds,
+  renderEntryLabel,
+}) => (
+  <section data-partition-entry-mode="gallery">
+    <div className="eyebrow flex items-center gap-2">
+      <GalleryHorizontalEnd className="h-3.5 w-3.5 text-[var(--color-shell-accent)]" strokeWidth={2} />
+      Паттерны
+    </div>
+    <div className="mt-3 flex gap-3 overflow-x-auto pb-2 pr-1 custom-scrollbar">
+      {entries.map(entry => {
+        const isSelected = entry.key === activeEntryKey;
+        const classIndexByKey = new Map(
+          entry.partition.classes.map((partitionClass, index) => [partitionClass.key, index]),
+        );
+
+        return (
+          <button
+            key={entry.key}
+            type="button"
+            aria-current={isSelected ? 'true' : undefined}
+            aria-label={entry.title}
+            data-partition-gallery-entry={entry.key}
+            onClick={() => onSelectTraitIds(entry.traitIds)}
+            className={`w-[190px] flex-none rounded-2xl border p-3 text-left transition-colors ${
+              isSelected
+                ? 'border-[var(--color-shell-active-bg)] bg-[var(--color-shell-active-bg)] text-[var(--color-shell-active-fg)]'
+                : 'border-[var(--color-shell-border)] bg-[var(--color-shell-surface-muted)] text-[var(--color-app-fg)] hover:border-[var(--color-shell-border-strong)]'
+            }`}
+          >
+            {renderEntryLabel(entry)}
+            <span className="mt-3 grid grid-cols-4 gap-1" aria-hidden="true">
+              {entry.partition.patternCells.map(cell => {
+                const classIndex = classIndexByKey.get(cell.classKey) ?? 0;
+                const tone = CLASS_TONES[classIndex % CLASS_TONES.length];
+                const typeCode = getTypeCode(cell.type.aliases, cell.type.id);
+
+                return (
+                  <span
+                    key={cell.type.id}
+                    className={`flex aspect-square items-center justify-center rounded-md border text-[9px] font-black leading-none ${tone}`}
+                    title={`${typeCode}: ${cell.classLabel}`}
+                  >
+                    {typeCode}
+                  </span>
+                );
+              })}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  </section>
+);

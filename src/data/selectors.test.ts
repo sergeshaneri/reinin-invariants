@@ -130,12 +130,52 @@ describe('domain selectors', () => {
       sourceFormula: {
         id: 'tetra-01',
         targetTrait: { id: 'vertness' },
+        basisTraits: [
+          { id: 'carefree' },
+          { id: 'intuition' },
+        ],
+        relationText: '(1) = (3) х (3)',
         status: 'extracted',
       },
       partition: {
         ok: true,
         kind: 'tetrachotomy',
       },
+    });
+    expect(catalog.entries[0].sourceFormula?.groups).toHaveLength(4);
+    expect(catalog.entries[0].sourceFormula?.groups[0]).toEqual({
+      sourceColor: '4a86e8',
+      typeIds: ['ILE', 'EIE', 'LIE', 'IEE'],
+    });
+    expect(catalog.entries[0].sourceFormula?.sourceBlocks?.[0]).toMatchObject({
+      typeIds: ['ILE', 'EIE', 'LIE', 'IEE'],
+      labels: ['Рыцари', 'Уникальность'],
+      rows: [
+        {
+          aspectIds: ['Ne'],
+          aspectText: 'ЧИ',
+          functionBlockLabel: 'мерность 4',
+          functionIds: [1, 8],
+        },
+        {
+          aspectIds: ['Ni'],
+          aspectText: 'БИ',
+          functionBlockLabel: 'мерность 3',
+          functionIds: [2, 7],
+        },
+        {
+          aspectIds: ['Se'],
+          aspectText: 'ЧС',
+          functionBlockLabel: 'мерность 2',
+          functionIds: [3, 6],
+        },
+        {
+          aspectIds: ['Si'],
+          aspectText: 'БС',
+          functionBlockLabel: 'мерность 1',
+          functionIds: [4, 5],
+        },
+      ],
     });
     expect(catalog.entries[0].partition.patternCells[0]).toMatchObject({
       type: { id: 'ILE' },
@@ -368,6 +408,12 @@ describe('domain selectors', () => {
       sourceFormula: {
         id: 'tetra-01',
         formulaText: 'Верт = Бс/Пр Х Ит/Сн (1,а)',
+        sourceBlocks: [
+          {
+            typeIds: ['ILE', 'EIE', 'LIE', 'IEE'],
+            labels: ['Рыцари', 'Уникальность'],
+          },
+        ],
       },
     });
   });

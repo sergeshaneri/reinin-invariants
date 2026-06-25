@@ -139,8 +139,27 @@ export interface PartitionCatalogEntryViewModel {
     id: string;
     formulaText: string;
     targetTrait: TraitSummaryViewModel;
+    basisTraits: readonly [TraitSummaryViewModel, TraitSummaryViewModel];
+    relationText?: string;
     status: TetrachotomyFormulaRecord['status'];
     sourceTableNumber: number;
+    groups: readonly {
+      sourceColor?: string;
+      typeIds: readonly SocionicTypeId[];
+    }[];
+    sourceBlocks?: readonly {
+      typeIds: readonly SocionicTypeId[];
+      labels: readonly string[];
+      status: 'extracted';
+      rows: readonly {
+        aspectIds: readonly AspectId[];
+        aspectText: string;
+        aspectFeaturesText: string;
+        functionBlockLabel: string;
+        functionIds: readonly number[];
+        functionFeaturesText: string;
+      }[];
+    }[];
   };
 }
 
@@ -357,8 +376,30 @@ const selectTetrachotomySourceCatalog = (
         id: formula.id,
         formulaText: formula.source.formulaText,
         targetTrait: selectTraitSummary(formula.targetTraitId),
+        basisTraits: [
+          selectTraitSummary(formula.basisTraitIds[0]),
+          selectTraitSummary(formula.basisTraitIds[1]),
+        ] as const,
+        relationText: formula.source.relationText,
         status: formula.status,
         sourceTableNumber: formula.source.tableNumber,
+        groups: formula.groups.map(group => ({
+          sourceColor: group.sourceColor,
+          typeIds: group.typeIds,
+        })),
+        sourceBlocks: formula.sourceBlocks?.map(block => ({
+          typeIds: block.typeIds,
+          labels: block.labels,
+          status: block.status,
+          rows: block.rows.map(row => ({
+            aspectIds: row.aspectIds,
+            aspectText: row.aspectText,
+            aspectFeaturesText: row.aspectFeaturesText,
+            functionBlockLabel: row.functionBlockLabel,
+            functionIds: row.functionIds,
+            functionFeaturesText: row.functionFeaturesText,
+          })),
+        })),
       },
     };
   });

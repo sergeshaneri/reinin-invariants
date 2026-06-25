@@ -25,6 +25,12 @@ Domain ground-truth rule:
 - Do not use web sources as primary authority for socionics data in this repo. External sources may be used only as secondary orientation and must not override the user's tables.
 - If a task lacks required user-confirmed domain data, stop and request that data instead of improvising.
 
+Theory diagram approval rule:
+
+- Before implementing or materially changing a diagram that encodes socionics logic, first state the proposed diagram model to the user and wait for confirmation.
+- The proposal should name the diagram objects, arrow direction, labels, grouping rule, source records used and unsupported/fallback cases.
+- This checkpoint applies to explanatory diagrams and source-derived model views. It does not apply to small style-only changes or exact diagram shapes already approved by the user in the current context.
+
 Windows PowerShell text-output rule:
 
 - When a PowerShell command prints repository file contents, diffs, or other likely non-ASCII text, include the UTF-8 setup in the same command invocation:

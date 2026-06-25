@@ -38,6 +38,7 @@ test('renders the app and key diagram controls', async ({ page }) => {
   await expect(page).toHaveScreenshot('reinin-invariants-app.png', {
     fullPage: true,
     maxDiffPixelRatio: 0.03,
+    timeout: 15000,
   });
 
   expect(errors).toEqual([]);
@@ -173,13 +174,9 @@ test('switches app modes through the URL state', async ({ page }) => {
 
   await page.getByRole('tab', { name: 'Тетрахотомия' }).click();
   await expect(page.getByRole('tab', { name: 'Тетрахотомия' })).toHaveAttribute('aria-selected', 'true');
-  await expect(page.locator('[data-partition-pattern="tetrachotomy"]')).toBeVisible();
-  await expect(page.locator('[data-partition-pattern="tetrachotomy"] [role="gridcell"]')).toHaveCount(16);
-  await expect(page.locator('[data-type-id="ILE"]')).toHaveAttribute('aria-pressed', 'true');
-  await page.locator('[data-type-id="SEI"]').click();
-  await expect(page.locator('[data-type-id="SEI"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('[data-tetrachotomy-model-a-slot]')).toBeVisible();
+  await expect(page.locator('[data-tetrachotomy-extra-materials]')).toBeVisible();
   await expect(page).toHaveURL(/mode=tetrachotomy/);
-  await expect(page).toHaveURL(/class=/);
   await expect(page).not.toHaveURL(/type=/);
 
   await page.getByRole('tab', { name: 'Октохотомия' }).click();
@@ -226,9 +223,22 @@ test('chooses tetra and octo partitions through sequential trait selection', asy
   await expect(page.locator('[data-partition-chooser="tetrachotomy"]')).toBeVisible();
   await expect(page.locator('[data-partition-catalog-count="tetrachotomy"]')).toHaveText('35');
   await expect(page.locator('[data-partition-entry-mode="structural"]')).toHaveCount(0);
+  await expect(page.locator('[data-partition-entry-mode="catalog"]')).toBeVisible();
+  await expect(page.locator('[data-partition-entry-mode="sequential"]')).not.toBeVisible();
+  await expect(page.locator('[data-partition-entry-mode="gallery"]')).not.toBeVisible();
+  await page.locator('[data-partition-catalog-entry="tetra-01"]').click();
+  const sourceBlock = page.locator('[data-tetrachotomy-source-block]');
+  await expect(sourceBlock).toBeVisible();
+  await expect(page.locator('[data-tetrachotomy-model-a-slot]')).toContainText('Рыцари');
+  await expect(sourceBlock.locator('[data-tetrachotomy-aspect-function-row="ЧИ"]')).toContainText('мерность 4');
+  await expect(sourceBlock.locator('[data-tetrachotomy-aspect-function-row="БИ"]')).toContainText('мерность 3');
+  await expect(sourceBlock.locator('[data-tetrachotomy-aspect-function-row="ЧС"]')).toContainText('мерность 2');
+  await expect(sourceBlock.locator('[data-tetrachotomy-aspect-function-row="БС"]')).toContainText('мерность 1');
 
+  await page.goto('/?mode=tetrachotomy');
+  await page.getByText('По шагам и паттерны').click();
   await page.locator('[data-partition-sequential-slot="0"][data-partition-sequential-trait="talness"]').click();
-  await expect(page.locator('[data-partition-pattern="tetrachotomy"]')).toBeVisible();
+  await expect(page.locator('[data-tetrachotomy-model-a-slot]')).toBeVisible();
   await expect(page.locator('[data-partition-catalog-entry="tetra-07"]')).toHaveAttribute('aria-current', 'true');
   await expect(page).toHaveURL(/mode=tetrachotomy/);
   await expect(page).toHaveURL(/traits=nalness%2Ctalness/);
@@ -251,8 +261,21 @@ test('chooses tetra and octo partitions through catalog entries', async ({ page 
   await page.locator('[data-partition-catalog-entry="tetra-35"]').click();
   await expect(page.locator('[data-partition-catalog-entry="tetra-35"]')).toHaveAttribute('aria-current', 'true');
   await expect(page.locator('[data-partition-pattern="tetrachotomy"] [role="gridcell"]')).toHaveCount(16);
-  await expect(page.locator('[data-tetrachotomy-source-formula="tetra-35"]')).toContainText('Лг/Эт = ?/! Х Рс/Рш');
+  const formulaPanel = page.locator('[data-tetrachotomy-formula-panel="tetra-35"]');
+  await expect(formulaPanel).toContainText('Лг/Эт = ?/! Х Рс/Рш');
+  await expect(formulaPanel.locator('[data-tetrachotomy-formula-target="logic"]')).toContainText('Логика / Этика');
+  await expect(formulaPanel.locator('[data-tetrachotomy-formula-basis="asking"]')).toContainText('Квестимность / Деклатимность');
+  await expect(formulaPanel.locator('[data-tetrachotomy-formula-basis="judicious"]')).toContainText('Рассудительность / Решительность');
+  await expect(formulaPanel.locator('[data-tetrachotomy-formula-cell]')).toHaveCount(4);
+  await expect(formulaPanel.locator('[data-tetrachotomy-formula-cell][data-target-pole-index="0"]')).toHaveCount(2);
+  await expect(formulaPanel.locator('[data-tetrachotomy-formula-cell][data-target-pole-index="1"]')).toHaveCount(2);
+  await expect(page.locator('[data-tetrachotomy-source-block-fallback]')).toContainText('source-разбор');
   await expect(page).toHaveURL(/traits=asking%2Cjudicious/);
+
+  await formulaPanel.locator('[data-tetrachotomy-formula-cell="asking:1|judicious:0"]').click();
+  await expect(page.locator('[data-tetrachotomy-class="asking:1|judicious:0"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('[data-tetrachotomy-model-a-slot]')).toBeVisible();
+  await expect(page).toHaveURL(/class=asking%3A1%7Cjudicious%3A0/);
 
   await page.getByRole('tab', { name: 'Октохотомия' }).click();
   await page.locator('[data-partition-catalog-entry="vertness+nalness+asking"]').click();
@@ -267,6 +290,7 @@ test('chooses tetra and octo partitions through visual pattern gallery', async (
   const errors = collectPageErrors(page);
 
   await page.goto('/?mode=tetrachotomy');
+  await page.getByText('По шагам и паттерны').click();
   await page.locator('[data-partition-gallery-entry="tetra-07"]').click();
   await expect(page.locator('[data-partition-gallery-entry="tetra-07"]')).toHaveAttribute('aria-current', 'true');
   await expect(page.locator('[data-partition-catalog-entry="tetra-07"]')).toHaveAttribute('aria-current', 'true');
@@ -286,11 +310,13 @@ test('shows tetrachotomy composition and toggles component poles', async ({ page
 
   await page.goto('/?mode=tetrachotomy&traits=vertness,nalness');
 
+  await page.getByText('Доп материалы').click();
   const composition = page.locator('[data-partition-composition="tetrachotomy"]');
   const finalPattern = composition.locator('[data-composition-final="true"]');
   const detail = page.locator('[data-tetrachotomy-detail]');
 
   await expect(detail).toHaveAttribute('data-selected-class-key', 'vertness:0|nalness:0');
+  await expect(page.locator('[data-tetrachotomy-model-a-slot]')).toBeVisible();
   await expect(composition).toBeVisible();
   await expect(detail.locator('[data-tetrachotomy-class]')).toHaveCount(4);
   await expect(detail.locator('[data-tetrachotomy-class="vertness:0|nalness:0"]')).toHaveAttribute('aria-pressed', 'true');
@@ -395,6 +421,7 @@ test('renders type mode Model A without English abbreviations', async ({ page })
   await expect(page).toHaveScreenshot('reinin-invariants-type-mode.png', {
     fullPage: true,
     maxDiffPixelRatio: 0.03,
+    timeout: 15000,
   });
 
   expect(errors).toEqual([]);

@@ -1,6 +1,6 @@
 import sourceExtract from '../../plans/roadmap/tetrachotomy-doc-extract.json';
 import { buildPartition } from './partitions';
-import type { ReininTraitId } from './socionics';
+import type { AspectId, ReininTraitId } from './socionics';
 import type { SocionicTypeId } from './types';
 
 export type FormulaSourceStatus = 'extracted' | 'draft' | 'incomplete' | 'verified';
@@ -19,6 +19,22 @@ export interface TetrachotomyFormulaGroup {
   typeIds: readonly SocionicTypeId[];
 }
 
+export interface TetrachotomySourceFormulaRow {
+  aspectIds: readonly AspectId[];
+  aspectText: string;
+  aspectFeaturesText: string;
+  functionBlockLabel: string;
+  functionIds: readonly number[];
+  functionFeaturesText: string;
+}
+
+export interface TetrachotomySourceFormulaBlock {
+  typeIds: readonly SocionicTypeId[];
+  labels: readonly string[];
+  rows: readonly TetrachotomySourceFormulaRow[];
+  status: 'extracted';
+}
+
 export interface TetrachotomyFormulaRecord {
   id: string;
   source: TetrachotomyFormulaSource;
@@ -26,6 +42,7 @@ export interface TetrachotomyFormulaRecord {
   basisTraitIds: readonly [ReininTraitId, ReininTraitId];
   status: Extract<FormulaSourceStatus, 'extracted' | 'verified'>;
   groups: readonly TetrachotomyFormulaGroup[];
+  sourceBlocks?: readonly TetrachotomySourceFormulaBlock[];
 }
 
 interface ExtractedTetrachotomyEntry {
@@ -97,12 +114,57 @@ const buildTetrachotomyFormulaId = (tetraNumber: number): string => (
   `tetra-${String(tetraNumber).padStart(2, '0')}`
 );
 
+const TETRACHOTOMY_SOURCE_BLOCKS_BY_FORMULA_ID: Partial<Record<string, readonly TetrachotomySourceFormulaBlock[]>> = {
+  'tetra-01': [
+    {
+      typeIds: ['ILE', 'EIE', 'LIE', 'IEE'],
+      labels: ['Рыцари', 'Уникальность'],
+      status: 'extracted',
+      rows: [
+        {
+          aspectIds: ['Ne'],
+          aspectText: 'ЧИ',
+          aspectFeaturesText: 'Экстравертные Дельта Отвлеченные Альфа Неявные Иррациональные Статичные',
+          functionBlockLabel: 'мерность 4',
+          functionIds: [1, 8],
+          functionFeaturesText: 'экстравертные оценочные сильные',
+        },
+        {
+          aspectIds: ['Ni'],
+          aspectText: 'БИ',
+          aspectFeaturesText: 'Интровертные Бета Отвлеченные Гамма Неявные Иррациональные Динамичные',
+          functionBlockLabel: 'мерность 3',
+          functionIds: [2, 7],
+          functionFeaturesText: 'интровертные ситуативные сильные',
+        },
+        {
+          aspectIds: ['Se'],
+          aspectText: 'ЧС',
+          aspectFeaturesText: 'Экстравертные Дельта Вовлеченные Гамма Явные Иррациональные Статичные',
+          functionBlockLabel: 'мерность 2',
+          functionIds: [3, 6],
+          functionFeaturesText: 'экстравертные ситуативные слабые',
+        },
+        {
+          aspectIds: ['Si'],
+          aspectText: 'БС',
+          aspectFeaturesText: 'Интровертные Дельта Вовлеченные Альфа Явные Иррациональные Динамичные',
+          functionBlockLabel: 'мерность 1',
+          functionIds: [4, 5],
+          functionFeaturesText: 'интровертные оценочные слабые',
+        },
+      ],
+    },
+  ],
+};
+
 export const TETRACHOTOMY_FORMULAS: readonly TetrachotomyFormulaRecord[] = (
   TETRACHOTOMY_EXTRACT.entries.map(entry => {
     const { targetTraitId, basisTraitIds } = parseFormulaTraits(entry.formula);
+    const id = buildTetrachotomyFormulaId(entry.tetraNumber);
 
     return {
-      id: buildTetrachotomyFormulaId(entry.tetraNumber),
+      id,
       source: {
         document: TETRACHOTOMY_EXTRACT.sourceDocument,
         tetraNumber: entry.tetraNumber,
@@ -118,6 +180,7 @@ export const TETRACHOTOMY_FORMULAS: readonly TetrachotomyFormulaRecord[] = (
         sourceColor: group.color,
         typeIds: group.typeIds,
       })),
+      sourceBlocks: TETRACHOTOMY_SOURCE_BLOCKS_BY_FORMULA_ID[id],
     };
   })
 );

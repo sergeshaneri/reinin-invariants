@@ -17,6 +17,39 @@ Use this file to convert repeated agent mistakes into concrete harness changes.
 
 ## Active Entries
 
+### 2026-06-25 - Diagram Design Decided Without User Review
+
+- Task: Add the first source-derived tetrachotomy aspect-to-function diagram.
+- What happened: The implementation chose a concrete visual form for an important theoretical diagram during execution, after the general direction was known but before the user reviewed the exact diagram model.
+- Expected behavior: For important diagrams and theory-bearing UI, the agent should first present the intended diagram model to the user in plain terms and wait for confirmation before implementing the visual shape.
+- Root cause: The harness emphasized source truth and validation, but did not require a user review checkpoint for high-impact explanatory diagrams.
+- Proposed harness change: Add a theory-diagram approval checkpoint: before implementing or materially changing diagrams that encode socionics logic, state the proposed diagram objects, direction of arrows, labels, grouping rule and unsupported cases, then ask for user confirmation. Small style-only changes and already-confirmed diagram extensions do not need this checkpoint.
+- Change type: workflow | documentation
+- Acceptance test: Future tasks that add or redesign source-derived diagrams stop before implementation with a concise proposal unless the user has already approved that exact diagram shape in the current context.
+- Status: accepted
+
+### 2026-06-24 - Tetrachotomy UI Task Misalignment
+
+- Task: Refine the tetrachotomy screen so the main focus is the question: what all representatives of one tetrad share in Model A.
+- What happened: The previous UI pass added and emphasized blocks that visualized source formulas as trait-pole intersections, type groups, composition, pattern maps, class lists and selected-class Model A previews. These pieces were useful as supporting materials, but they duplicated each other and did not answer the main question about how aspects map into functions for the whole tetrachotomy formula.
+- Expected behavior: Before adding more tetrachotomy UI, the agent should align on the primary explanatory target: the shared Model A invariant of a selected tetrad, especially aspect/function mapping across the full formula, not only type-class membership.
+- Root cause: Task misalignment. The agent interpreted "visualize formulas in detail" as "show the computed partition/classes in more detail" instead of "show the socionics element logic behind the formula." This led to executing the wrong task and making secondary classification views more prominent than the core aspect-to-function explanation.
+- Proposed harness change: Add a frontend/theory alignment check for formula UI tasks: identify the user's primary question in one sentence, classify each proposed screen block as primary/supporting/advanced, and put supporting or duplicated material behind collapsed sections unless the user asks for it as the main view.
+- Change type: workflow | documentation
+- Acceptance test: Future tetrachotomy UI work keeps `Источник` and the main aspect/function explanation visible by default, while `По шагам`, `Паттерны`, `Композиция`, `Классы тетрахотомии` and type-group diagnostics remain secondary or collapsed unless explicitly promoted by the user.
+- Status: accepted
+
+### 2026-06-24 - Playwright Screenshot Font Wait Timeout
+
+- Task: Validate tetrachotomy formula UI changes with browser screenshots.
+- What happened: `npm run test:e2e` twice reached unrelated `toHaveScreenshot` checks and timed out while waiting for fonts to load within the default 5000 ms matcher timeout.
+- Expected behavior: Existing full-page screenshot checks should allow enough bounded time for Windows font readiness without weakening visual comparison.
+- Root cause: The screenshot matcher used the default timeout, which was too tight for occasional Windows font-load stabilization under parallel Playwright load.
+- Proposed harness change: Set an explicit 15000 ms timeout on full-page screenshot assertions while keeping `maxDiffPixelRatio` unchanged.
+- Change type: check
+- Acceptance test: `npm run test:e2e` no longer fails on the repeated `waiting for fonts to load` timeout in the unchanged screenshot surfaces.
+- Status: accepted
+
 ### 2026-06-15 - Worker Wrote Mojibake UI Literals
 
 - Task: Implement C4.2 Partition Explorer chooser with Russian user-facing labels.

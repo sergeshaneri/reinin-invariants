@@ -17,6 +17,17 @@ Use this file to convert repeated agent mistakes into concrete harness changes.
 
 ## Active Entries
 
+### 2026-10-02 - DOCX Audit Accepted Rows From Other Formula Sections
+
+- Task: Review and commit the source-derived tetrachotomy transfer.
+- What happened: Formula references inside sections changed extraction ownership, while a cross-formula type-group fallback masked the resulting attribution errors. Cyrillic `с` section markers were also omitted from heading recognition.
+- Expected behavior: Each extracted block belongs to the current genuine formula heading; an audit match requires the same formula ID, type group and row signatures.
+- Root cause: An unanchored formula-number regex and a permissive cross-formula fallback; existing tests checked totals and formula presence without validating section ownership.
+- Proposed harness change: Require section-scoped provenance tests for every transferred formula and a negative regression case where matching rows are reassigned to another formula.
+- Change type: test | check
+- Acceptance test: Ownership regression and cross-formula rejection tests pass; all 11 bound formulas pass the strict audit; deferred tetra-07/tetra-13 remain unbound.
+- Status: accepted
+
 ### 2026-10-02 - Diagram Priority Did Not Guarantee Initial Mobile Viewport
 
 - Task: X2.5, put existing diagrams ahead of supporting material.

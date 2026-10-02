@@ -10,6 +10,7 @@
     "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
     "lint": "tsc --noEmit",
     "test": "vitest run src",
+    "audit:tetra-docx": "tsx scripts/audit-tetrachotomy-docx.ts",
     "test:e2e": "node scripts/e2e-dev.mjs",
     "test:e2e:preview": "node scripts/preview-e2e.mjs",
     "test:e2e:update": "playwright test --update-snapshots",

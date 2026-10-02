@@ -7,8 +7,17 @@ Current harness:
 - `npm run validate` runs all deterministic checks.
 - `npm run smoke:render` renders the React app through `react-dom/server` and verifies the default UI/data surface.
 - `npm run smoke` starts the Vite dev server, requests the local page, and verifies the app root is present.
+- `npm run audit:tetra-docx` extracts direct `->` tetrachotomy source rows from `harness/theory/tetrachotomy-source.docx` and compares current `sourceBlocks` with the DOCX rows.
 - `npm run test:e2e` opens the app in Chromium desktop and mobile viewports, checks key UI controls, captures a screenshot snapshot, and fails on browser console errors.
 - `harness/failure-log.md` records recurring agent failures and proposed harness fixes.
+
+Tetrachotomy DOCX audit rule:
+
+- Run `npm run audit:tetra-docx` after editing `scripts/audit-tetrachotomy-docx.ts` or any `TetrachotomyFormulaRecord.sourceBlocks` in `src/data/tetrachotomies.ts`.
+- `docx-ok` means every current source block for that formula has a matching DOCX direct-row group and matching row signatures within that formula's own section. Paired-formula references do not change section ownership; matches in another formula cannot satisfy this check.
+- `groups-ok` means the current source block type groups match the formula's extracted `typeIds` groups.
+- `fallback` for `tetra-07` or `tetra-13` is intentional until the DOCX direct-row groups and `plans/roadmap/tetrachotomy-doc-extract.json` groups are reconciled or confirmed by the user.
+- `docx-mismatch`, `groups-mismatch`, or non-empty `missing in DOCX direct rows` / `extra DOCX direct rows` means stop before binding those rows. Do not infer a basis/source mapping from similar-looking groups.
 
 Dev e2e port rule:
 

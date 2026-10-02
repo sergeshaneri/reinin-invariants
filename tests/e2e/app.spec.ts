@@ -16,6 +16,58 @@ const collectPageErrors = (page: Page) => {
   return errors;
 };
 
+test('prioritizes diagrams and keeps supporting views optional', async ({ page, isMobile }) => {
+  const errors = collectPageErrors(page);
+  await page.goto('/?theme=dark');
+
+  const diagram = page.locator('[data-primary-diagram="dichotomy"]');
+  const extra = page.locator('[data-dichotomy-extra-materials]');
+  await expect(diagram).toBeInViewport();
+  await expect(extra).not.toHaveAttribute('open', '');
+  await expect(page.locator('[data-partition-types-panel="dichotomy"]')).not.toBeVisible();
+  await expect(page.locator('[data-partition-pattern="dichotomy"]')).not.toBeVisible();
+  await expect(page.getByRole('button', { name: 'Дополнительные материалы' })).toHaveAttribute('aria-expanded', 'false');
+
+  if (isMobile) {
+    await page.locator('[data-compact-selection="trait"]').selectOption('talness');
+    await expect(page).toHaveURL(/trait=talness/);
+    await expect(page.locator('[data-trait-nav="talness"]')).toHaveAttribute('aria-current', 'true');
+    const positions = await page.evaluate(() => ({
+      diagram: document.querySelector('[data-primary-diagram]')!.getBoundingClientRect().top,
+      catalog: document.querySelector('[data-full-catalog]')!.getBoundingClientRect().top,
+    }));
+    expect(positions.diagram).toBeLessThan(positions.catalog);
+  }
+
+  await extra.locator('summary').click();
+  await expect(page.locator('[data-partition-pattern="dichotomy"]')).toBeVisible();
+  await expect(page.locator('[data-model-preview-type-id]')).toHaveCount(8);
+  await extra.locator('summary').click();
+
+  await page.goto('/?mode=tetrachotomy&traits=carefree,intuition&theme=dark');
+  const tetraDiagram = page.locator('[data-tetrachotomy-model-a-slot]');
+  await expect(tetraDiagram).toBeInViewport();
+  await expect(page.locator('[data-partition-types-panel="tetrachotomy"]')).not.toBeVisible();
+  await expect(page.locator('[data-tetrachotomy-class-select] option')).toHaveCount(4);
+  await page.locator('[data-tetrachotomy-class-select]').selectOption('carefree:0|intuition:1');
+  await expect(tetraDiagram).toContainText('Благосостояние');
+  await expect(page).toHaveURL(/class=carefree%3A0%7Cintuition%3A1/);
+
+  if (isMobile) {
+    await page.locator('[data-compact-selection="tetrachotomy"]').selectOption('tetra-03');
+    await expect(page).toHaveURL(/traits=yielding%2Clogic/);
+    await expect(page.locator('[data-partition-catalog-entry="tetra-03"]')).toHaveAttribute('aria-current', 'true');
+    await page.locator('[data-compact-selection="tetrachotomy"]').selectOption('tetra-01');
+  }
+
+  await expect(page).toHaveScreenshot('reinin-invariants-diagram-first-tetrachotomy.png', {
+    fullPage: true,
+    maxDiffPixelRatio: 0.03,
+    timeout: 15000,
+  });
+  expect(errors).toEqual([]);
+});
+
 test('renders the app and key diagram controls', async ({ page }) => {
   const errors = collectPageErrors(page);
 
@@ -23,7 +75,7 @@ test('renders the app and key diagram controls', async ({ page }) => {
 
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Инварианты');
   await expect(page.getByRole('tab', { name: 'Признак' })).toHaveAttribute('aria-selected', 'true');
-  await expect(page.getByRole('tab', { name: 'Пикто' })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.locator('[data-aspect-display-mode]')).toHaveAttribute('data-aspect-display-mode', 'icon');
   await expect(page.getByRole('tab', { name: 'Тип' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Признаки' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Аспектон' })).toBeVisible();
@@ -84,6 +136,7 @@ test('keeps dichotomy gallery and sidebar selection in sync', async ({ page }) =
   const errors = collectPageErrors(page);
 
   await page.goto('/?trait=vertness&pole=1&view=1');
+  await page.locator('[data-dichotomy-extra-materials] > summary').click();
 
   await page.locator('[data-dichotomy-card="democracy"]').click();
   await expect(page.locator('[data-dichotomy-card="democracy"]')).toHaveAttribute('aria-current', 'true');
@@ -104,6 +157,7 @@ test('selects the dichotomy pole from the 16-type pattern', async ({ page }) => 
   const errors = collectPageErrors(page);
 
   await page.goto('/?trait=vertness');
+  await page.locator('[data-dichotomy-extra-materials] > summary').click();
 
   await expect(page.locator('[data-partition-pattern="dichotomy"]')).toBeVisible();
   await expect(page.locator('[data-partition-pattern="dichotomy"] [role="gridcell"]')).toHaveCount(16);
@@ -127,7 +181,7 @@ test('selects the dichotomy pole from the 16-type pattern', async ({ page }) => 
   expect(errors).toEqual([]);
 });
 
-test('switches app modes through the URL state', async ({ page }) => {
+test('switches app modes through the URL state', async ({ page, isMobile }) => {
   const errors = collectPageErrors(page);
 
   await page.goto('/?trait=democracy');
@@ -157,11 +211,19 @@ test('switches app modes through the URL state', async ({ page }) => {
   await expect(page).not.toHaveURL(/pole=/);
   await expect(page).not.toHaveURL(/view=/);
 
+  if (isMobile) {
+    await page.locator('[data-compact-selection="type"]').selectOption('SEI');
+    await expect(page.getByRole('heading', { name: 'СЭИ' })).toBeVisible();
+    await expect(page).toHaveURL(/type=SEI/);
+    await page.locator('[data-compact-selection="type"]').selectOption('ILE');
+  }
+
   await page.getByRole('button', { name: /^ЛСИ/ }).click();
   await expect(page.getByRole('button', { name: /^ЛСИ/ })).toHaveAttribute('aria-current', 'true');
   await expect(page.getByRole('heading', { name: 'ЛСИ' })).toBeVisible();
   await expect(page).toHaveURL(/type=LSI/);
 
+  await page.locator('[data-display-settings] > summary').click();
   await page.getByRole('tab', { name: 'Аббр.' }).click();
   await expect(page.getByRole('tab', { name: 'Аббр.' })).toHaveAttribute('aria-selected', 'true');
   await expect(page.locator('[data-aspect-display-mode="symbol"]')).toBeVisible();
@@ -185,6 +247,12 @@ test('switches app modes through the URL state', async ({ page }) => {
   await expect(page.locator('[data-partition-pattern="octochotomy"] [role="gridcell"]')).toHaveCount(16);
   await expect(page).toHaveURL(/mode=octochotomy/);
 
+  if (isMobile) {
+    await page.locator('[data-compact-selection="octochotomy"]').selectOption('vertness+nalness+yielding');
+    await expect(page).toHaveURL(/traits=vertness%2Cnalness%2Cyielding/);
+    await expect(page.locator('[data-partition-catalog-entry="vertness+nalness+yielding"]')).toHaveAttribute('aria-current', 'true');
+  }
+
   await page.getByRole('tab', { name: 'Признак' }).click();
   await expect(page.getByRole('tab', { name: 'Признак' })).toHaveAttribute('aria-selected', 'true');
   await expect(page).not.toHaveURL(/mode=/);
@@ -196,6 +264,7 @@ test('switches app modes through the URL state', async ({ page }) => {
 
 test('syncs theme toggle with URL and local storage', async ({ page }) => {
   await page.goto('/?theme=dark');
+  await page.locator('[data-display-settings] > summary').click();
 
   await expect(page.locator('#root > [data-theme="dark"]')).toBeVisible();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
@@ -229,10 +298,10 @@ test('chooses tetra and octo partitions through sequential trait selection', asy
   await page.locator('[data-partition-catalog-entry="tetra-01"]').click();
   const sourceBlock = page.locator('[data-tetrachotomy-source-block]');
   await expect(sourceBlock).toBeVisible();
-  await expect(page.locator('[data-tetrachotomy-detail] > [data-partition-pattern="tetrachotomy"]')).toContainText('Экстраверсия / Интроверсия');
-  await expect(page.locator('[data-tetrachotomy-detail] > [data-partition-pattern="tetrachotomy"] [data-type-id="ILE"]')).toContainText('Экс / Бес / Инт');
-  await expect(page.locator('[data-tetrachotomy-detail] > [data-partition-pattern="tetrachotomy"]')).toContainText('Выбранный класс');
-  await expect(page.locator('[data-tetrachotomy-detail] > [data-partition-pattern="tetrachotomy"]')).toContainText('Экстраверты');
+  await expect(page.locator('[data-tetrachotomy-extra-materials] > div > [data-partition-pattern="tetrachotomy"]')).toContainText('Экстраверсия / Интроверсия');
+  await expect(page.locator('[data-tetrachotomy-extra-materials] > div > [data-partition-pattern="tetrachotomy"] [data-type-id="ILE"]')).toContainText('Экс / Бес / Инт');
+  await expect(page.locator('[data-tetrachotomy-extra-materials] > div > [data-partition-pattern="tetrachotomy"]')).toContainText('Выбранный класс');
+  await expect(page.locator('[data-tetrachotomy-extra-materials] > div > [data-partition-pattern="tetrachotomy"]')).toContainText('Экстраверты');
   await expect(page.locator('[data-partition-types-panel="tetrachotomy"]')).toContainText('Экстраверты');
   await expect(page.locator('[data-tetrachotomy-model-a-slot]')).toContainText('Рыцари');
   await expect(sourceBlock.locator('[data-tetrachotomy-source-aspect]')).toHaveCount(8);
@@ -288,8 +357,8 @@ test('chooses tetra and octo partitions through catalog entries', async ({ page 
   await page.goto('/?mode=tetrachotomy');
   await page.locator('[data-partition-catalog-entry="tetra-35"]').click();
   await expect(page.locator('[data-partition-catalog-entry="tetra-35"]')).toHaveAttribute('aria-current', 'true');
-  await expect(page.locator('[data-tetrachotomy-detail] > [data-partition-pattern="tetrachotomy"] [role="gridcell"]')).toHaveCount(16);
-  await expect(page.locator('[data-partition-types-panel="tetrachotomy"]')).toBeVisible();
+  await expect(page.locator('[data-tetrachotomy-extra-materials] > div > [data-partition-pattern="tetrachotomy"] [role="gridcell"]')).toHaveCount(16);
+  await expect(page.locator('[data-partition-types-panel="tetrachotomy"]')).not.toBeVisible();
   await expect(page.locator('[data-tetrachotomy-formula-panel="tetra-35"]')).not.toBeVisible();
   await page.getByText('Доп материалы').click();
   const formulaPanel = page.locator('[data-tetrachotomy-formula-panel="tetra-35"]');
@@ -425,6 +494,7 @@ test('shows octochotomy diagnostics for dependent URL triples', async ({ page })
   await expect(page.locator('[data-partition-pattern="octochotomy"]')).toHaveCount(0);
   await expect(page.locator('[data-partition-diagnostic="octochotomy"]')).toHaveAttribute('data-partition-diagnostic-reason', 'dependent-traits');
   await expect(page.locator('[data-partition-diagnostic="octochotomy"]')).toContainText('Selected traits');
+  await expect(page.locator('[data-compact-selection="octochotomy"]')).toHaveValue('custom');
   await expect(page).toHaveURL(/mode=octochotomy/);
   await expect(page).toHaveURL(/traits=vertness%2Cnalness%2Ctalness/);
   await expect(page).not.toHaveURL(/class=/);

@@ -17,6 +17,28 @@ Use this file to convert repeated agent mistakes into concrete harness changes.
 
 ## Active Entries
 
+### 2026-10-02 - Diagram Priority Did Not Guarantee Initial Mobile Viewport
+
+- Task: X2.5, put existing diagrams ahead of supporting material.
+- What happened: Reordering diagrams above patterns passed SSR ordering tests, but the first mobile browser run still placed the dichotomy diagram outside the initial viewport. Header/control panels consumed vertical space and the fixed theme panel covered content.
+- Expected behavior: The primary diagram should intersect the initial viewport without scrolling on supported desktop/mobile layouts; optional settings should not obscure it.
+- Root cause: DOM ordering and element visibility do not measure initial viewport priority or obstruction by fixed overlays.
+- Proposed harness change: Keep route-specific `toBeInViewport()` assertions for dichotomy and source tetrachotomy, check mobile catalog placement, and review desktop/mobile snapshots with optional views collapsed.
+- Change type: test | workflow
+- Acceptance test: `prioritizes diagrams and keeps supporting views optional` passes in both Chromium projects and compact selections preserve URL state.
+- Status: accepted
+
+### 2026-10-02 - Dependency Audit Blocks UI Release Gate
+
+- Task: Run full validation after X2.5.
+- What happened: Type checking, 99 unit tests, production build, asset smoke and production browser preview passed; unified validation stopped at dependency audit with 7 vulnerabilities (1 low, 3 moderate, 3 high).
+- Expected behavior: Full release validation requires the existing moderate-severity audit gate to pass; UI test success must not be reported as a successful full gate.
+- Root cause: The installed dependency tree has advisories affecting Babel, Vitest mocker, baseline-browser-mapping, browserslist, nanoid and PostCSS. Package versions and lockfile were not changed by this UI task.
+- Proposed harness change: Resolve dependency updates in a separate scoped maintenance task, then rerun `npm run validate`. Do not suppress the audit threshold to close unrelated UI work.
+- Change type: workflow
+- Acceptance test: `npm run validate` reaches `All validation checks passed.` after dependency remediation.
+- Status: proposed
+
 ### 2026-06-25 - Diagram Design Decided Without User Review
 
 - Task: Add the first source-derived tetrachotomy aspect-to-function diagram.

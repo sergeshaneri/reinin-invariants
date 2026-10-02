@@ -18,7 +18,7 @@ const OPTIONS: readonly {
 ];
 
 export const ThemeToggle: React.FC<Props> = ({ theme, onSelectTheme }) => (
-  <section className="fixed bottom-4 right-4 z-40 w-[calc(100vw-2rem)] max-w-xs">
+  <section>
     <div className="shell-panel flex flex-col gap-3 rounded-2xl border px-4 py-3 shadow-sm backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between">
       <h2 className="shell-heading text-[11px] font-semibold uppercase tracking-[0.18em]">
         Тема

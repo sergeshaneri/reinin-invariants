@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { REININ_TRAITS, AspectId, TraitClass, type PoleIndex } from './data/socionics';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { REININ_TRAITS, SOCIONIC_TYPES, TraitClass, type PoleIndex } from './data/socionics';
 import {
   getDefaultPartitionState,
   getDefaultTraitPoleIndex,
@@ -11,7 +11,7 @@ import {
   type ThemeMode,
   getThemeStorageKey,
 } from './appState';
-import { selectDichotomyTypesPanelView, selectPartitionExplorerView } from './data/selectors';
+import { selectDichotomyTypesPanelView, selectPartitionExplorerView, selectTetrachotomyCatalog, selectOctochotomyCatalog } from './data/selectors';
 import { DIAGRAMS, DEFAULT_DIAGRAM_ID } from './diagrams/registry';
 import { HelpModal } from './components/HelpModal';
 import { Header } from './components/Header';
@@ -60,6 +60,33 @@ const App: React.FC = () => {
   const currentView = currentPole.views[activeViewIndex] ?? currentPole.views[0];
   const isPartitionMode = mode === 'tetrachotomy' || mode === 'octochotomy';
   const partitionView = selectPartitionExplorerView(partition.traitIds, partition.selectedClassKey);
+  const compactCatalog = useMemo(() => (
+    mode === 'tetrachotomy' ? selectTetrachotomyCatalog()
+      : mode === 'octochotomy' ? selectOctochotomyCatalog() : null
+  ), [mode]);
+  const compactEntry = compactCatalog?.entries.find(entry => (
+    entry.traitIds.length === partition.traitIds.length
+    && entry.traitIds.every(traitId => partition.traitIds.includes(traitId))
+  ));
+  const compactValue = mode === 'type' ? selectedTypeId
+    : isPartitionMode ? compactEntry?.key ?? 'custom' : currentTrait.id;
+  const compactOptions = mode === 'type'
+    ? SOCIONIC_TYPES.map(type => ({ value: type.id, label: type.aliases.socionics?.[0] ?? type.names.ru }))
+    : compactCatalog ? compactCatalog.entries.map(entry => ({ value: entry.key, label: entry.title }))
+      : REININ_TRAITS.map(trait => ({ value: trait.id, label: trait.name }));
+
+  const handleCompactSelect = (value: string) => {
+    if (mode === 'type') {
+      const type = SOCIONIC_TYPES.find(candidate => candidate.id === value);
+      if (type) setSelectedTypeId(type.id);
+    } else if (compactCatalog) {
+      const entry = compactCatalog.entries.find(candidate => candidate.key === value);
+      if (entry) handleSelectPartitionTraits(entry.traitIds);
+    } else {
+      const index = REININ_TRAITS.findIndex(trait => trait.id === value);
+      if (index >= 0) handleSelectTrait(index);
+    }
+  };
 
   const handleSelectMode = (nextMode: AppMode) => {
     const nextKind = getPartitionKindForMode(nextMode);
@@ -152,13 +179,8 @@ const App: React.FC = () => {
 
       <main className="relative max-w-7xl mx-auto px-4 md:px-6 pb-16 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
         <ModeSelector mode={mode} onSelectMode={handleSelectMode} />
-        <AspectDisplayToggle
-          mode={aspectDisplayMode}
-          onSelectMode={setAspectDisplayMode}
-        />
-        <ThemeToggle theme={theme} onSelectTheme={setTheme} />
 
-        <div className="lg:col-span-4">
+        <div className="order-2 lg:order-none lg:col-span-4" data-full-catalog>
           {mode === 'type' ? (
             <TypeSelector
               selectedTypeId={selectedTypeId}
@@ -179,7 +201,21 @@ const App: React.FC = () => {
           )}
         </div>
 
-        <div className="lg:col-span-8 space-y-5 md:space-y-6">
+        <div className="order-1 lg:order-none lg:col-span-8 space-y-5 md:space-y-6" data-primary-content>
+          <label className="shell-panel flex flex-col gap-2 rounded-2xl border p-3 lg:hidden">
+            <span className="eyebrow">{mode === 'type' ? 'Тип' : isPartitionMode ? 'Формула' : 'Признак'}</span>
+            <select
+              className="shell-control min-h-10 w-full rounded-xl border border-[var(--color-shell-border)] px-3 py-2 text-sm text-[var(--color-app-fg)]"
+              data-compact-selection={mode}
+              value={compactValue}
+              onChange={event => handleCompactSelect(event.target.value)}
+            >
+              {compactValue === 'custom' ? <option value="custom">Выбранная комбинация признаков</option> : null}
+              {compactOptions.map(option => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
+          </label>
           {mode === 'type' ? (
             <TypeModelDiagram
               typeId={selectedTypeId}
@@ -223,28 +259,11 @@ const App: React.FC = () => {
               data-dichotomy-detail={currentTrait.id}
               data-selected-pole-index={selectedPoleIndex}
             >
-              <DichotomyGallery
-                selectedTraitIndex={selectedTraitIndex}
-                onSelectTrait={handleSelectTrait}
-              />
-
               <PoleSelector
                 trait={currentTrait}
                 selectedPoleIndex={selectedPoleIndex}
                 activeView={currentView}
                 onSelectPole={setSelectedPoleIndex}
-              />
-
-              <DichotomyDistribution
-                traitId={currentTrait.id}
-                selectedPoleIndex={selectedPoleIndex as PoleIndex}
-                onSelectPole={setSelectedPoleIndex}
-              />
-
-              <PartitionTypesPanel
-                view={selectDichotomyTypesPanelView(currentTrait.id, selectedPoleIndex as PoleIndex)}
-                activeView={currentView}
-                aspectDisplayMode={aspectDisplayMode}
               />
 
               <ViewSelector
@@ -253,21 +272,58 @@ const App: React.FC = () => {
                 onSelect={setActiveViewIndex}
               />
 
-              <Diagram
-                trait={currentTrait}
-                pole={currentPole}
-                view={currentView}
-                activeCell={activeCell}
-                onAspectHover={(id) => setHoveredCell(id === null ? null : { kind: 'aspect', id })}
-                onFunctionHover={(id) => setHoveredCell(id === null ? null : { kind: 'function', id })}
-                onAspectClick={(id) => setPinnedCell(current => togglePinnedCell(current, { kind: 'aspect', id }))}
-                onFunctionClick={(id) => setPinnedCell(current => togglePinnedCell(current, { kind: 'function', id }))}
-              />
+              <div data-primary-diagram="dichotomy">
+                <Diagram
+                  trait={currentTrait}
+                  pole={currentPole}
+                  view={currentView}
+                  activeCell={activeCell}
+                  onAspectHover={(id) => setHoveredCell(id === null ? null : { kind: 'aspect', id })}
+                  onFunctionHover={(id) => setHoveredCell(id === null ? null : { kind: 'function', id })}
+                  onAspectClick={(id) => setPinnedCell(current => togglePinnedCell(current, { kind: 'aspect', id }))}
+                  onFunctionClick={(id) => setPinnedCell(current => togglePinnedCell(current, { kind: 'function', id }))}
+                />
+              </div>
 
               <FormulaPanel trait={currentTrait} view={currentView} />
+
+              <details className="glass-panel rounded-[28px]" data-dichotomy-extra-materials>
+                <summary className="cursor-pointer px-5 py-4 text-sm text-[var(--color-app-fg)]">
+                  Типы, модели А и галерея признаков
+                </summary>
+                <div className="space-y-5 border-t border-[var(--color-shell-border)] p-5">
+                  <DichotomyDistribution
+                    traitId={currentTrait.id}
+                    selectedPoleIndex={selectedPoleIndex as PoleIndex}
+                    onSelectPole={setSelectedPoleIndex}
+                  />
+                  <PartitionTypesPanel
+                    view={selectDichotomyTypesPanelView(currentTrait.id, selectedPoleIndex as PoleIndex)}
+                    activeView={currentView}
+                    aspectDisplayMode={aspectDisplayMode}
+                  />
+                  <DichotomyGallery
+                    selectedTraitIndex={selectedTraitIndex}
+                    onSelectTrait={handleSelectTrait}
+                  />
+                </div>
+              </details>
             </section>
           )}
         </div>
+
+        <details className="glass-panel order-3 rounded-2xl lg:col-span-12" data-display-settings>
+          <summary className="cursor-pointer px-5 py-4 text-sm text-[var(--color-app-fg)]">
+            Оформление и обозначения
+          </summary>
+          <div className="grid gap-4 border-t border-[var(--color-shell-border)] p-4 sm:grid-cols-2">
+            <AspectDisplayToggle
+              mode={aspectDisplayMode}
+              onSelectMode={setAspectDisplayMode}
+            />
+            <ThemeToggle theme={theme} onSelectTheme={setTheme} />
+          </div>
+        </details>
       </main>
 
       <Footer />

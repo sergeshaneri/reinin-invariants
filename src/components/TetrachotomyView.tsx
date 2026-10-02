@@ -119,25 +119,26 @@ export const TetrachotomyView: React.FC<Props> = ({
       data-tetrachotomy-detail
       data-selected-class-key={selectedClassKey ?? ''}
     >
-      <TypePatternCard
-        view={view}
-        onSelectClass={onSelectClass}
-      />
+      <label className="shell-panel flex flex-col gap-2 rounded-2xl border p-3">
+        <span className="eyebrow">Тетрада</span>
+        <select
+          className="shell-control min-h-10 w-full rounded-xl border border-[var(--color-shell-border)] px-3 py-2 text-sm text-[var(--color-app-fg)]"
+          data-tetrachotomy-class-select
+          value={selectedClassKey ?? ''}
+          onChange={event => onSelectClass(event.target.value)}
+        >
+          {partition.classes.map(partitionClass => (
+            <option key={partitionClass.key} value={partitionClass.key}>
+              {partitionClass.types.map(type => getTypeCode(type.aliases, type.id)).join(' · ')}
+            </option>
+          ))}
+        </select>
+      </label>
 
       <TetrachotomyAspectFunctionPanel
         view={view}
         aspectDisplayMode={aspectDisplayMode}
       />
-
-      {activeView ? (
-        <PartitionTypesPanel
-          view={typesPanelView}
-          activeView={activeView}
-          aspectDisplayMode={aspectDisplayMode}
-          sourceBlock={sourceBlock}
-          extraPoles={sourceTargetPole ? [sourceTargetPole] : []}
-        />
-      ) : null}
 
       <details
         className="glass-panel rounded-[28px] p-0"
@@ -151,6 +152,11 @@ export const TetrachotomyView: React.FC<Props> = ({
         </summary>
 
         <div className="space-y-5 border-t border-[var(--color-shell-border)] p-5 md:space-y-6">
+          <TypePatternCard
+            view={view}
+            onSelectClass={onSelectClass}
+          />
+
           <TetrachotomyFormulaPanel
             view={view}
             onSelectClass={onSelectClass}
@@ -166,6 +172,15 @@ export const TetrachotomyView: React.FC<Props> = ({
             selectedClassKey={selectedClassKey}
             onSelectClass={onSelectClass}
           />
+          {activeView ? (
+            <PartitionTypesPanel
+              view={typesPanelView}
+              activeView={activeView}
+              aspectDisplayMode={aspectDisplayMode}
+              sourceBlock={sourceBlock}
+              extraPoles={sourceTargetPole ? [sourceTargetPole] : []}
+            />
+          ) : null}
         </div>
       </details>
     </section>

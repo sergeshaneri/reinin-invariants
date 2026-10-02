@@ -1115,3 +1115,39 @@ Continue with F4.6: finish or extend source-derived octochotomy formulas only af
   - No verified octochotomy records were added because the source text does not yet provide fully checkable formulas/basis traits in this task scope.
 - Remaining:
   - F4.6 should add or verify missing octochotomy formulas only after user confirmation of source ground truth.
+
+### 2026-10-02 - Task X2.5: diagram-first main screen
+
+- Status: DONE for the requested UI scope; full release validation is blocked by dependency audit.
+- Changed files:
+  - `src/App.tsx`
+  - `src/components/Header.tsx`
+  - `src/components/TetrachotomyView.tsx`
+  - `src/components/AspectDisplayToggle.tsx`
+  - `src/components/ThemeToggle.tsx`
+  - `src/App.layout.test.tsx`
+  - `tests/e2e/app.spec.ts`
+  - desktop/mobile screenshot baselines under `tests/e2e/app.spec.ts-snapshots/`
+  - `plans/roadmap/tasks.md`, `plans/roadmap/progress.md`, `harness/failure-log.md`
+- Summary:
+  - Moved dichotomy patterns, Model A previews and the visual gallery into a closed optional section after the existing diagram and formula.
+  - Replaced the large primary tetrachotomy type pattern with a compact tetrad selector; moved patterns and previews into existing extra materials after the source diagram.
+  - Kept full catalogs beside primary content on desktop and below it on mobile; added compact mobile selection for all four modes using existing selectors and URL handlers.
+  - Reduced header height and collapsed the introduction and reference links by default.
+  - Moved aspect-display and theme preferences into optional settings; removed the fixed theme panel that obscured mobile content.
+  - Preserved domain data, source formulas, unsupported-formula fallback and diagram semantics. Pre-existing dirty changes were left intact. No commit or push was made.
+- Checks:
+  - New layout tests were observed failing before implementation and passed afterward.
+  - `npm run lint`: passed.
+  - `npm test`: passed, 99 tests in 9 files.
+  - `npm run build`, `npm run smoke:dist`, `npm run test:e2e:preview`: passed during unified validation.
+  - `npm run validate`: failed at `npm audit --audit-level=moderate`, reporting 7 dependency vulnerabilities (1 low, 3 moderate, 3 high). Dependencies were not changed in this UI task.
+  - Remaining validation commands were run separately: `npm run smoke:render`, `npm run smoke`, `npm run test:e2e` passed; 28 desktop/mobile e2e cases passed without snapshot updates.
+  - Final strengthened e2e cases also passed, including compact type/octochotomy selection and preservation of dependent-triple diagnostics.
+  - Desktop/mobile screenshots of the default and tetrachotomy surfaces were reviewed; viewport assertions verify diagrams intersect the initial viewport without scrolling.
+  - `git diff --check`: passed.
+- Decisions:
+  - User approved prioritizing existing diagrams and making supporting views optional; no new theoretical diagram model was introduced.
+- Remaining:
+  - Repair dependency audit as a separate maintenance task before claiming the full release gate is green.
+  - Functional-block terminology, Gulenko–Newman data, diagram-readiness inventory and English localization remain separate follow-ups.

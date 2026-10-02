@@ -19,7 +19,7 @@ const OPTIONS: readonly {
 ];
 
 export const AspectDisplayToggle: React.FC<Props> = ({ mode, onSelectMode }) => (
-  <section className="lg:col-span-12">
+  <section>
     <div className="shell-panel flex flex-col gap-3 rounded-2xl border px-4 py-3 shadow-sm backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between">
       <h2 className="shell-heading text-[11px] font-semibold uppercase tracking-[0.18em]">
         Аспекты

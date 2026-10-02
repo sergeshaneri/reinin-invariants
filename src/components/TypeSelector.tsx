@@ -42,19 +42,19 @@ export const TypeSelector: React.FC<Props> = ({ selectedTypeId, onSelectType }) 
             className={`min-h-20 rounded-2xl border px-3 py-3 text-left transition-colors ${
               isActive
                 ? 'border-[var(--color-shell-active-fg)] bg-[var(--color-shell-active-fg)] text-[var(--color-shell-active-bg)] shadow-sm'
-                : 'border-[var(--color-shell-border-strong)] bg-[var(--color-shell-active-bg)] text-[var(--color-app-fg)] hover:border-[var(--color-shell-accent)] hover:bg-[var(--color-shell-accent-soft)]'
+                : 'border-[var(--color-shell-border-strong)] bg-[var(--color-shell-active-bg)] text-[var(--color-shell-active-fg)] hover:border-[var(--color-shell-accent)]'
             }`}
           >
             <span className="flex items-start justify-between gap-2">
               <span className="min-w-0">
                 <span className="block text-[15px] font-bold leading-none tracking-normal">{visibleCode}</span>
-                <span className={`mt-1 block truncate text-[11px] font-medium ${isActive ? 'opacity-80' : 'shell-heading'}`}>
+                <span className={`mt-1 block truncate text-[11px] font-medium ${isActive ? 'opacity-80' : 'text-[var(--color-shell-active-fg)] opacity-70'}`}>
                   {aliasLine}
                 </span>
               </span>
-              <Badge className={`h-3.5 w-3.5 shrink-0 ${isActive ? 'opacity-80' : 'shell-subtle'}`} strokeWidth={2} />
+              <Badge className={`h-3.5 w-3.5 shrink-0 ${isActive ? 'opacity-80' : 'text-[var(--color-shell-active-fg)] opacity-55'}`} strokeWidth={2} />
             </span>
-            <span className={`mt-2 block text-[11px] leading-snug ${isActive ? 'opacity-80' : 'shell-heading'}`}>
+            <span className={`mt-2 block text-[11px] leading-snug ${isActive ? 'opacity-80' : 'text-[var(--color-shell-active-fg)] opacity-70'}`}>
               {type.names.ru}
             </span>
           </button>

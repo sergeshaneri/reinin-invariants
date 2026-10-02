@@ -33,6 +33,12 @@ const hasProcessCycleDecorator = (view: View): boolean => (
   view.decoratorIds?.includes('process-cycle') === true
 );
 
+const getFunctionGroupIndex = (view: View, functionId: number): number | null => {
+  const index = view.mappings.findIndex(mapping => mapping.functions.includes(functionId));
+
+  return index >= 0 ? index : null;
+};
+
 export const ModelAPreviewGrid: React.FC<Props> = ({
   typeIds,
   view,
@@ -64,33 +70,42 @@ export const ModelAPreviewGrid: React.FC<Props> = ({
               <div className="relative">
                 {showProcessCycle ? <MiniProcessCycle /> : null}
                 <div className="grid grid-cols-2 border border-[var(--color-app-fg)] bg-[var(--color-shell-control)]">
-                  {preview.assignments.map((assignment, assignmentIndex) => (
-                    <React.Fragment key={assignment.functionId}>
-                      {showProcessCycle && assignmentIndex === 4 ? (
-                        <div className="col-span-2 h-3 bg-[var(--color-shell-control)]" aria-hidden="true" />
-                      ) : null}
-                      <div
-                        className={`flex aspect-square min-h-10 flex-col items-center justify-center border border-[var(--color-app-fg)] ${
-                          assignment.highlightGroupIndex !== null
-                            ? HIGHLIGHT_TONES[assignment.highlightGroupIndex % HIGHLIGHT_TONES.length]
-                            : 'bg-[var(--color-shell-control)] text-[var(--color-app-fg)]'
-                        } ${assignment.highlightIntensity === 'secondary' ? 'opacity-45' : 'opacity-100'}`}
-                        data-model-preview-function-id={assignment.functionId}
-                        data-model-preview-aspect-id={assignment.aspectId}
-                        data-model-preview-highlighted={assignment.isHighlighted ? 'true' : 'false'}
-                        data-model-preview-highlight-group={assignment.highlightGroupIndex ?? ''}
-                        data-model-preview-highlight-intensity={assignment.highlightIntensity ?? ''}
-                        title={`${assignment.functionId}: ${assignment.aspectFullName}`}
-                      >
-                        <AspectGlyph
-                          aspectId={assignment.aspectId}
-                          label={assignment.aspectName}
-                          mode={aspectDisplayMode}
-                          size="sm"
-                        />
-                      </div>
-                    </React.Fragment>
-                  ))}
+                  {preview.assignments.map((assignment, assignmentIndex) => {
+                    const fallbackFunctionGroupIndex = assignment.highlightGroupIndex === null
+                      ? getFunctionGroupIndex(view, assignment.functionId)
+                      : null;
+                    const toneIndex = assignment.highlightGroupIndex ?? fallbackFunctionGroupIndex;
+                    const isMuted = assignment.highlightIntensity === 'secondary' || assignment.highlightGroupIndex === null;
+
+                    return (
+                      <React.Fragment key={assignment.functionId}>
+                        {showProcessCycle && assignmentIndex === 4 ? (
+                          <div className="col-span-2 h-3 bg-[var(--color-shell-control)]" aria-hidden="true" />
+                        ) : null}
+                        <div
+                          className={`flex aspect-square min-h-14 flex-col items-center justify-center border border-[var(--color-app-fg)] p-1.5 ${
+                            toneIndex !== null
+                              ? HIGHLIGHT_TONES[toneIndex % HIGHLIGHT_TONES.length]
+                              : 'bg-[var(--color-shell-control)] text-[var(--color-app-fg)]'
+                          } ${isMuted ? 'opacity-45' : 'opacity-100'}`}
+                          data-model-preview-function-id={assignment.functionId}
+                          data-model-preview-aspect-id={assignment.aspectId}
+                          data-model-preview-highlighted={assignment.isHighlighted ? 'true' : 'false'}
+                          data-model-preview-highlight-group={assignment.highlightGroupIndex ?? ''}
+                          data-model-preview-function-group={fallbackFunctionGroupIndex ?? ''}
+                          data-model-preview-highlight-intensity={assignment.highlightIntensity ?? ''}
+                          title={`${assignment.functionId}: ${assignment.aspectFullName}`}
+                        >
+                          <AspectGlyph
+                            aspectId={assignment.aspectId}
+                            label={assignment.aspectName}
+                            mode={aspectDisplayMode}
+                            size="xl"
+                          />
+                        </div>
+                      </React.Fragment>
+                    );
+                  })}
                 </div>
               </div>
               <div className="mt-2 text-center">

@@ -190,7 +190,7 @@ export const TetrachotomyAspectFunctionPanel: React.FC<Props> = ({
                           aspectId={aspect.id}
                           label={aspect.name}
                           mode={aspectDisplayMode}
-                          size="sm"
+                          size="xl"
                         />
                       </span>
                     </button>

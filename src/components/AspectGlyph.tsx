@@ -8,19 +8,21 @@ interface Props {
   aspectId: AspectId;
   label: string;
   mode: AspectDisplayMode;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
 const SIZE_CLASSES = {
   sm: 'h-7 w-7',
   md: 'h-5 w-5',
   lg: 'h-7 w-7',
+  xl: 'h-10 w-10',
 } as const;
 
 const TEXT_SIZE_CLASSES = {
   sm: 'text-sm',
   md: 'text-[11px]',
   lg: 'text-sm',
+  xl: 'text-base',
 } as const;
 
 export const AspectGlyph: React.FC<Props> = ({

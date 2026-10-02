@@ -307,8 +307,10 @@ test('chooses tetra and octo partitions through sequential trait selection', asy
   await expect(sourceBlock.locator('[data-tetrachotomy-source-aspect]')).toHaveCount(8);
   await expect(sourceBlock.locator('[data-tetrachotomy-source-function]')).toHaveCount(8);
   await expect(sourceBlock.locator('[data-tetrachotomy-source-aspect="ЧИ"]')).toHaveAttribute('data-source-row-index', '0');
-  await expect(sourceBlock.locator('[data-tetrachotomy-source-aspect="ЧИ"] path')).toHaveAttribute('fill', '#050505');
-  await expect(sourceBlock.locator('[data-tetrachotomy-source-aspect="БИ"] path')).toHaveAttribute('fill', '#ffffff');
+  await expect(sourceBlock.locator('[data-tetrachotomy-source-aspect="ЧИ"] [data-aspect-icon-layer="shape"]')).toHaveAttribute('fill', '#050505');
+  await expect(sourceBlock.locator('[data-tetrachotomy-source-aspect="ЧИ"] [data-aspect-icon-layer="contrast"]')).toHaveCount(1);
+  await expect(sourceBlock.locator('[data-tetrachotomy-source-aspect="БИ"] [data-aspect-icon-layer="shape"]')).toHaveAttribute('fill', '#ffffff');
+  await expect(sourceBlock.locator('[data-tetrachotomy-source-aspect="ЧИ"] [data-aspect-icon-size="xl"]')).toHaveCount(1);
   await expect(sourceBlock.locator('[data-tetrachotomy-source-aspect="ЧИ"] [data-aspect-glyph-mode="icon"]')).toHaveCount(1);
   await expect(sourceBlock.locator('[data-tetrachotomy-source-function="1"]')).toHaveAttribute('data-source-row-index', '0');
   await expect(sourceBlock.locator('[data-tetrachotomy-source-function="8"]')).toHaveAttribute('data-source-row-index', '0');
@@ -318,6 +320,7 @@ test('chooses tetra and octo partitions through sequential trait selection', asy
   await expect(sourceBlock.locator('[data-tetrachotomy-aspect-function-row="БС"]')).toContainText('мерность 1');
   await page.getByText('Доп материалы').click();
   const ilePreview = page.locator('[data-model-preview-type-id="ILE"]');
+  await expect(ilePreview.locator('[data-model-preview-function-id="1"] [data-aspect-icon-size="xl"]')).toHaveCount(1);
   await expect(ilePreview.locator('[data-model-preview-function-id="1"]')).toHaveAttribute('data-model-preview-highlight-group', '0');
   await expect(ilePreview.locator('[data-model-preview-function-id="1"]')).toHaveAttribute('data-model-preview-highlight-intensity', 'primary');
   await expect(ilePreview.locator('[data-model-preview-function-id="8"]')).toHaveAttribute('data-model-preview-highlight-group', '0');

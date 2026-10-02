@@ -40,7 +40,7 @@ export const PoleSelector: React.FC<Props> = ({ trait, selectedPoleIndex, active
                 className={`px-3 py-2 rounded-xl transition-colors text-[12px] font-semibold leading-tight border break-words hyphens-auto ${
                   selectedPoleIndex === idx
                     ? 'bg-[var(--color-shell-active-fg)] text-[var(--color-shell-active-bg)] border-[var(--color-shell-active-fg)]'
-                    : 'bg-[var(--color-shell-active-bg)] text-[var(--color-shell-muted)] border-[var(--color-shell-border-strong)] hover:border-[var(--color-shell-accent)] hover:text-[var(--color-shell-accent)]'
+                    : 'bg-[var(--color-shell-active-bg)] text-[var(--color-shell-active-fg)] border-[var(--color-shell-border-strong)] hover:border-[var(--color-shell-accent)] hover:text-[var(--color-shell-accent)]'
                 }`}
               >
                 {pole.name}

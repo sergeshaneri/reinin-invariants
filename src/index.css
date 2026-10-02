@@ -41,20 +41,20 @@
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --color-app-bg: #0a0b0d;
+  --color-app-bg: #111316;
   --color-app-fg: #edeae3;
-  --color-app-vignette: rgb(237 234 227 / 0.04);
-  --color-shell-surface: rgb(14 16 20 / 0.86);
-  --color-shell-surface-muted: rgb(7 8 9 / 0.72);
-  --color-shell-control: rgb(237 234 227 / 0.035);
-  --color-shell-border: rgb(237 234 227 / 0.07);
-  --color-shell-border-strong: rgb(237 234 227 / 0.14);
+  --color-app-vignette: rgb(237 234 227 / 0.05);
+  --color-shell-surface: rgb(24 26 30 / 0.88);
+  --color-shell-surface-muted: rgb(19 21 25 / 0.82);
+  --color-shell-control: rgb(237 234 227 / 0.05);
+  --color-shell-border: rgb(237 234 227 / 0.09);
+  --color-shell-border-strong: rgb(237 234 227 / 0.17);
   --color-shell-muted: rgb(237 234 227 / 0.64);
   --color-shell-subtle: rgb(237 234 227 / 0.36);
   --color-shell-accent: #b89976;
   --color-shell-accent-soft: rgb(184 153 118 / 0.16);
   --color-shell-active-bg: #edeae3;
-  --color-shell-active-fg: #0a0b0d;
+  --color-shell-active-fg: #111316;
   --color-shell-hover-fg: #ffffff;
   --color-selection-bg: rgb(184 153 118 / 0.28);
   --color-selection-fg: #fffaf1;

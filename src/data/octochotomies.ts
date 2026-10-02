@@ -184,7 +184,8 @@ export const OCTOCHOTOMY_FORMULAS: readonly OctochotomyFormulaRecord[] = [
   {
     id: 'octo-08-quasi-identity',
     source: source(8, 'квазитождество'),
-    status: 'incomplete',
+    basisTraitIds: ['positivism', 'yielding', 'logic'],
+    status: 'verified',
     classes: [
       pair('ILE', 'LIE', 1195),
       pair('SEI', 'ESI', 1214),
@@ -195,6 +196,7 @@ export const OCTOCHOTOMY_FORMULAS: readonly OctochotomyFormulaRecord[] = [
       pair('SLE', 'LSE', 1309),
       pair('IEI', 'EII', 1328),
     ],
+    note: 'Verified by the right side of the source formula: +/- x Ус/Уп x Лг/Эт.',
   },
   {
     id: 'octo-09-conflict',
@@ -210,6 +212,7 @@ export const OCTOCHOTOMY_FORMULAS: readonly OctochotomyFormulaRecord[] = [
       pair('SLE', 'EII', 1465),
       pair('IEI', 'LSE', 1484),
     ],
+    note: 'Source marks one candidate basis cue as "знаки?", so the three-trait basis is not treated as verified yet.',
   },
   {
     id: 'octo-10-superego',
@@ -229,7 +232,8 @@ export const OCTOCHOTOMY_FORMULAS: readonly OctochotomyFormulaRecord[] = [
   {
     id: 'octo-11-extinguishment',
     source: source(11, 'погашение'),
-    status: 'incomplete',
+    basisTraitIds: ['intuition', 'constructivism', 'tactical'],
+    status: 'verified',
     classes: [
       pair('ILE', 'ILI', 1741),
       pair('SEI', 'SEE', 1770),
@@ -240,6 +244,7 @@ export const OCTOCHOTOMY_FORMULAS: readonly OctochotomyFormulaRecord[] = [
       pair('SLE', 'SLI', 1865),
       pair('IEI', 'IEE', 1884),
     ],
+    note: 'Verified by the source split: Ит/Сн x Кн/Эм x Тк/Ст.',
   },
   {
     id: 'octo-12-reverse-request',

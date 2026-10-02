@@ -11,12 +11,41 @@ import {
 import { SOCIONIC_TYPE_ORDER } from './types';
 
 const STATUS_VALUES = ['draft', 'incomplete', 'verified'] as const;
+const VERIFIED_FORMULA_IDS = [
+  'octo-08-quasi-identity',
+  'octo-11-extinguishment',
+] as const;
 
 const sortedSetKey = (typeIds: readonly string[]): string => (
   [...typeIds].sort().join('|')
 );
 
 describe('octochotomy source draft formulas', () => {
+  it('keeps the expected status matrix stable', () => {
+    const formulasByStatus = {
+      draft: OCTOCHOTOMY_FORMULAS.filter(formula => formula.status === 'draft'),
+      incomplete: OCTOCHOTOMY_FORMULAS.filter(formula => formula.status === 'incomplete'),
+      verified: OCTOCHOTOMY_FORMULAS.filter(formula => formula.status === 'verified'),
+    };
+
+    expect(formulasByStatus.verified.map(formula => formula.id)).toEqual(VERIFIED_FORMULA_IDS);
+    expect(formulasByStatus.incomplete.map(formula => formula.id)).toEqual([
+      'octo-01-duality',
+      'octo-02-activation',
+      'octo-03-mirror',
+      'octo-04-request',
+      'octo-05-revision',
+      'octo-06-zhukov',
+      'octo-07-esenin',
+      'octo-09-conflict',
+      'octo-10-superego',
+      'octo-12-reverse-request',
+    ]);
+    expect(formulasByStatus.draft.map(formula => formula.id)).toEqual([
+      'octo-13-control-draft',
+    ]);
+  });
+
   it('uses explicit draft/incomplete/verified status on every record', () => {
     OCTOCHOTOMY_FORMULAS.forEach(formula => {
       expect(STATUS_VALUES).toContain(formula.status);
@@ -71,9 +100,36 @@ describe('octochotomy source draft formulas', () => {
     });
   });
 
-  it('does not mark source records verified before full formula checks exist', () => {
-    expect(getVerifiedOctochotomyFormulas()).toHaveLength(0);
-    expect(OCTOCHOTOMY_FORMULAS.every(formula => formula.status !== 'verified')).toBe(true);
+  it('marks only source records with confirmed basis traits and full classes as verified', () => {
+    expect(getVerifiedOctochotomyFormulas().map(formula => formula.id)).toEqual(VERIFIED_FORMULA_IDS);
+
+    getVerifiedOctochotomyFormulas().forEach(formula => {
+      expect(formula.basisTraitIds).toHaveLength(3);
+    });
+
+    expect(getOctochotomyFormulaById('octo-08-quasi-identity')).toMatchObject({
+      status: 'verified',
+      basisTraitIds: ['positivism', 'yielding', 'logic'],
+    });
+    expect(getOctochotomyFormulaById('octo-11-extinguishment')).toMatchObject({
+      status: 'verified',
+      basisTraitIds: ['intuition', 'constructivism', 'tactical'],
+    });
+
+    expect(getOctochotomyFormulaById('octo-09-conflict')?.status).toBe('incomplete');
+    expect(getOctochotomyFormulaById('octo-10-superego')?.status).toBe('incomplete');
+    expect(getOctochotomyFormulaById('octo-12-reverse-request')?.status).toBe('incomplete');
+    expect(getOctochotomyFormulaById('octo-13-control-draft')?.status).toBe('draft');
+  });
+
+  it('does not return incomplete or draft records from the verified selector', () => {
+    const verifiedIds = new Set(getVerifiedOctochotomyFormulas().map(formula => formula.id));
+
+    OCTOCHOTOMY_FORMULAS
+      .filter(formula => formula.status !== 'verified')
+      .forEach(formula => {
+        expect(verifiedIds.has(formula.id)).toBe(false);
+      });
   });
 
   it('lets incomplete records omit some of the eight classes', () => {
@@ -121,12 +177,20 @@ describe('octochotomy source draft formulas', () => {
     });
   });
 
-  it('keeps verified matching logic separate until source basis traits are confirmed', () => {
+  it('requires verified records to match computed octochotomy partition classes', () => {
     getVerifiedOctochotomyFormulas().forEach(formula => {
       const partition = buildPartition(formula.basisTraitIds);
       expect(partition.ok).toBe(true);
       expect(partition.ok ? partition.kind : null).toBe('octochotomy');
       expect(partition.ok ? partition.classes : []).toHaveLength(8);
+      expect(formula.classes).toHaveLength(8);
+
+      const sourceClassKeys = formula.classes.map(sourceClass => sortedSetKey(sourceClass.typeIds)).sort();
+      const partitionClassKeys = partition.ok
+        ? partition.classes.map(partitionClass => sortedSetKey(partitionClass.typeIds)).sort()
+        : [];
+
+      expect(sourceClassKeys).toEqual(partitionClassKeys);
     });
   });
 });

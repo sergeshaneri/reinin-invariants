@@ -3,8 +3,8 @@
 ## Snapshot
 
 - Created: 2026-06-12.
-- Scope of this pass: Partition Explorer hardening through dark-theme visual migration, then roadmap correction for formula-ground-truth coverage.
-- Source changes in this pass: Q9.1 render smoke covers partition detail modes and dependent diagnostics; Q9.4 documents H3 display order; H6.4 migrates diagram, formula and partition surfaces toward the reference visual style; F4.1 records that tetra/octo formula catalogs are not complete just because structural partitions work.
+- Scope of this pass: Partition Explorer hardening through dark-theme visual migration, roadmap correction for formula-ground-truth coverage, current focus realignment toward tetrachotomy aspect-to-function formula transfer, and source-safe T4A.2/F4.6 data hardening.
+- Source changes in this pass: Q9.1 render smoke covers partition detail modes and dependent diagnostics; Q9.4 documents H3 display order; H6.4 migrates diagram, formula and partition surfaces toward the reference visual style; F4.1 records that tetra/octo formula catalogs are not complete just because structural partitions work; T4A makes source-derived tetrachotomy aspect→function formulas the active next work; T4A.2 adds DOCX audit tooling plus `npm run audit:tetra-docx` harness docs; F4.6 verifies only octochotomy records whose source basis can be checked without new theory decisions.
 - Existing dirty workspace changes were observed before planning and left untouched.
 - Validation: `npm run smoke:render` and `npm run lint` passed; `npm run validate` was not run for Q9.1 because it can write generated `dist/`.
 
@@ -24,8 +24,9 @@
 | Type invariant highlight | DONE/SUPERSEDED | U2.5 works technically but is no longer the desired UX direction. |
 | Partition Explorer UX | DONE | Structural partition UI is complete: C4.1 catalogs, C4.2 multi-entry chooser, C4.3 tetrachotomy composition, C4.4 tetrachotomy detail, C4.5 octochotomy composition and C4.6 octochotomy detail. |
 | Tetrachotomies | DONE | Structural view works and the canonical 35 source formulas now drive the default tetra catalog; 105 structural pairs remain an advanced path. |
-| Octochotomies | PARTIAL | Structural independent triples work, but source-derived octochotomy formulas are still draft/incomplete until the user finishes and confirms the source. |
-| Formula ground truth | IN PROGRESS | F4.1-F4.5 split source-derived tetra/octo formula catalogs from computed partition structure, verify the 35 extracted tetras, use them in the default tetra UI and add explicit draft/incomplete/verified octochotomy schema. |
+| Octochotomies | PARTIAL | Structural independent triples work; source-derived records now include verified `octo-08` and `octo-11`, while remaining records stay `incomplete`/`draft` until basis or source issues are confirmed. |
+| Formula ground truth | IN PROGRESS | F4.1-F4.5 split source-derived tetra/octo formula catalogs from computed partition structure, verify the 35 extracted tetras, use them in the default tetra UI and add explicit draft/incomplete/verified octochotomy schema. F4.6 is partial: only source-checkable octochotomies are marked `verified`. |
+| Tetrachotomy aspect→function transfer | IN PROGRESS | T4A.1 makes the active task source-derived formula rows for `Отображение аспектов в функции`; T4A.2 has audit tooling and 11 `sourceBlocks` formulas, with `tetra-07`/`tetra-13` deferred. |
 | Render smoke hardening | DONE | Q9.1 covers default dichotomy, valid tetrachotomy, valid octochotomy and dependent octochotomy SSR paths. |
 | H3 order explanation | DONE | Q9.4 documents canonical H3 order in PRD without adding main-screen UI text. |
 | Aspect icons | DONE | V5.1 visual metadata, V5.2 UI registry and V5.3 icon/symbol/combined compact display are complete. |
@@ -35,7 +36,7 @@
 
 ## Recommended Next Step
 
-Continue with F4.6: finish or extend source-derived octochotomy formulas only after user confirmation of the remaining source text. F4.7 should keep verified/draft source records separate from structural independent triples.
+Continue only at confirmed boundaries: resolve `tetra-07`/`tetra-13` group mismatches or approve T4A.3a no-class-3 diagram model before UI work; for F4.6, keep `octo-09` as incomplete with normal source marker `знаки?`, confirm basis/source blockers for `octo-10` and `octo-12`, and finish source pairs for the unfinished `octo-13` before marking more records `verified`.
 
 ## Milestone Checklist
 
@@ -1115,6 +1116,133 @@ Continue with F4.6: finish or extend source-derived octochotomy formulas only af
   - No verified octochotomy records were added because the source text does not yet provide fully checkable formulas/basis traits in this task scope.
 - Remaining:
   - F4.6 should add or verify missing octochotomy formulas only after user confirmation of source ground truth.
+
+### 2026-07-13 - Active focus realigned to tetrachotomy aspect→function formulas
+
+- Status: IN PROGRESS
+- Changed files:
+  - `plans/roadmap/tasks.md`
+  - `plans/roadmap/progress.md`
+- Summary:
+  - Added Phase 4T for source-derived tetrachotomy aspect-to-function formula transfer.
+  - Made T4A.1 the active task: concrete formulas for `Отображение аспектов в функции`, starting with simpler formulas where no class-3 dichotomies participate.
+  - Deferred octochotomy F4.6/F4.7 until after the tetrachotomy formula-transfer focus.
+  - Preserved the harness rule that material theory-diagram changes need a proposed diagram model and user confirmation before implementation.
+- Checks:
+  - docs-only change; deterministic app validation not run.
+- Decisions:
+  - User explicitly reprioritized the active project phase from octochotomy source completion to tetrachotomy aspect→function formula transfer.
+- Remaining:
+  - T4A.2 should expand source-derived `sourceBlocks` from `harness/theory/tetrachotomy-source.docx` for direct `→` formulas using class 1/2 traits only.
+  - T4A.3 should improve the main diagram after the diagram model is confirmed.
+
+### 2026-07-13 - Task T4A.2 second simple tetrachotomy example
+
+- Status: IN PROGRESS
+- Changed files:
+  - `src/data/tetrachotomies.ts`
+  - `src/data/tetrachotomies.test.ts`
+  - `plans/roadmap/tasks.md`
+  - `plans/roadmap/progress.md`
+- Summary:
+  - Added `tetra-03` (`Верт = Ус/Уп Х Лг/Эт`) as the second source-derived direct aspect→function example after `tetra-01`.
+  - Used only class 1/2 traits and direct `→` rows from `harness/theory/tetrachotomy-source.docx`; no class-3 equivalence or sequence semantics were inferred.
+  - Kept source block labels empty because the DOCX section has no explicit tetrad names for this formula.
+  - Marked T4A.2 as in progress while more simple formulas remain.
+- Checks:
+  - `npm test -- src/data/tetrachotomies.test.ts`: passed
+  - `npm run lint`: passed
+- Decisions:
+  - `tetra-03` rows preserve function block labels such as `мерность 4` as block labels, not separate numeric fields.
+- Remaining:
+  - Continue T4A.2 with more direct class 1/2 formulas, or add extraction tooling before scaling beyond one-off examples.
+
+### 2026-07-13 - Task T4A.2 simple tetrachotomy sourceBlocks expansion
+
+- Status: IN PROGRESS
+- Changed files:
+  - `src/data/tetrachotomies.ts`
+  - `src/data/tetrachotomies.test.ts`
+  - `plans/roadmap/tasks.md`
+  - `plans/roadmap/progress.md`
+- Summary:
+  - Added direct DOCX source rows for `tetra-04`, `tetra-06`, `tetra-12`, `tetra-18`, `tetra-19`, `tetra-28`, `tetra-29`, `tetra-32` and `tetra-33`.
+  - Kept `tetra-07` and `tetra-13` without `sourceBlocks` because exact DOCX row groups do not align cleanly with `plans/roadmap/tetrachotomy-doc-extract.json` `typeIds`.
+  - Added tests requiring transferred source blocks to align with extract group sets and use registered aspect/function IDs.
+- Checks:
+  - `npm test -- src/data/tetrachotomies.test.ts`: passed
+- Decisions:
+  - Empty `functionBlockLabel` means the direct source row did not provide a separate function block label; no labels were invented.
+  - Apparent source typos and source wording were preserved where rows were otherwise unambiguous.
+- Remaining:
+  - Resolve or confirm skipped `tetra-07` and `tetra-13` source/extract mismatches before adding their `sourceBlocks`.
+  - Continue T4A.2 only for further class 1/2 direct rows whose DOCX groups bind clearly to extract groups; T4A.3 diagram changes still need the harness approval checkpoint.
+
+### 2026-07-14 - T4A.2 deferred formulas recorded
+
+- Status: TODO recorded
+- Changed files:
+  - `plans/roadmap/tasks.md`
+  - `plans/roadmap/progress.md`
+- Summary:
+  - Added explicit deferred task `T4A.2-deferred` for `tetra-07` (`Верт = Наль Х Таль`) and `tetra-13` (`Бс/Пр = Тк/Ст Х Таль`).
+  - Captured exact blocker: current DOCX row groups do not cleanly match extract `typeIds`, so source rows must not be mapped until the mismatch is resolved or confirmed by the user.
+- Checks:
+  - docs-only update; deterministic app validation not run.
+- Remaining:
+  - Next active implementation step is T4A.3 diagram-model proposal/approval, unless the user wants to resolve `T4A.2-deferred` first.
+
+### 2026-07-14 - Tetrachotomy diagram approval split
+
+- Status: TODO recorded
+- Changed files:
+  - `plans/roadmap/tasks.md`
+  - `plans/roadmap/progress.md`
+- Summary:
+  - Split diagram work into `T4A.3a` approval for no-class-3 tetrachotomy diagrams and `T4A.3b` implementation after approval.
+  - Added `T4A.4-deferred` for a separate future diagram model covering class-3 dichotomies (`Дм/Ар`, `+/-`, `?/!`, `Пц/Рз`), `~` equivalences and `>` sequences.
+  - Captured the current boundary: no final class-3 diagram form exists yet, so that theory-design work must not block the simpler direct-row diagrams.
+- Checks:
+  - docs-only update; deterministic app validation not run.
+- Remaining:
+  - Next active step is `T4A.3a`: propose and get approval for the no-class-3 diagram model before UI implementation.
+
+### 2026-07-14 - T4A.2 audit tooling and F4.6 source-safe octochotomy transfer
+
+- Status: IN PROGRESS
+- Changed files:
+  - `scripts/audit-tetrachotomy-docx.ts`
+  - `src/data/tetrachotomies.ts`
+  - `src/data/tetrachotomies.test.ts`
+  - `src/data/octochotomies.ts`
+  - `src/data/octochotomies.test.ts`
+  - `plans/roadmap/tasks.md`
+  - `plans/roadmap/progress.md`
+- Summary:
+  - Added a no-dependency DOCX audit helper and `npm run audit:tetra-docx` script that extract direct `→` blocks from `harness/theory/tetrachotomy-source.docx`, compare them with current `TetrachotomyFormulaRecord.sourceBlocks`, and report exact `tetra-07`/`tetra-13` group mismatches.
+  - Documented when to run the audit in `harness/README.md`, including `docx-ok`, `groups-ok`, fallback, and mismatch meanings.
+  - Added `getTetrachotomyFormulaSourceBlocks()` as a safe fallback helper for formulas without `sourceBlocks`.
+  - Fixed three `tetra-32` source feature texts to match DOCX exact wording and strengthened tests for aspect IDs, function IDs, registered type IDs, source group alignment, and fallback behavior.
+  - Updated F4.6 octochotomy records from `harness/theory/Октохотомии.md`: `octo-08-quasi-identity` and `octo-11-extinguishment` are `verified` with basis traits and computed partition checks; `octo-09-conflict` remains `incomplete` with the normal source marker `знаки?`.
+  - Kept `octo-10-superego`, `octo-12-reverse-request`, and `octo-13-control-draft` non-verified; `octo-13` is unfinished in the source rather than ready for verification.
+- Checks:
+  - `npm test -- src/data/tetrachotomies.test.ts src/data/octochotomies.test.ts`: passed
+  - `npm run audit:tetra-docx`: passed and reported current 11 `sourceBlocks` formulas as `docx-ok`
+  - `npm run lint`: passed
+  - `npm run smoke:render`: not run because this pass changed data/tests/tooling only, not UI or smoke-relevant selectors.
+  - `npm run validate`: not run because scoped validation covered this data/tooling change and full validation performs production build/audit/dev-server checks outside the requested minimum.
+- Remaining:
+  - Do not add `tetra-07` or `tetra-13` until DOCX row groups and extract `typeIds` are reconciled or confirmed by the user.
+  - Do not mark more octochotomies `verified` until their source basis is explicit and computed partition matching passes; `знаки?` is normal source wording, while one-pair/partial source sections remain unfinished.
+  - T4A.3a remains a separate user-approval step before any final tetrachotomy diagram implementation.
+
+### 2026-10-02 - Pre-commit DOCX provenance correction
+
+- Independent review found that paired-formula references changed extracted block ownership and that a cross-formula fallback masked the incorrect attribution.
+- Heading recognition now accepts Latin/Cyrillic section markers only in genuine formula headings. Audit matches require the same formula ID, type group and row signatures.
+- Added regression tests for transferred-formula section ownership, the original tetra-13 groups, and rejection of identical rows attributed to another formula. Both new cases failed before their fixes and passed afterward.
+- Strict audit confirms all 11 bound formulas. Corrected deferred diagnostics leave one differing group for each of tetra-07 and tetra-13; neither was bound or normalized.
+- The earlier 99-test count refers to validation before these two new tests. Dependency audit remains a separate release blocker.
 
 ### 2026-10-02 - Task X2.5: diagram-first main screen
 

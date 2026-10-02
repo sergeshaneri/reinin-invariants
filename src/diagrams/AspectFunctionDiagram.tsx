@@ -144,26 +144,26 @@ export const AspectFunctionDiagram: DiagramComponent = ({
 
   return (
     <div
-      className="glass-panel rounded-[32px] p-8 md:p-10 relative"
+      className="aspect-function-panel glass-panel rounded-[32px] p-8 md:p-10 relative"
     >
       {isBlock && (
-        <div className="mb-7 flex items-start gap-2.5 rounded-2xl border border-[var(--color-shell-border-strong)] bg-[var(--color-shell-accent-soft)] p-3.5 text-[12px] leading-relaxed text-[var(--color-shell-muted)]">
+        <div className="mb-7 flex items-start gap-2.5 rounded-2xl border border-[var(--color-shell-border-strong)] bg-[var(--color-shell-accent-soft)] p-3.5 text-[12px] leading-relaxed text-[var(--color-shell-muted)]" data-block-invariant-explanation>
           <Shuffle className="w-4 h-4 mt-0.5 shrink-0 text-[var(--color-shell-accent)]" strokeWidth={2} />
           <span>
-            <span className="font-semibold">Блочный инвариант.</span> При наведении на аспект блоки функций перебираются по очереди: блок выбранного аспекта может оказаться в любом из блоков функций, но&nbsp;<span className="font-medium">блоки остаются нераздельными</span>. 4 блока аспектов переставляются в 4 блока функций без точной привязки друг к другу.
+            <span className="font-semibold">Блочный инвариант.</span> В моделях выбранного полюса каждый блок аспектов целиком занимает один из блоков функций. Соответствие между блоками может различаться между типами; состав каждого блока сохраняется. При наведении по очереди подсвечиваются возможные блоки на другой стороне диаграммы.
           </span>
         </div>
       )}
 
-      <div className="flex flex-col md:flex-row items-stretch justify-between gap-10 md:gap-16">
+      <div className="aspect-function-map">
         {/* Аспектон */}
-        <div className="w-full md:w-1/2">
+        <div className="min-w-0">
           <div className="flex items-center justify-center gap-2 mb-6">
             <div className="hairline h-px flex-1" />
             <h3 className="eyebrow text-center">Аспектон</h3>
             <div className="hairline h-px flex-1" />
           </div>
-          <div className="grid grid-cols-4 gap-2 md:gap-3">
+          <div className="mx-auto grid w-full max-w-96 grid-cols-4 gap-2 md:gap-3">
             {ASPECTS.map((aspect) => {
               const hl = aspectHighlight(aspect.id);
               const idx = aspectToIdx.get(aspect.id);
@@ -194,24 +194,24 @@ export const AspectFunctionDiagram: DiagramComponent = ({
           </div>
         </div>
 
-        {/* Соединение: стрелка вниз на мобиле, вправо на десктопе */}
-        <div className="flex flex-row md:flex-col items-center justify-center shrink-0">
+        {/* Направление зависит от ширины самой диаграммы. */}
+        <div className="aspect-function-direction flex items-center justify-center">
           <div
             className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-shell-border-strong)] bg-[var(--color-shell-control)] text-[var(--color-shell-muted)]"
             aria-hidden="true"
           >
-            <ArrowRight className="w-4 h-4 rotate-90 md:rotate-0" strokeWidth={2} />
+            <ArrowRight className="aspect-function-arrow w-4 h-4" strokeWidth={2} />
           </div>
         </div>
 
         {/* Функцион */}
-        <div className="w-full md:w-1/3">
+        <div className="min-w-0">
           <div className="flex items-center justify-center gap-2 mb-6">
             <div className="hairline h-px flex-1" />
             <h3 className="eyebrow text-center">Функцион</h3>
             <div className="hairline h-px flex-1" />
           </div>
-          <div className="grid grid-cols-2 gap-2 md:gap-3 relative">
+          <div className="mx-auto grid w-full max-w-80 grid-cols-2 gap-2 md:gap-3 relative">
             {MODEL_A_LAYOUT.map((fId, mapIdx) => {
               const func = FUNCTIONS.find(f => f.id === fId)!;
               const hl = functionHighlight(func.id);

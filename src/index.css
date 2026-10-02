@@ -98,6 +98,13 @@ body {
   background: var(--color-shell-control);
 }
 
+select.shell-control,
+select.shell-control option {
+  background: var(--color-app-bg);
+  color: var(--color-app-fg);
+  color-scheme: inherit;
+}
+
 .shell-heading {
   color: var(--color-shell-muted);
 }
@@ -166,6 +173,169 @@ body {
 
 .hairline {
   background: var(--color-shell-border-strong);
+}
+
+/* Adapt to the actual diagram width, including narrow desktop preview panes. */
+.aspect-function-panel {
+  container: aspect-function / inline-size;
+}
+
+.aspect-function-map {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.aspect-function-arrow {
+  rotate: 90deg;
+}
+
+@container aspect-function (min-width: 560px) {
+  .aspect-function-map {
+    grid-template-columns: minmax(0, 1fr) 2.5rem minmax(0, 0.85fr);
+  }
+
+  .aspect-function-direction {
+    align-self: center;
+  }
+
+  .aspect-function-arrow {
+    rotate: 0deg;
+  }
+}
+
+.tetra-invariant-panel {
+  container: tetra-invariant / inline-size;
+}
+
+.tetra-invariant-map {
+  display: grid;
+  gap: 1rem;
+  align-items: start;
+}
+
+.tetra-aspect-grid {
+  max-width: 24rem;
+  margin-inline: auto;
+}
+
+.tetra-function-grid {
+  max-width: 20rem;
+  margin-inline: auto;
+}
+
+.tetra-aspect-tile {
+  height: 3.5rem;
+}
+
+[data-source-aspect-display='icon-symbol'] .tetra-aspect-tile {
+  height: 4.75rem;
+}
+
+.tetra-function-tile {
+  height: 3rem;
+}
+
+.tetra-map-arrow,
+.source-row-arrow {
+  rotate: 90deg;
+}
+
+.tetra-source-row {
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.source-row-direction {
+  align-self: center;
+}
+
+.source-row-heading {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+}
+
+.source-row-model-caption {
+  display: none;
+}
+
+.source-feature {
+  border-color: color-mix(in oklab, var(--color-shell-border) 65%, transparent);
+}
+
+@container tetra-invariant (max-width: 459px) {
+  .tetra-panel-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.5rem 0.75rem;
+  }
+
+  .tetra-panel-title {
+    display: contents;
+  }
+
+  .tetra-panel-eyebrow {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+  }
+
+  .tetra-panel-source {
+    grid-column: 2;
+    grid-row: 1;
+    padding: 0.375rem 0.5rem;
+  }
+
+  .tetra-panel-heading {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin-top: 0;
+  }
+
+  .tetra-panel-labels {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    margin-top: 0;
+  }
+}
+
+@container tetra-invariant (max-width: 359px) {
+  .source-feature {
+    border-color: transparent;
+    padding-inline: 0;
+  }
+}
+
+@container tetra-invariant (min-width: 260px) {
+  .tetra-source-row {
+    grid-template-columns: minmax(0, 1fr) 1rem minmax(0, 1fr);
+    column-gap: 0.5rem;
+  }
+
+  .source-row-arrow {
+    rotate: 0deg;
+  }
+}
+
+@container tetra-invariant (min-width: 460px) {
+  .source-row-model-caption {
+    display: inline;
+  }
+}
+
+@container tetra-invariant (min-width: 560px) {
+  .tetra-invariant-map {
+    grid-template-columns: minmax(0, 1fr) 1.75rem minmax(0, 0.85fr);
+  }
+
+  .tetra-map-direction {
+    align-self: center;
+  }
+
+  .tetra-map-arrow {
+    rotate: 0deg;
+  }
 }
 
 .map-tone-0 { background: #2e91a6; border-color: color-mix(in oklab, #2e91a6 72%, black); }

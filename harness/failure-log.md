@@ -17,6 +17,17 @@ Use this file to convert repeated agent mistakes into concrete harness changes.
 
 ## Active Entries
 
+### 2026-10-02 - Aspect-Feature Terms Misread as Type Quadras
+
+- Task: Clarify the source-derived invariant row cards.
+- What happened: A UI proposal separated «Дельта, Альфа» as quadra names rather than preserving them as aspect-feature names. The user corrected the interpretation before implementation.
+- Expected behavior: Preserve the source aspect-feature terms, defined through quadra values. Their explanation belongs in separately reviewed theory-introduction materials, not in the invariant card.
+- Root cause: Familiar quadra names were interpreted without checking the carrier of the displayed property.
+- Proposed harness change: For theory-bearing labels, identify the carrier (aspect, function, type) before grouping or rewriting; preserve author definitions and test the confirmed rendering.
+- Change type: rule | test
+- Acceptance test: `separates source features without reclassifying quadra-value aspect terms` and the source-row browser scenario preserve the aspect labels alongside other aspect properties. E10.1 defers definitions to author-approved introductory content.
+- Status: accepted
+
 ### 2026-10-02 - DOCX Audit Accepted Rows From Other Formula Sections
 
 - Task: Review and commit the source-derived tetrachotomy transfer.
@@ -291,3 +302,30 @@ Use this file to convert repeated agent mistakes into concrete harness changes.
 - Change type: check
 - Acceptance test: `npm run test:e2e` and `npm run validate` pass.
 - Status: accepted
+
+### 2026-10-02 - Narrow Panel Layout Was Coupled to Viewport Breakpoints
+
+- Task: Improve invariant diagrams and source-row cards on mobile and in the desktop preview pane.
+- What happened: Device-based browser projects passed while source rows still switched to tall vertical stacks too early and a narrow panel in a wide viewport retained an unsuitable header layout. A compact-card iteration also split a property word across lines.
+- Expected behavior: Layout follows the component's available width, keeps grouped arrows meaningful and preserves complete property words and labels.
+- Root cause: Responsive classes depended on viewport width; tests did not constrain the panel independently or inspect word wrapping.
+- Proposed harness change: Test explicit panel widths from 260 to 640 px, arrow orientation, compact tile dimensions, column alignment, overflow, full-width headings, intact feature words and combined glyph bounds.
+- Change type: test
+- Acceptance test: New regressions pass in both browser projects; standalone full Playwright run passes without snapshot updates.
+- Status: accepted; 36 tests passed with two workers. Avoid overlapping the final visual comparison run with build validation after observed screenshot/font-load timeouts under concurrent load.
+
+### 2026-10-02 - Compactness Fix Missed the Ordinary Trait Renderer
+
+- Task: Prevent excessively stretched invariant tiles across application modes.
+- What happened: Tetrachotomy width tests passed, but ordinary trait diagrams still used unbounded grids. The user's next screenshot exposed the unchanged renderer.
+- Root cause: The fix and regression coverage were scoped to one of two components displaying aspect/function mappings.
+- Proposed harness change: Exercise actual renderer paths separately; assert bounded grid widths and orientation in both narrow viewports and narrow panels inside wide viewports, including the cycle-decorated variant.
+- Acceptance test: A regression reproduces the 646 px aspect grid before implementation and passes after applying the 384/320 px grid caps.
+- Status: accepted; verified on desktop and touch projects.
+
+### 2026-10-02 - Remote Fonts Make Visual Tests Non-Deterministic
+
+- What happened: A full run still hit a screenshot font-wait timeout with a single worker and no simultaneous build. An unchanged isolated rerun passed.
+- Evidence: Failure trace records successful but slow requests to `fonts.googleapis.com` and `fonts.gstatic.com`; some requests take longer than the screenshot assertion's 5000 ms timeout.
+- Proposed harness change: Provide deterministic local or test-cached copies of the same font assets; retain actual font rendering and pixel comparisons rather than disabling font waits or silently switching to fallback fonts.
+- Status: proposed, not implemented in this width-only fix. Reduced worker counts mitigate load but do not remove the external-font dependency.

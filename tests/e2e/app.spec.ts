@@ -24,7 +24,8 @@ test('prioritizes diagrams and keeps supporting views optional', async ({ page, 
   const extra = page.locator('[data-dichotomy-extra-materials]');
   await expect(diagram).toBeInViewport();
   await expect(extra).not.toHaveAttribute('open', '');
-  await expect(page.locator('[data-partition-types-panel="dichotomy"]')).not.toBeVisible();
+  await expect(page.locator('[data-partition-types-panel="dichotomy"]')).toBeVisible();
+  await expect(diagram.locator('+ [data-partition-types-panel="dichotomy"]')).toHaveCount(1);
   await expect(page.locator('[data-partition-pattern="dichotomy"]')).not.toBeVisible();
   await expect(page.getByRole('button', { name: 'Дополнительные материалы' })).toHaveAttribute('aria-expanded', 'false');
 
@@ -47,7 +48,8 @@ test('prioritizes diagrams and keeps supporting views optional', async ({ page, 
   await page.goto('/?mode=tetrachotomy&traits=carefree,intuition&theme=dark');
   const tetraDiagram = page.locator('[data-tetrachotomy-model-a-slot]');
   await expect(tetraDiagram).toBeInViewport();
-  await expect(page.locator('[data-partition-types-panel="tetrachotomy"]')).not.toBeVisible();
+  await expect(page.locator('[data-partition-types-panel="tetrachotomy"]')).toBeVisible();
+  await expect(tetraDiagram.locator('+ [data-partition-types-panel="tetrachotomy"]')).toHaveCount(1);
   await expect(page.locator('[data-tetrachotomy-class-select] option')).toHaveCount(4);
   await page.locator('[data-tetrachotomy-class-select]').selectOption('carefree:0|intuition:1');
   await expect(tetraDiagram).toContainText('Благосостояние');
@@ -66,6 +68,194 @@ test('prioritizes diagrams and keeps supporting views optional', async ({ page, 
     timeout: 15000,
   });
   expect(errors).toEqual([]);
+});
+
+test('keeps formula selectors theme-aware and unused source cells colored', async ({ page }) => {
+  const errors = collectPageErrors(page);
+  for (const theme of ['dark', 'light']) {
+    await page.goto(`/?mode=tetrachotomy&traits=judicious,nalness&theme=${theme}`);
+    const background = theme === 'dark' ? 'rgb(17, 19, 22)' : 'rgb(237, 234, 224)';
+    const foreground = theme === 'dark' ? 'rgb(237, 234, 227)' : 'rgb(15, 13, 9)';
+    for (const selector of ['[data-compact-selection="tetrachotomy"]', '[data-tetrachotomy-class-select]']) {
+      const control = page.locator(selector);
+      await expect(control).toHaveCSS('background-color', background);
+      await expect(control).toHaveCSS('color', foreground);
+      await expect(control.locator('option').first()).toHaveCSS('background-color', background);
+      await expect(control.locator('option').first()).toHaveCSS('color', foreground);
+    }
+    const diagram = page.locator('[data-tetrachotomy-model-a-slot]');
+    const unused = diagram.locator('button[data-source-row-index=""]');
+    await expect(unused).toHaveCount(8);
+    for (const cell of await unused.all()) {
+      await expect(cell).toHaveClass(/\bmap-tone-[0-7]\b/);
+      await expect(cell).toHaveCSS('opacity', '0.45');
+    }
+    const active = diagram.locator('[data-tetrachotomy-source-aspect="ЧИ"]');
+    await active.hover();
+    const dimmed = diagram.locator('[data-tetrachotomy-source-aspect="ЧС"]');
+    await expect(dimmed).toHaveCSS('opacity', '0.25');
+    await expect(unused.first()).toHaveCSS('opacity', '0.45');
+    await unused.first().focus();
+    await expect(dimmed).toHaveCSS('opacity', '1');
+  }
+  expect(errors).toEqual([]);
+});
+
+test('clarifies source row correspondences without changing aspect feature terminology', async ({ page }) => {
+  const errors = collectPageErrors(page);
+  for (const theme of ['dark', 'light']) {
+    await page.goto(`/?mode=tetrachotomy&traits=judicious,nalness&theme=${theme}`);
+    const row = page.locator('[data-tetrachotomy-aspect-function-row]').first();
+    await expect(row).toHaveAttribute('data-tetrachotomy-aspect-function-row', 'ЧИ БС');
+    await expect(row.getByRole('heading', { name: 'Аспекты', exact: true })).toBeVisible();
+    await expect(row.getByRole('heading', { name: 'Функции модели А', exact: true })).toBeVisible();
+    expect(await row.evaluate(element => {
+      const headings = element.querySelectorAll('h3');
+      return Math.abs(headings[0].getBoundingClientRect().top - headings[1].getBoundingClientRect().top) <= 1;
+    })).toBe(true);
+    const glyphs = row.locator('[data-aspect-glyph-mode="icon-symbol"]');
+    await expect(glyphs).toHaveCount(2);
+    for (const [index, label] of ['ЧИ', 'БС'].entries()) {
+      const glyph = glyphs.nth(index);
+      await expect(glyph).toHaveText(label);
+      expect(await glyph.evaluate(element => (
+        element.querySelector('span')!.getBoundingClientRect().top >= element.querySelector('svg')!.getBoundingClientRect().bottom
+      ))).toBe(true);
+    }
+    await expect(row.locator('[data-source-row-direction]')).toBeVisible();
+    await expect(row.locator('[data-source-row-direction] svg')).toHaveCSS('rotate', '0deg');
+    await expect(row.locator('[data-source-feature="aspect"]')).toHaveText(['дельта', 'альфа', 'иррациональные']);
+    await expect(row.locator('[data-source-feature="function"]')).toHaveText(['оценочные', 'вербальные', 'акцептные']);
+    await expect(row.locator('[data-source-function-chip]')).toHaveText(['1', '5']);
+    await expect(row.locator('[data-source-function-chip]').first()).toHaveClass(/map-tone-0/);
+    await expect(page.locator('[data-tetrachotomy-invariant-explanation]')).toContainText('у всех типов выбранной тетрады');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    await expect(row).toHaveScreenshot(`tetrachotomy-source-row-${theme}.png`);
+  }
+
+  await page.locator('[data-display-settings] > summary').click();
+  await page.getByRole('tablist', { name: 'Отображение аспектов' }).getByRole('tab', { name: 'Аббр.', exact: true }).click();
+  const row = page.locator('[data-tetrachotomy-aspect-function-row]').first();
+  await expect(row.locator('[data-aspect-glyph-mode="symbol"]')).toHaveText(['ЧИ', 'БС']);
+  await expect(row.locator('[data-aspect-glyph-mode="icon-symbol"]')).toHaveCount(0);
+
+  await page.goto('/?trait=democracy&theme=dark');
+  await expect(page.locator('[data-block-invariant-explanation]')).toContainText('состав каждого блока сохраняется');
+  await expect(page.locator('[data-tetrachotomy-invariant-explanation]')).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+
+test('adapts the invariant to its own width with compact tiles and grouped row arrows', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 1000 });
+  await page.goto('/?mode=tetrachotomy&traits=judicious,nalness&theme=dark');
+  const panel = page.locator('[data-tetrachotomy-model-a-slot]');
+  for (const width of [640, 480, 360, 320, 260]) {
+    await panel.evaluate((element, targetWidth) => { element.style.width = `${targetWidth}px`; }, width);
+    await expect.poll(() => panel.evaluate(element => {
+      const aspects = element.querySelector('[data-tetrachotomy-source-aspect]')!.parentElement!;
+      const functions = element.querySelector('[data-tetrachotomy-source-function]')!.parentElement!;
+      const a = aspects.getBoundingClientRect();
+      const f = functions.getBoundingClientRect();
+      const contentWidth = element.clientWidth - parseFloat(getComputedStyle(element).paddingLeft) - parseFloat(getComputedStyle(element).paddingRight);
+      return contentWidth >= 560 ? f.left > a.right : f.top > a.bottom;
+    })).toBe(true);
+    await expect.poll(() => panel.evaluate(element => {
+      const row = element.querySelector('[data-tetrachotomy-aspect-function-row]')!;
+      const headings = row.querySelectorAll('h3');
+      const contentWidth = element.clientWidth - parseFloat(getComputedStyle(element).paddingLeft) - parseFloat(getComputedStyle(element).paddingRight);
+      return contentWidth >= 260
+        ? Math.abs(headings[0].getBoundingClientRect().top - headings[1].getBoundingClientRect().top) <= 1
+        : headings[1].getBoundingClientRect().top > headings[0].getBoundingClientRect().bottom;
+    })).toBe(true);
+    const metrics = await panel.evaluate(element => ({
+      aspectWidths: [...element.querySelectorAll('[data-tetrachotomy-source-aspect]')].map(cell => cell.getBoundingClientRect().width),
+      aspectHeights: [...element.querySelectorAll('[data-tetrachotomy-source-aspect]')].map(cell => cell.getBoundingClientRect().height),
+      functionHeights: [...element.querySelectorAll('[data-tetrachotomy-source-function]')].map(cell => cell.getBoundingClientRect().height),
+      functionOrder: [...element.querySelectorAll('[data-tetrachotomy-source-function]')].map(cell => cell.getAttribute('data-tetrachotomy-source-function')),
+      noOverflow: element.scrollWidth <= element.clientWidth,
+    }));
+    expect(metrics.aspectWidths.every(value => value >= 44 && value <= 96)).toBe(true);
+    expect(metrics.aspectHeights.every(value => value >= 44 && value <= 64)).toBe(true);
+    expect(metrics.functionHeights.every(value => value >= 44 && value <= 52)).toBe(true);
+    expect(metrics.functionOrder).toEqual(['1', '2', '4', '3', '6', '5', '7', '8']);
+    expect(metrics.noOverflow).toBe(true);
+    if (width === 640 || width === 320) {
+      await expect(panel).toHaveScreenshot(`tetrachotomy-container-${width}.png`);
+    }
+  }
+});
+
+test('keeps compact headings full-width and aspect feature words intact', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 1000 });
+  for (const traits of ['judicious,nalness', 'yielding,logic', 'judicious,talness']) {
+    await page.goto(`/?mode=tetrachotomy&traits=${traits}&theme=dark`);
+    const panel = page.locator('[data-tetrachotomy-model-a-slot]');
+    await panel.evaluate(element => { element.style.width = '320px'; });
+    expect(await panel.evaluate(element => {
+      const style = getComputedStyle(element);
+      const contentWidth = element.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+      return element.querySelector('h2')!.getBoundingClientRect().width >= contentWidth - 1;
+    })).toBe(true);
+    const intactWords = await panel.locator('[data-source-feature]').evaluateAll(features => features.every(feature => {
+      const range = document.createRange();
+      range.selectNodeContents(feature);
+      return range.getClientRects().length === 1;
+    }));
+    expect(intactWords).toBe(true);
+    expect(await panel.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
+    await page.locator('[data-display-settings] > summary').click();
+    await page.getByRole('tablist', { name: 'Отображение аспектов' }).getByRole('tab', { name: 'Оба', exact: true }).click();
+    await expect(panel).toHaveAttribute('data-source-aspect-display', 'icon-symbol');
+    expect(await panel.locator('[data-tetrachotomy-source-aspect]').evaluateAll(cells => cells.every(cell => {
+      const bounds = cell.getBoundingClientRect();
+      const glyph = cell.querySelector('[data-aspect-glyph-mode="icon-symbol"]')!.getBoundingClientRect();
+      return glyph.left >= bounds.left && glyph.right <= bounds.right && glyph.top >= bounds.top && glyph.bottom <= bounds.bottom;
+    }))).toBe(true);
+  }
+});
+
+test('bounds dichotomy grids independently of viewport width', async ({ page }) => {
+  for (const { viewportWidth, trait } of [
+    { viewportWidth: 744, trait: 'vertness' },
+    { viewportWidth: 1280, trait: 'vertness' },
+    { viewportWidth: 1280, trait: 'process' },
+  ]) {
+    await page.setViewportSize({ width: viewportWidth, height: 1000 });
+    await page.goto(`/?trait=${trait}&pole=1&theme=light`);
+    const panel = page.locator('[data-dichotomy-detail] .glass-panel').filter({
+      has: page.getByRole('heading', { name: 'Аспектон', exact: true }),
+    });
+    await expect(panel).toHaveCount(1);
+    for (const width of [740, 540, 320]) {
+      await panel.evaluate((element, value) => { element.style.width = `${value}px`; element.style.maxWidth = '100%'; }, width);
+      const metrics = await panel.evaluate(element => {
+        const aspects = element.querySelector('.grid-cols-4')!;
+        const functions = element.querySelector('.grid-cols-2')!;
+        const a = aspects.getBoundingClientRect();
+        const f = functions.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        const available = element.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+        return {
+          aspectWidth: a.width,
+          functionWidth: f.width,
+          horizontal: f.left > a.right,
+          expectedHorizontal: available >= 560,
+          arrowRotation: getComputedStyle(element.querySelector('.aspect-function-arrow')!).rotate,
+          noOverflow: element.scrollWidth <= element.clientWidth,
+          functions: [...functions.querySelectorAll('button')].map(button => button.querySelector('span')!.textContent),
+        };
+      });
+      expect(metrics.aspectWidth).toBeLessThanOrEqual(384);
+      expect(metrics.functionWidth).toBeLessThanOrEqual(320);
+      expect(metrics.horizontal).toBe(metrics.expectedHorizontal);
+      expect(metrics.arrowRotation).toBe(metrics.expectedHorizontal ? '0deg' : '90deg');
+      expect(metrics.noOverflow).toBe(true);
+      expect(metrics.functions).toEqual(['1', '2', '4', '3', '6', '5', '7', '8']);
+      if (viewportWidth === 744 && width !== 320) {
+        await expect(panel).toHaveScreenshot(`dichotomy-container-${width}.png`);
+      }
+    }
+  }
 });
 
 test('renders the app and key diagram controls', async ({ page }) => {
@@ -361,7 +551,7 @@ test('chooses tetra and octo partitions through catalog entries', async ({ page 
   await page.locator('[data-partition-catalog-entry="tetra-35"]').click();
   await expect(page.locator('[data-partition-catalog-entry="tetra-35"]')).toHaveAttribute('aria-current', 'true');
   await expect(page.locator('[data-tetrachotomy-extra-materials] > div > [data-partition-pattern="tetrachotomy"] [role="gridcell"]')).toHaveCount(16);
-  await expect(page.locator('[data-partition-types-panel="tetrachotomy"]')).not.toBeVisible();
+  await expect(page.locator('[data-partition-types-panel="tetrachotomy"]')).toBeVisible();
   await expect(page.locator('[data-tetrachotomy-formula-panel="tetra-35"]')).not.toBeVisible();
   await page.getByText('Доп материалы').click();
   const formulaPanel = page.locator('[data-tetrachotomy-formula-panel="tetra-35"]');

@@ -285,22 +285,23 @@ const App: React.FC = () => {
                 />
               </div>
 
+              <PartitionTypesPanel
+                view={selectDichotomyTypesPanelView(currentTrait.id, selectedPoleIndex as PoleIndex)}
+                activeView={currentView}
+                aspectDisplayMode={aspectDisplayMode}
+              />
+
               <FormulaPanel trait={currentTrait} view={currentView} />
 
               <details className="glass-panel rounded-[28px]" data-dichotomy-extra-materials>
                 <summary className="cursor-pointer px-5 py-4 text-sm text-[var(--color-app-fg)]">
-                  Типы, модели А и галерея признаков
+                  Карта типов и галерея признаков
                 </summary>
                 <div className="space-y-5 border-t border-[var(--color-shell-border)] p-5">
                   <DichotomyDistribution
                     traitId={currentTrait.id}
                     selectedPoleIndex={selectedPoleIndex as PoleIndex}
                     onSelectPole={setSelectedPoleIndex}
-                  />
-                  <PartitionTypesPanel
-                    view={selectDichotomyTypesPanelView(currentTrait.id, selectedPoleIndex as PoleIndex)}
-                    activeView={currentView}
-                    aspectDisplayMode={aspectDisplayMode}
                   />
                   <DichotomyGallery
                     selectedTraitIndex={selectedTraitIndex}

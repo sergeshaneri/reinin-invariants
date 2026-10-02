@@ -1279,3 +1279,58 @@ Continue only at confirmed boundaries: resolve `tetra-07`/`tetra-13` group misma
 - Remaining:
   - Repair dependency audit as a separate maintenance task before claiming the full release gate is green.
   - Functional-block terminology, Gulenko–Newman data, diagram-readiness inventory and English localization remain separate follow-ups.
+
+### 2026-10-02 - Tasks X2.6/X2.7: selected-pole placement and readable source rows
+
+- Status: DONE for the approved UI scope; full release validation remains blocked by dependency audit.
+- Changed files:
+  - `src/App.tsx`, `src/App.layout.test.tsx`
+  - `src/components/TetrachotomyView.tsx`, `src/components/TetrachotomyAspectFunctionPanel.tsx`
+  - `src/diagrams/AspectFunctionDiagram.tsx`, `src/index.css`
+  - `tests/e2e/app.spec.ts` and desktop/mobile screenshot baselines
+  - `plans/roadmap/tasks.md`, `plans/roadmap/decisions.md`, `harness/failure-log.md`
+- Summary:
+  - Native formula/tetrad controls and options use opaque theme-aware surfaces; pole types immediately follow the primary diagram, with their Model A previews outside optional materials.
+  - Unused source cells stay colored and muted; visual tone does not create formula membership or hover links.
+  - Source-row cards show individual aspect abbreviations beneath pictograms, a right/down arrow, separate property labels, and consistent group color on the card strip and function numbers. Empty block labels no longer produce a blank pill. Explicit abbreviation-only mode is preserved.
+  - Quadra-value aspect terms remain aspect properties, without reclassification or added definitions. E10.1 tracks author-approved introductory theory content.
+  - Direct source-row explanations describe permitted function groups. Block-permutation explanations describe preserved whole blocks and variable block correspondence, separately from hover animation.
+  - Domain records and source texts were not edited; the broader T4A.3a/T4A.3b theoretical-readiness tasks were not closed by these visual refinements.
+- Checks:
+  - Focused SSR regressions failed before implementation and passed afterward; the desktop heading-alignment regression was also verified red/green.
+  - `npm run validate`: TypeScript, 106 unit tests, production build, dist smoke and production browser preview passed; stopped at dependency audit with 7 vulnerabilities (1 low, 3 moderate, 3 high).
+  - Full desktop/mobile Playwright suite passed without snapshot updates: 32 tests. New row scenarios cover both themes, label placement, arrows, property terms, colored numbers, abbreviation-only mode and block-specific explanation.
+  - New source-row screenshots reviewed on desktop/mobile and in light/dark themes.
+- Decisions: DEC-010 (user-confirmed aspect-feature terminology and invariant-specific explanations).
+- Remaining:
+  - E10.1 introductory theory text requires author approval before implementation.
+  - Dependency remediation is separate; no dependency update, commit or push was made in this pass.
+
+### 2026-10-02 - Task X2.8: container-responsive invariant layout
+
+- Status: DONE for the agreed mobile layout; full validation is still blocked at dependency audit.
+- Changes:
+  - Named inline-size container controls both the primary diagram and source rows, independently of viewport breakpoints. Aspecton/functionon sit side by side when the panel content reaches 560 px; source groups use a horizontal arrow from 260 px, with a vertical fallback below that width.
+  - Aspect and function grids have bounded widths and smaller tiles; Model A ordering, icon sizes, domain membership, colors, muting and hover behavior are preserved.
+  - Narrow-panel headings occupy the full content width. Individual abbreviations stay beneath their pictograms; property labels remain intact without splitting words or reducing their text size. The full accessible function-column heading remains available when its visual suffix is hidden.
+  - Direct and block invariant explanations and source data were not modified.
+- Checks:
+  - New compactness and heading/whole-word regressions failed before their corresponding fixes and passed afterward.
+  - Container widths 640, 480, 360, 320 and 260 px are tested on desktop and touch-browser projects, including orientation, tile dimensions, column alignment and overflow; additional long-feature formulas and combined pictogram/abbreviation mode are covered.
+  - 106 unit tests and TypeScript passed. Production build, dist smoke, production browser preview, render/dev smoke and scoped DOCX audit passed.
+  - Full Playwright suite passed without updating snapshots: 36 tests, two workers. An earlier four-worker run overlapped validation and hit screenshot/font-load timeouts; the independent run passed.
+  - Final narrow/wide container and mobile source-row snapshots were reviewed.
+  - `npm run validate` stopped at `npm audit`: registry returned HTTP 400 / `Invalid package tree`. The current run did not produce a vulnerability inventory; dependency files were not changed.
+- Remaining: no commit or push; dependency-audit remediation and E10.1 remain separate.
+
+### 2026-10-02 - Task X2.9: bound the ordinary trait diagram too
+
+- Cause: X2.8 adjusted the tetrachotomy source panel, while ordinary dichotomies render through a separate `AspectFunctionDiagram` with full-width grids and viewport-dependent column widths. The reported screenshot was reproduced on this path: aspect grid width 646 px exceeded the intended 384 px limit.
+- Fix: aspect grid is bounded at 24rem, function grid at 20rem. Container-width-driven orientation replaces viewport-width-driven orientation; columns switch at 560 px of available content. Existing tile/icon sizes, Model A ordering, colors, hover/pin behavior and cycle decorator spacing are preserved.
+- Checks:
+  - New browser regression failed on the measured width before the fix and passed on both projects afterward.
+  - Panels of 740, 540 and 320 px are tested inside narrow/wide viewports, including the process-cycle renderer variant. Narrow/wide screenshots were reviewed.
+  - TypeScript, 106 unit tests, production build, dist smoke and production browser preview passed.
+  - Final full browser run: 37 passed, one source-row snapshot timed out waiting for fonts; isolated `--last-failed` rerun passed without changing its assertions or baseline. Trace records slow remote Google Fonts requests; a single worker does not eliminate this dependency.
+  - Current `npm run validate` reaches the dependency audit and reports 7 vulnerabilities (1 low, 3 moderate, 3 high); dependency files were not modified.
+- Remaining: browser-font determinism and dependency remediation are separate. No commit or push.

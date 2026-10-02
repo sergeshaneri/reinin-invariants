@@ -209,3 +209,18 @@ Structural independent triples must not be labelled as verified author octochoto
 ### Consequences
 
 Future formula tasks must validate source records against computed partitions without moving formula metadata into `buildPartition`. Tests should assert source counts, source group equality with computed classes, separation from broader structural catalogs, and explicit source status. Localization and semantic interpretation work should wait until the formula-ground-truth layer is no longer confused with the structural explorer.
+
+## DEC-010: Aspect quadra-value terms and invariant-specific explanations
+
+- Status: Accepted
+- Date: 2026-10-02
+- Owner: user
+- Related tasks: X2.7, E10.1
+
+### Decision
+
+The source terms «Альфа», «Бета», «Гамма», «Дельта» are names of aspect features defined through quadra values. Preserve them as aspect features, with the other source properties; do not label them as quadras of the selected types or invent replacement terminology. Their definitions belong in future introductory theory materials (E10.1), subject to author approval.
+
+For the approved source-row UI, put each aspect's own abbreviation below its pictogram, show an adaptive arrow, separate properties visually, and use the existing group color on the card's strip and function numbers. Omit empty function-block labels. Preserve source texts and aspect/function sets in domain data.
+
+Direct source rows describe the function group into which the indicated aspects fall for the selected tetrad. Block-permutation explanations instead state that whole aspect blocks occupy function blocks with type-dependent block correspondence and preserved block composition. Visual row/color indices in a block-permutation view do not establish fixed aspect-block/function-block matches.

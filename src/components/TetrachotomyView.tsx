@@ -136,9 +136,21 @@ export const TetrachotomyView: React.FC<Props> = ({
       </label>
 
       <TetrachotomyAspectFunctionPanel
+        key={`${view.sourceFormula?.id ?? 'structural'}:${selectedClassKey}`}
         view={view}
         aspectDisplayMode={aspectDisplayMode}
+        baseView={activeView}
       />
+
+      {activeView ? (
+        <PartitionTypesPanel
+          view={typesPanelView}
+          activeView={activeView}
+          aspectDisplayMode={aspectDisplayMode}
+          sourceBlock={sourceBlock}
+          extraPoles={sourceTargetPole ? [sourceTargetPole] : []}
+        />
+      ) : null}
 
       <details
         className="glass-panel rounded-[28px] p-0"
@@ -172,15 +184,6 @@ export const TetrachotomyView: React.FC<Props> = ({
             selectedClassKey={selectedClassKey}
             onSelectClass={onSelectClass}
           />
-          {activeView ? (
-            <PartitionTypesPanel
-              view={typesPanelView}
-              activeView={activeView}
-              aspectDisplayMode={aspectDisplayMode}
-              sourceBlock={sourceBlock}
-              extraPoles={sourceTargetPole ? [sourceTargetPole] : []}
-            />
-          ) : null}
         </div>
       </details>
     </section>

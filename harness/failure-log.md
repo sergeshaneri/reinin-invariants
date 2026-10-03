@@ -59,6 +59,7 @@ Use this file to convert repeated agent mistakes into concrete harness changes.
 - Proposed harness change: Resolve dependency updates in a separate scoped maintenance task, then rerun `npm run validate`. Do not suppress the audit threshold to close unrelated UI work.
 - Change type: workflow
 - Acceptance test: `npm run validate` reaches `All validation checks passed.` after dependency remediation.
+- Follow-up (2026-10-03, tetrachotomy chooser): the unchanged dependency tree again blocks `npm run validate` at the same audit gate. Type checking, 115 unit tests, build and production preview checks pass. Separate dev-browser checks pass 45 of 46 cases; the remaining mobile full-page snapshot differs and requires review independently of dependency maintenance.
 - Status: proposed
 
 ### 2026-06-25 - Diagram Design Decided Without User Review

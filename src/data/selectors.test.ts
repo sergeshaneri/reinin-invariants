@@ -126,7 +126,7 @@ describe('domain selectors', () => {
     expect(catalog.entries[0]).toMatchObject({
       key: 'tetra-01',
       traitIds: ['carefree', 'intuition'],
-      title: 'Верт = Бс/Пр Х Ит/Сн (1,а)',
+      title: '1. Верт ⊙ Бс/Пр ⊙ Ит/Сн = 1',
       classCount: 4,
       classSize: 4,
       sourceFormula: {

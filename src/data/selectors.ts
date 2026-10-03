@@ -24,6 +24,7 @@ import {
 } from './types';
 import {
   TETRACHOTOMY_FORMULAS,
+  TETRACHOTOMY_TRAIT_BY_SOURCE_LABEL,
   type TetrachotomyFormulaRecord,
   type TetrachotomySourceFormulaRow,
 } from './tetrachotomies';
@@ -361,6 +362,10 @@ const selectTetrachotomySourceCatalog = (
 ): PartitionCatalogViewModel => {
   const entries = TETRACHOTOMY_FORMULAS.map(formula => {
     const partition = selectPartition(buildPartition(formula.basisTraitIds), locale);
+    const traitLabels = [formula.targetTraitId, ...formula.basisTraitIds].map(traitId => (
+      Object.entries(TETRACHOTOMY_TRAIT_BY_SOURCE_LABEL)
+        .find(([, id]) => id === traitId)![0]
+    ));
 
     if (!partition.ok || partition.kind !== 'tetrachotomy') {
       throw new Error(`Tetrachotomy formula ${formula.id} does not compute a tetrachotomy`);
@@ -369,7 +374,7 @@ const selectTetrachotomySourceCatalog = (
     return {
       key: formula.id,
       traitIds: formula.basisTraitIds,
-      title: formula.source.formulaText,
+      title: `${formula.source.tetraNumber}. ${traitLabels.join(' ⊙ ')} = 1`,
       traits: partition.traits,
       classCount: partition.classes.length,
       classSize: partition.classes[0]?.types.length ?? 0,

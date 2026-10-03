@@ -72,7 +72,10 @@ const App: React.FC = () => {
     : isPartitionMode ? compactEntry?.key ?? 'custom' : currentTrait.id;
   const compactOptions = mode === 'type'
     ? SOCIONIC_TYPES.map(type => ({ value: type.id, label: type.aliases.socionics?.[0] ?? type.names.ru }))
-    : compactCatalog ? compactCatalog.entries.map(entry => ({ value: entry.key, label: entry.title }))
+    : compactCatalog ? compactCatalog.entries.map(entry => ({
+      value: entry.key,
+      label: `${entry.title}${entry.sourceFormula?.sourceBlocks?.some(block => block.rows.length > 0) ? ' ✓' : ''}`,
+    }))
       : REININ_TRAITS.map(trait => ({ value: trait.id, label: trait.name }));
 
   const handleCompactSelect = (value: string) => {

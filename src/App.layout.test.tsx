@@ -59,6 +59,11 @@ describe('diagram-first layout', () => {
     expect(html).not.toContain('Короткое видео');
   });
 
+  it('marks transferred diagrams in the compact tetrachotomy selector', () => {
+    const html = renderWithSearch('?mode=tetrachotomy&traits=carefree,intuition');
+    expect(html).toMatch(/<option[^>]*value="tetra-01"[^>]*>1\. Верт ⊙ Бс\/Пр ⊙ Ит\/Сн = 1 ✓<\/option>/);
+  });
+
   it('retains group colors on unused source cells while muting them', () => {
     const html = renderWithSearch('?mode=tetrachotomy&traits=judicious,nalness');
     const unusedCells = [...html.matchAll(/<button[^>]*data-tetrachotomy-source-(?:aspect|function)=[^>]*>/g)]

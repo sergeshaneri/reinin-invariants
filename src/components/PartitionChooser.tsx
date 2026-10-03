@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { ChevronDown, GalleryHorizontalEnd, ListChecks, MousePointer2 } from 'lucide-react';
+import { ChevronDown, CircleCheck, GalleryHorizontalEnd, ListChecks, MousePointer2 } from 'lucide-react';
 import {
   REININ_TRAITS,
   type ReininTraitId,
@@ -85,7 +85,7 @@ export const PartitionChooser: React.FC<Props> = ({
 
   const renderEntryLabel = (entry: PartitionCatalogEntryViewModel) => (
     <span className="min-w-0">
-      <span className="block truncate text-[13px] font-bold leading-snug">
+      <span className={`block leading-snug ${entry.sourceFormula ? 'font-serif text-[14px] font-medium' : 'truncate text-[13px] font-bold'}`}>
         {entry.title}
       </span>
       <span className="mt-1 block text-[11px] font-semibold opacity-70">
@@ -145,6 +145,16 @@ export const PartitionChooser: React.FC<Props> = ({
                   }`}
                 >
                   {renderEntryLabel(entry)}
+                  {entry.sourceFormula?.sourceBlocks?.some(block => block.rows.length > 0) ? (
+                    <span
+                      className="shrink-0 text-[var(--color-shell-accent)]"
+                      title="Диаграммы перенесены"
+                      data-tetrachotomy-diagrams-ready={entry.key}
+                    >
+                      <CircleCheck className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+                      <span className="sr-only">Диаграммы перенесены</span>
+                    </span>
+                  ) : null}
                 </button>
               );
             })}

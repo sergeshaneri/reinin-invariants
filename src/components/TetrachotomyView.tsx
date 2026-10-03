@@ -8,6 +8,7 @@ import type { AspectDisplayMode } from './AspectGlyph';
 import { PartitionCompositionView } from './PartitionCompositionView';
 import { PartitionTypesPanel } from './PartitionTypesPanel';
 import { TetrachotomyAspectFunctionPanel } from './TetrachotomyAspectFunctionPanel';
+import { TetrachotomyCracyPanel } from './TetrachotomyCracyPanel';
 import { TetrachotomyFormulaPanel } from './TetrachotomyFormulaPanel';
 import { TypePatternCard } from './TypePatternCard';
 
@@ -141,6 +142,8 @@ export const TetrachotomyView: React.FC<Props> = ({
         aspectDisplayMode={aspectDisplayMode}
         baseView={activeView}
       />
+
+      <TetrachotomyCracyPanel view={view} aspectDisplayMode={aspectDisplayMode} />
 
       {activeView ? (
         <PartitionTypesPanel

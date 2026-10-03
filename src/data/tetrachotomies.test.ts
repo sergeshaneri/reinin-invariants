@@ -23,7 +23,7 @@ const groupSetKeys = (groups: readonly (readonly string[])[]): readonly string[]
   groups.map(sortedSetKey).sort()
 );
 
-const SOURCE_BLOCK_FORMULA_IDS = [
+const SIMPLE_SOURCE_BLOCK_FORMULA_IDS = [
   'tetra-01',
   'tetra-03',
   'tetra-04',
@@ -38,6 +38,11 @@ const SOURCE_BLOCK_FORMULA_IDS = [
   'tetra-32',
   'tetra-33',
 ];
+
+const SOURCE_BLOCK_FORMULA_IDS = [
+  ...SIMPLE_SOURCE_BLOCK_FORMULA_IDS,
+  'tetra-02', 'tetra-08', 'tetra-14', 'tetra-20', 'tetra-21', 'tetra-22', 'tetra-23',
+].sort();
 
 const AUTHOR_CONFIRMED_SOURCE_BLOCK_FORMULA_IDS = ['tetra-07', 'tetra-13'];
 
@@ -212,7 +217,10 @@ describe('tetrachotomy source formulas', () => {
         REININ_TRAITS.find(trait => trait.id === traitId)!.class !== 3
       ))
     )).map(formula => formula.id);
-    expect(simpleFormulaIds).toEqual(SOURCE_BLOCK_FORMULA_IDS);
+    expect(SOURCE_BLOCK_FORMULA_IDS).toHaveLength(20);
+    expect(simpleFormulaIds).toEqual(SIMPLE_SOURCE_BLOCK_FORMULA_IDS);
+    expect(simpleFormulaIds).toHaveLength(13);
+    expect(TETRACHOTOMY_FORMULAS.filter(formula => !formula.sourceBlocks)).toHaveLength(15);
   });
 
   it('preserves author-confirmed group corrections separately from literal DOCX groups', () => {

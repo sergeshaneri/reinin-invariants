@@ -16,8 +16,11 @@ Tetrachotomy DOCX audit rule:
 - Run `npm run audit:tetra-docx` after editing `scripts/audit-tetrachotomy-docx.ts` or any `TetrachotomyFormulaRecord.sourceBlocks` in `src/data/tetrachotomies.ts`.
 - `docx-ok` means every current source block for that formula has a matching DOCX direct-row group and matching row signatures within that formula's own section. Paired-formula references do not change section ownership; matches in another formula cannot satisfy this check.
 - `groups-ok` means the current source block type groups match the formula's extracted `typeIds` groups.
-- `fallback` for `tetra-07` or `tetra-13` is intentional until the DOCX direct-row groups and `plans/roadmap/tetrachotomy-doc-extract.json` groups are reconciled or confirmed by the user.
-- `docx-mismatch`, `groups-mismatch`, or non-empty `missing in DOCX direct rows` / `extra DOCX direct rows` means stop before binding those rows. Do not infer a basis/source mapping from similar-looking groups.
+- `tetra-07` and `tetra-13` use extract groups explicitly confirmed by the author on 2026-10-02. `sourceGroupCorrection` preserves the literal DOCX group, confirmed group, formula ID and confirmation attribution/date. Only the two registered corrections are allowed; the audit still requires exact rows in the original formula section and literal source group.
+- `docx-rows-ok; author-confirmed-groups=1` distinguishes corrected group binding from literal group equality. The separately printed extract/DOCX differences are retained intentionally for these approved cases. Never normalize the extractor output to conceal a correction.
+- `docx-mismatch`, `groups-mismatch`, or unapproved source-group differences mean stop before binding those rows. Do not infer a basis/source mapping from similar-looking groups.
+- Model A placement diagnostics are independent of `docx-ok`. The author approved direct correction of the four rational `tetra-28` row left sides on 2026-10-03; app data and the working DOCX now agree and all 13 transferred formulas have zero placement mismatches. The original DOCX was verified in Git `70acb99` before editing; only `word/document.xml` changed in the package. The repeatable check is `plans/roadmap/tetra-28-review/verify.ts`. Source-row edits require explicit author approval and verified preservation of the original; literal audit and Model A checks remain separate.
+- The audit CLI prints diagnostics; exit zero alone does not establish semantic correctness. Read the placement report and run `npm test` before claiming readiness.
 
 Dev e2e port rule:
 

@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { auditCurrentSourceBlocks, extractDirectTetrachotomySourceBlocks } from '../../scripts/audit-tetrachotomy-docx';
+import {
+  auditCurrentSourceBlocks,
+  extractDirectTetrachotomySourceBlocks,
+  getSourceModelAssignmentMismatches,
+} from '../../scripts/audit-tetrachotomy-docx';
 import { rankTraitVectors } from './partitions';
 import { ASPECTS, FUNCTIONS, REININ_TRAITS } from './socionics';
 import {
@@ -9,7 +13,7 @@ import {
   getTetrachotomyFormulaById,
   getTetrachotomyFormulaSourceBlocks,
 } from './tetrachotomies';
-import { SOCIONIC_TYPE_ORDER } from './types';
+import { SOCIONIC_TYPES, SOCIONIC_TYPE_ORDER } from './types';
 
 const sortedSetKey = (typeIds: readonly string[]): string => (
   [...typeIds].sort().join('|')
@@ -24,7 +28,9 @@ const SOURCE_BLOCK_FORMULA_IDS = [
   'tetra-03',
   'tetra-04',
   'tetra-06',
+  'tetra-07',
   'tetra-12',
+  'tetra-13',
   'tetra-18',
   'tetra-19',
   'tetra-28',
@@ -33,7 +39,7 @@ const SOURCE_BLOCK_FORMULA_IDS = [
   'tetra-33',
 ];
 
-const EXPECTED_DEFERRED_SOURCE_BLOCK_FORMULA_IDS = ['tetra-07', 'tetra-13'];
+const AUTHOR_CONFIRMED_SOURCE_BLOCK_FORMULA_IDS = ['tetra-07', 'tetra-13'];
 
 describe('tetrachotomy source formulas', () => {
   it('maps every source label to a registered Reinin trait', () => {
@@ -194,32 +200,61 @@ describe('tetrachotomy source formulas', () => {
     ]);
   });
 
-  it('covers the transferred simple direct source formulas and leaves ambiguous rows unbound', () => {
+  it('covers every direct formula using only class-1/2 traits', () => {
     expect(
       TETRACHOTOMY_FORMULAS
         .filter(formula => formula.sourceBlocks)
         .map(formula => formula.id),
     ).toEqual(SOURCE_BLOCK_FORMULA_IDS);
 
-    EXPECTED_DEFERRED_SOURCE_BLOCK_FORMULA_IDS.forEach(formulaId => {
-      const formula = getTetrachotomyFormulaById(formulaId);
+    const simpleFormulaIds = TETRACHOTOMY_FORMULAS.filter(formula => (
+      [formula.targetTraitId, ...formula.basisTraitIds].every(traitId => (
+        REININ_TRAITS.find(trait => trait.id === traitId)!.class !== 3
+      ))
+    )).map(formula => formula.id);
+    expect(simpleFormulaIds).toEqual(SOURCE_BLOCK_FORMULA_IDS);
+  });
 
-      expect(formula?.sourceBlocks).toBeUndefined();
-      expect(formula ? getTetrachotomyFormulaSourceBlocks(formula) : []).toEqual([]);
+  it('preserves author-confirmed group corrections separately from literal DOCX groups', () => {
+    const expectations = [
+      { id: 'tetra-07', sourceTypeIds: ['SEI', 'IEE', 'ILI', 'SLI'], typeIds: ['SEI', 'IEI', 'ILI', 'SLI'] },
+      { id: 'tetra-13', sourceTypeIds: ['SEI', 'EII', 'LIE', 'SLI'], typeIds: ['SEI', 'EIE', 'LIE', 'SLI'] },
+    ];
+    expectations.forEach(({ id, sourceTypeIds, typeIds }) => {
+      expect(getTetrachotomyFormulaById(id)?.sourceBlocks).toHaveLength(4);
+      expect(getTetrachotomyFormulaById(id)?.sourceBlocks).toContainEqual(expect.objectContaining({
+        typeIds,
+        sourceGroupCorrection: {
+          formulaId: id, sourceTypeIds, typeIds, confirmedBy: 'author', confirmedOn: '2026-10-02',
+        },
+      }));
     });
   });
 
-  it('keeps DOCX audit extraction aligned with transferred and deferred formulas', () => {
+  it('checks every newly transferred aspect placement against all four Model A assignments', () => {
+    AUTHOR_CONFIRMED_SOURCE_BLOCK_FORMULA_IDS.forEach(formulaId => {
+      const formula = getTetrachotomyFormulaById(formulaId)!;
+      expect(formula.sourceBlocks).toHaveLength(4);
+      formula.sourceBlocks!.forEach(block => block.rows.forEach(row => {
+        expect(row.functionIds).toHaveLength(2);
+        expect([1, 2]).toContain(row.aspectIds.length);
+        block.typeIds.forEach(typeId => {
+          const type = SOCIONIC_TYPES.find(candidate => candidate.id === typeId)!;
+          const image = row.aspectIds.map(aspectId => type.modelA.find(p => p.aspectId === aspectId)!.functionId);
+          image.forEach(functionId => expect(row.functionIds, `${formulaId}:${typeId}:${row.aspectText}`).toContain(functionId));
+          if (row.aspectIds.length === 2) expect([...image].sort()).toEqual([...row.functionIds].sort());
+        });
+      }));
+    });
+  });
+
+  it('keeps DOCX audit extraction aligned with all transferred formulas', () => {
     const docxBlocks = extractDirectTetrachotomySourceBlocks();
     const docxFormulaIds = new Set(docxBlocks.map(block => block.formulaId));
 
     expect(docxBlocks).toHaveLength(140);
     SOURCE_BLOCK_FORMULA_IDS.forEach(formulaId => {
       expect(docxFormulaIds.has(formulaId)).toBe(true);
-    });
-    EXPECTED_DEFERRED_SOURCE_BLOCK_FORMULA_IDS.forEach(formulaId => {
-      expect(docxFormulaIds.has(formulaId)).toBe(true);
-      expect(getTetrachotomyFormulaById(formulaId)?.sourceBlocks).toBeUndefined();
     });
   });
 
@@ -228,7 +263,7 @@ describe('tetrachotomy source formulas', () => {
     SOURCE_BLOCK_FORMULA_IDS.forEach(formulaId => {
       const formula = getTetrachotomyFormulaById(formulaId)!;
       expect(groupSetKeys(docxBlocks.filter(block => block.formulaId === formulaId).map(block => block.typeIds)), formulaId)
-        .toEqual(groupSetKeys(formula.sourceBlocks!.map(block => block.typeIds)));
+        .toEqual(groupSetKeys(formula.sourceBlocks!.map(block => block.sourceGroupCorrection?.sourceTypeIds ?? block.typeIds)));
     });
     expect(docxBlocks.filter(block => block.formulaId === 'tetra-13').map(block => block.typeIds)).toEqual([
       ['ILE', 'LSI', 'ESI', 'IEE'],
@@ -245,6 +280,22 @@ describe('tetrachotomy source formulas', () => {
     ));
     expect(auditCurrentSourceBlocks(docxBlocks)).toContain(
       'tetra-03: groups-ok; docx-mismatch missing=4 rows=0; blocks=4',
+    );
+  });
+
+  it('audits corrected groups against their literal DOCX origin without normalizing the source', () => {
+    const docxBlocks = extractDirectTetrachotomySourceBlocks();
+    const audit = auditCurrentSourceBlocks(docxBlocks);
+    AUTHOR_CONFIRMED_SOURCE_BLOCK_FORMULA_IDS.forEach(id => {
+      expect(audit).toContain(`${id}: groups-ok; docx-rows-ok; author-confirmed-groups=1; blocks=4`);
+    });
+    const normalizedSource = docxBlocks.map(block => (
+      block.formulaId === 'tetra-07' && block.typeIds.includes('SEI')
+        ? { ...block, typeIds: ['SEI', 'IEI', 'ILI', 'SLI'] as typeof block.typeIds }
+        : block
+    ));
+    expect(auditCurrentSourceBlocks(normalizedSource)).toContain(
+      'tetra-07: groups-ok; docx-mismatch missing=1 rows=0; blocks=4',
     );
   });
 
@@ -291,9 +342,39 @@ describe('tetrachotomy source formulas', () => {
     });
   });
 
+  it('requires every transferred source placement to agree with Model A after the approved tetra-28 correction', () => {
+    expect(getSourceModelAssignmentMismatches()).toEqual([]);
+  });
+
+  it('selects exactly each declared tetra-28 group among all 16 Model A assignments', () => {
+    const formula = getTetrachotomyFormulaById('tetra-28')!;
+    formula.sourceBlocks!.forEach(block => {
+      const matchingTypes = SOCIONIC_TYPES.filter(type => block.rows.every(row => {
+        const image = row.aspectIds.map(aspectId => type.modelA.find(position => position.aspectId === aspectId)!.functionId);
+        return sortedSetKey(image.map(String)) === sortedSetKey(row.functionIds.map(String));
+      })).map(type => type.id);
+      expect(sortedSetKey(matchingTypes)).toBe(sortedSetKey(block.typeIds));
+    });
+  });
+
+  it('rejects unapproved corrections even when corrected groups still match the extract', () => {
+    const original = getTetrachotomyFormulaById('tetra-07')!;
+    const mutated = {
+      ...original,
+      sourceBlocks: original.sourceBlocks!.map(block => (
+        block.sourceGroupCorrection ? {
+          ...block,
+          sourceGroupCorrection: { ...block.sourceGroupCorrection, confirmedOn: '2026-10-01' },
+        } : block
+      )),
+    };
+    expect(auditCurrentSourceBlocks(extractDirectTetrachotomySourceBlocks(), [mutated])).toContain(
+      'tetra-07: groups-ok; docx-mismatch missing=1 rows=0; blocks=4',
+    );
+  });
+
   it('keeps source-block coverage explicit instead of silently adding partial rows', () => {
     const formulaIdsWithSourceBlocks = new Set(SOURCE_BLOCK_FORMULA_IDS);
-    const deferredFormulaIds = new Set(EXPECTED_DEFERRED_SOURCE_BLOCK_FORMULA_IDS);
 
     TETRACHOTOMY_FORMULAS.forEach(formula => {
       const sourceBlocks = getTetrachotomyFormulaSourceBlocks(formula);
@@ -305,10 +386,6 @@ describe('tetrachotomy source formulas', () => {
 
       expect(sourceBlocks).toEqual([]);
       expect(formula.sourceBlocks).toBeUndefined();
-    });
-
-    deferredFormulaIds.forEach(formulaId => {
-      expect(formulaIdsWithSourceBlocks.has(formulaId)).toBe(false);
     });
   });
 

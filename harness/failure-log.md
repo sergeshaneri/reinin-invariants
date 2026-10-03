@@ -17,6 +17,17 @@ Use this file to convert repeated agent mistakes into concrete harness changes.
 
 ## Active Entries
 
+### 2026-10-02 - Literal Source Equality Did Not Validate Aspect Placements
+
+- Task: T4A.2, finish simple tetrachotomy source-row transfer after author confirmation of two group corrections.
+- What happened: The existing `tetra-28` rows passed formula-scoped DOCX transcription audit while contradicting Model A for 32 aspect placements in rational tetrads. New `tetra-07`/`tetra-13` placements passed independent checks; the defect predates this transfer.
+- Expected behavior: Report transcription and semantic correctness separately; preserve primary text until the author approves a correction.
+- Root cause: Previous provenance tests validated registered IDs, groups and source equality without checking each aspect's allowed function position for every type in its tetrad.
+- Proposed harness change: Add independent Model A placement diagnostics and a regression that limits known source defects to the explicitly tracked `tetra-28` cases. Author-approved group corrections must retain literal provenance and a narrow allowlist.
+- Change type: test | check | workflow
+- Acceptance test: after the author-approved `tetra-28` correction, `getSourceModelAssignmentMismatches()` returns no mismatches for all transferred formulas; literal source equality and exact four-tetrad classification pass independently. Unauthorized group corrections and normalized-source substitution remain rejected.
+- Status: resolved by T4A.2-review on 2026-10-03; the four approved left-side corrections are applied to app data and the working DOCX, with the original document preserved in Git `70acb99`.
+
 ### 2026-10-02 - Aspect-Feature Terms Misread as Type Quadras
 
 - Task: Clarify the source-derived invariant row cards.

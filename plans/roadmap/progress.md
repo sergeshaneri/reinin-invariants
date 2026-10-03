@@ -26,7 +26,7 @@
 | Tetrachotomies | DONE | Structural view works and the canonical 35 source formulas now drive the default tetra catalog; 105 structural pairs remain an advanced path. |
 | Octochotomies | PARTIAL | Structural independent triples work; source-derived records now include verified `octo-08` and `octo-11`, while remaining records stay `incomplete`/`draft` until basis or source issues are confirmed. |
 | Formula ground truth | IN PROGRESS | F4.1-F4.5 split source-derived tetra/octo formula catalogs from computed partition structure, verify the 35 extracted tetras, use them in the default tetra UI and add explicit draft/incomplete/verified octochotomy schema. F4.6 is partial: only source-checkable octochotomies are marked `verified`. |
-| Tetrachotomy aspect→function transfer | IN PROGRESS | T4A.1 makes the active task source-derived formula rows for `Отображение аспектов в функции`; T4A.2 has audit tooling and 11 `sourceBlocks` formulas, with `tetra-07`/`tetra-13` deferred. |
+| Tetrachotomy aspect→function transfer | IN PROGRESS | T4A.2 source transcription is complete for all 13 no-class-3 formulas; `tetra-07`/`tetra-13` use author-confirmed extract groups with literal DOCX provenance preserved. The author-approved T4A.2-review correction is applied to `tetra-28` in app data and the working DOCX; Model A placement checks pass for all 13 formulas. The original DOCX is archived in Git `70acb99`. 22 class-3 formulas keep explicit fallback; broader T4A.3 theoretical readiness is not closed. |
 | Render smoke hardening | DONE | Q9.1 covers default dichotomy, valid tetrachotomy, valid octochotomy and dependent octochotomy SSR paths. |
 | H3 order explanation | DONE | Q9.4 documents canonical H3 order in PRD without adding main-screen UI text. |
 | Aspect icons | DONE | V5.1 visual metadata, V5.2 UI registry and V5.3 icon/symbol/combined compact display are complete. |
@@ -36,7 +36,7 @@
 
 ## Recommended Next Step
 
-Continue only at confirmed boundaries: resolve `tetra-07`/`tetra-13` group mismatches or approve T4A.3a no-class-3 diagram model before UI work; for F4.6, keep `octo-09` as incomplete with normal source marker `знаки?`, confirm basis/source blockers for `octo-10` and `octo-12`, and finish source pairs for the unfinished `octo-13` before marking more records `verified`.
+Continue only at confirmed boundaries: separately review T4A.3a theoretical diagram readiness. The author resolved `tetra-07`/`tetra-13` group mismatches on 2026-10-02 and approved the applied `tetra-28` row correction on 2026-10-03. For F4.6, keep `octo-09` as incomplete with normal source marker `знаки?`, confirm basis/source blockers for `octo-10` and `octo-12`, and finish source pairs for the unfinished `octo-13` before marking more records `verified`.
 
 ## Milestone Checklist
 
@@ -1334,3 +1334,39 @@ Continue only at confirmed boundaries: resolve `tetra-07`/`tetra-13` group misma
   - Final full browser run: 37 passed, one source-row snapshot timed out waiting for fonts; isolated `--last-failed` rerun passed without changing its assertions or baseline. Trace records slow remote Google Fonts requests; a single worker does not eliminate this dependency.
   - Current `npm run validate` reaches the dependency audit and reports 7 vulnerabilities (1 low, 3 moderate, 3 high); dependency files were not modified.
 - Remaining: browser-font determinism and dependency remediation are separate. No commit or push.
+
+### 2026-10-03 - T4A.2: complete simple source-row transcription
+
+- Status: DONE for source transcription; theoretical readiness is separate.
+- Author confirmation on 2026-10-02: extracted table type combinations are correct. Added `tetra-07` and `tetra-13`: eight tetrad blocks and 32 literal source rows, preserving the DOCX text and function order.
+- Coverage: all 13 formulas without class-3 traits have four `sourceBlocks` each; 22 class-3 formulas retain explicit fallback. No source DOCX, extracted table, Model A assignments or dependencies were changed.
+- Correction metadata preserves original/confirmed groups, formula ID and author confirmation attribution/date. The audit accepts only the two registered corrections and exact rows in their original formula sections. Tests reject unauthorized metadata and source normalization.
+- Independent Model A incidence checks find no mismatches in the new formulas or the other transferred formulas except the existing `tetra-28` defect: 32 aspect placements in rational tetrads. T4A.2-review tracks author-approved source-row remediation; literal source rows were not corrected silently.
+- Checks:
+  - Initial transfer regressions failed before implementation; focused tests passed afterward. Latest repeated `npm test`: 111 tests in nine files passed; DOCX provenance audit and `git diff --check` passed.
+  - TypeScript, production build, production asset smoke, production browser preview, render smoke and dev-server smoke passed.
+  - New browser scenario passed on desktop/mobile, checking all four tetrads of both formulas in dark/light themes.
+  - Full two-worker browser run: 38 passed, two existing snapshot scenarios timed out waiting for fonts. Both passed on an unchanged one-worker `--last-failed` rerun. An earlier one-worker full run exceeded the 300-second process limit after 34 passing tests. No assertions or snapshot baselines were weakened.
+  - `npm run validate` stopped at the existing dependency audit: seven vulnerabilities (one low, three moderate, three high). The complete aggregate gate is not green.
+  - Independent review `deleg_6dd4ed2d` passed: DOCX XML inspected independently, all 32 new rows and labels matched, correction mutations and cross-formula probes rejected; no security or logic concerns.
+- Remaining: author decision on `tetra-28`, broader T4A.3 diagram readiness, dependency remediation and deterministic font loading. This transfer remains local; no commit or push.
+
+### 2026-10-03 - T4A.2-review: verified tetra-28 correction proposal
+
+- Compared all four groups and 12 literal rows against their own DOCX section; groups also match the computed partition. The discrepancy predates transcription and is relative to the registered Model A assignments.
+- Prepared a candidate that swaps the entire aspect side of the first two rows in each rational tetrad. Four rows change; type groups, functional positions/properties and all other rows remain intact.
+- `plans/roadmap/tetra-28-review/verify.ts` executed successfully: original 32 placement errors become zero; all 48 group images are exact and 64 classification decisions select precisely the declared tetrads among the 16 registered models. Substituting the candidate in memory also clears the full transferred-catalog placement report.
+- Scope is the registered 16 models, not arbitrary aspect/function bijections. Computation verifies the candidate's consistency; it does not establish the intended editorial correction.
+- `npm test`: 111 tests passed; TypeScript and diff whitespace checks passed. No application/source-document data were changed in this review step; existing transfer changes were preserved.
+- Proposal and repeatable command are recorded in `plans/roadmap/tetra-28-review/README.md`. T4A.2-review awaits author approval before applying row corrections. No commit or push.
+
+### 2026-10-03 - T4A.2-review: approved tetra-28 correction applied
+
+- The author approved direct application without a new row-correction metadata layer. Original DOCX bytes were confirmed in Git `70acb99` and the matching remote-tracking blob before editing; no separate archive branch was created.
+- Swapped four aspect sides with their aspect features in `src/data/tetrachotomies.ts` and the working DOCX. Functional positions/properties, tetrad groups and other source rows remain unchanged. Only `word/document.xml` changed inside the DOCX package; other ZIP member bytes, CRC health and paragraph readback were checked.
+- The repeatable review script now verifies the applied data: all 12 rows match current DOCX; 48 exact images and 64 classification decisions among all 16 models pass. Model A placement mismatches are zero throughout the 13 transferred formulas.
+- Replaced the known-defect regression with a zero-mismatch requirement; added exact four-tetrad classification regression and desktop/mobile dark/light UI coverage.
+- Validation: TypeScript, 112 unit tests, production build, dist smoke, production preview e2e, DOCX audit, render smoke, dev smoke and diff whitespace checks passed. The focused Playwright run passed 4 tests covering all tetrads of `tetra-07`, `tetra-13` and `tetra-28` in both themes on desktop/mobile.
+- Aggregate `npm run validate` remains blocked at `npm audit`: 7 vulnerabilities (1 low, 3 moderate, 3 high). Dependency manifests/lockfile were not changed. No commit or push.
+- Independent read-only review `deleg_cab00069` passed with no security or logic findings. It compared every DOCX package member and paragraph against Git `70acb99`, confirming only the four approved left sides changed; functional data, groups, other formulas and rendering-significant formatting are preserved. ZIP member contents are preserved outside `word/document.xml`; ZIP container flags/attributes were normalized, so the rebuilt ZIP itself is not byte-identical.
+- Non-blocking review suggestion: strengthen the browser regression with explicit distinct-tetrad coverage and aspect-feature text assertions. Existing Model A, literal row/feature equality, exact classification tests and the four focused browser tests pass.

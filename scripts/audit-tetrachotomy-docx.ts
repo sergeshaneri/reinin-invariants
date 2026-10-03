@@ -2,10 +2,10 @@ import { inflateRawSync } from 'node:zlib';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { TETRACHOTOMY_FORMULAS } from '../src/data/tetrachotomies';
+import { TETRACHOTOMY_FORMULAS, TETRACHOTOMY_SOURCE_GROUP_CORRECTIONS } from '../src/data/tetrachotomies';
 import type { TetrachotomyFormulaRecord, TetrachotomySourceFormulaRow } from '../src/data/tetrachotomies';
 import type { AspectId } from '../src/data/socionics';
-import type { SocionicTypeId } from '../src/data/types';
+import { SOCIONIC_TYPES, type SocionicTypeId } from '../src/data/types';
 
 interface ZipEntry {
   compression: number;
@@ -166,8 +166,9 @@ function sortedSetKey(typeIds: readonly SocionicTypeId[]): string {
   return [...typeIds].sort().join('|');
 }
 
-function rowSignature(row: Pick<TetrachotomySourceFormulaRow, 'aspectText' | 'aspectFeaturesText' | 'functionBlockLabel' | 'functionIds' | 'functionFeaturesText'>): string {
+function rowSignature(row: Pick<TetrachotomySourceFormulaRow, 'aspectIds' | 'aspectText' | 'aspectFeaturesText' | 'functionBlockLabel' | 'functionIds' | 'functionFeaturesText'>): string {
   return [
+    row.aspectIds.join(','),
     row.aspectText,
     row.aspectFeaturesText,
     row.functionBlockLabel,
@@ -288,7 +289,10 @@ export function extractDirectTetrachotomySourceBlocks(docxPath = DEFAULT_DOCX_PA
   return blocks.filter(block => block.rows.length > 0);
 }
 
-export function auditCurrentSourceBlocks(docxBlocks: readonly DocxSourceBlock[]): readonly string[] {
+export function auditCurrentSourceBlocks(
+  docxBlocks: readonly DocxSourceBlock[],
+  formulas: readonly TetrachotomyFormulaRecord[] = TETRACHOTOMY_FORMULAS,
+): readonly string[] {
   const lines: string[] = [];
   const blocksByFormulaAndTypes = new Map<string, DocxSourceBlock[]>();
 
@@ -299,8 +303,8 @@ export function auditCurrentSourceBlocks(docxBlocks: readonly DocxSourceBlock[])
     blocksByFormulaAndTypes.set(scopedKey, [...(blocksByFormulaAndTypes.get(scopedKey) ?? []), block]);
   });
 
-  const formulasWithSourceBlocks = TETRACHOTOMY_FORMULAS.filter(formula => formula.sourceBlocks);
-  const formulasWithoutSourceBlocks = TETRACHOTOMY_FORMULAS.filter(formula => !formula.sourceBlocks);
+  const formulasWithSourceBlocks = formulas.filter(formula => formula.sourceBlocks);
+  const formulasWithoutSourceBlocks = formulas.filter(formula => !formula.sourceBlocks);
 
   lines.push(`DOCX direct source blocks: ${docxBlocks.length}`);
   lines.push(`Current formulas with sourceBlocks: ${formulasWithSourceBlocks.map(formula => formula.id).join(', ')}`);
@@ -310,11 +314,30 @@ export function auditCurrentSourceBlocks(docxBlocks: readonly DocxSourceBlock[])
   formulasWithSourceBlocks.forEach(formula => {
     const missingGroups: string[] = [];
     const rowMismatches: string[] = [];
+    let correctedGroups = 0;
     const sourceBlocks = formula.sourceBlocks ?? [];
 
     sourceBlocks.forEach(block => {
       const typesKey = sortedSetKey(block.typeIds);
-      const docxCandidates = blocksByFormulaAndTypes.get(`${formula.id}:${typesKey}`)
+      const correction = block.sourceGroupCorrection;
+      if (correction) {
+        const approved = TETRACHOTOMY_SOURCE_GROUP_CORRECTIONS.some(candidate => (
+          candidate.formulaId === formula.id
+          && correction.formulaId === candidate.formulaId
+          && sortedSetKey(candidate.typeIds) === typesKey
+          && sortedSetKey(correction.typeIds) === typesKey
+          && sortedSetKey(candidate.sourceTypeIds) === sortedSetKey(correction.sourceTypeIds)
+          && correction.confirmedBy === candidate.confirmedBy
+          && correction.confirmedOn === candidate.confirmedOn
+        ));
+        if (!approved) {
+          missingGroups.push(typesKey);
+          return;
+        }
+        correctedGroups += 1;
+      }
+      const sourceTypesKey = correction ? sortedSetKey(correction.sourceTypeIds) : typesKey;
+      const docxCandidates = blocksByFormulaAndTypes.get(`${formula.id}:${sourceTypesKey}`)
         ?? [];
 
       if (docxCandidates.length === 0) {
@@ -340,8 +363,11 @@ export function auditCurrentSourceBlocks(docxBlocks: readonly DocxSourceBlock[])
     const groupAlignment = JSON.stringify(groupKeys) === JSON.stringify(extractGroupKeys)
       ? 'groups-ok'
       : 'groups-mismatch';
+    const sourceStatus = correctedGroups > 0
+      ? `docx-rows-ok; author-confirmed-groups=${correctedGroups}`
+      : 'docx-ok';
     const docxAlignment = missingGroups.length === 0 && rowMismatches.length === 0
-      ? 'docx-ok'
+      ? sourceStatus
       : `docx-mismatch missing=${missingGroups.length} rows=${rowMismatches.length}`;
 
     lines.push(`${formula.id}: ${groupAlignment}; ${docxAlignment}; blocks=${sourceBlocks.length}`);
@@ -355,7 +381,7 @@ export function auditCurrentSourceBlocks(docxBlocks: readonly DocxSourceBlock[])
 
   lines.push('');
   ['tetra-07', 'tetra-13'].forEach(formulaId => {
-    const formula = TETRACHOTOMY_FORMULAS.find(candidate => candidate.id === formulaId) as TetrachotomyFormulaRecord | undefined;
+    const formula = formulas.find(candidate => candidate.id === formulaId);
     if (!formula) {
       return;
     }
@@ -368,11 +394,34 @@ export function auditCurrentSourceBlocks(docxBlocks: readonly DocxSourceBlock[])
     const extraInDocx = docxKeys.filter(key => !extractKeys.includes(key));
 
     lines.push(`${formulaId}: sourceBlocks=${formula.sourceBlocks ? 'present' : 'fallback'}; extract-vs-docx direct groups`);
+    if (TETRACHOTOMY_SOURCE_GROUP_CORRECTIONS.some(correction => correction.formulaId === formulaId)) {
+      lines.push('  Author-confirmed extract groups; literal DOCX differences intentionally preserved.');
+    }
     lines.push(`  missing in DOCX direct rows: ${missingInDocx.join('; ') || 'none'}`);
     lines.push(`  extra DOCX direct rows: ${extraInDocx.join('; ') || 'none'}`);
   });
 
   return lines;
+}
+
+export function getSourceModelAssignmentMismatches(
+  formulas: readonly TetrachotomyFormulaRecord[] = TETRACHOTOMY_FORMULAS,
+): {
+  formulaId: string;
+  typeId: SocionicTypeId;
+  aspectId: AspectId;
+  functionId: number | null;
+  expectedFunctionIds: readonly number[];
+}[] {
+  return formulas.flatMap(formula => (formula.sourceBlocks ?? []).flatMap(block => (
+    block.typeIds.flatMap(typeId => block.rows.flatMap(row => row.aspectIds.flatMap(aspectId => {
+      const type = SOCIONIC_TYPES.find(candidate => candidate.id === typeId);
+      const functionId = type?.modelA.find(placement => placement.aspectId === aspectId)?.functionId ?? null;
+      return functionId !== null && row.functionIds.includes(functionId) ? [] : [{
+        formulaId: formula.id, typeId, aspectId, functionId, expectedFunctionIds: row.functionIds,
+      }];
+    })))
+  )));
 }
 
 function main(): void {
@@ -382,6 +431,13 @@ function main(): void {
   const docxBlocks = extractDirectTetrachotomySourceBlocks(docxPath);
 
   console.log(auditCurrentSourceBlocks(docxBlocks).join('\n'));
+  const assignmentMismatches = getSourceModelAssignmentMismatches();
+  console.log(`\nModel A placement mismatches (independent of DOCX transcription): ${assignmentMismatches.length}`);
+  [...new Set(assignmentMismatches.map(issue => issue.formulaId))].forEach(formulaId => {
+    const issues = assignmentMismatches.filter(issue => issue.formulaId === formulaId);
+    const first = issues[0];
+    console.log(`${formulaId}: model-a-mismatch=${issues.length}; example=${first.typeId}:${first.aspectId}->${first.functionId}, expected=${first.expectedFunctionIds.join(',')}`);
+  });
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

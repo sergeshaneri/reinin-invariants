@@ -145,6 +145,93 @@ test('clarifies source row correspondences without changing aspect feature termi
   expect(errors).toEqual([]);
 });
 
+test('renders all author-confirmed tetra-07 and tetra-13 groups as source rows', async ({ page }) => {
+  const errors = collectPageErrors(page);
+  for (const { id, traits, groups, functionIds } of [
+    {
+      id: 'tetra-07', traits: 'nalness,talness',
+      groups: [
+        { typeIds: ['ILE', 'SLE', 'SEE', 'IEE'], aspectTexts: ['ЧИ ЧС', 'БС БИ', 'ЧЭ ЧЛ', 'БЛ БЭ'] },
+        { typeIds: ['SEI', 'IEI', 'ILI', 'SLI'], aspectTexts: ['БС БИ', 'ЧИ ЧС', 'БЛ БЭ', 'ЧЭ ЧЛ'] },
+        { typeIds: ['ESE', 'EIE', 'LIE', 'LSE'], aspectTexts: ['ЧЭ ЧЛ', 'БЛ БЭ', 'ЧИ ЧС', 'БС БИ'] },
+        { typeIds: ['LII', 'LSI', 'ESI', 'EII'], aspectTexts: ['БЛ БЭ', 'ЧЭ ЧЛ', 'БС БИ', 'ЧИ ЧС'] },
+      ],
+      functionIds: [[1, 3], [5, 7], [6, 8], [2, 4]],
+    },
+    {
+      id: 'tetra-13', traits: 'tactical,talness',
+      groups: [
+        { typeIds: ['ILE', 'LSI', 'ESI', 'IEE'], aspectTexts: ['ЧИ', 'БС', 'ЧС', 'БИ'] },
+        { typeIds: ['SEI', 'EIE', 'LIE', 'SLI'], aspectTexts: ['БС', 'ЧИ', 'БИ', 'ЧС'] },
+        { typeIds: ['ESE', 'IEI', 'ILI', 'LSE'], aspectTexts: ['БИ', 'ЧС', 'БС', 'ЧИ'] },
+        { typeIds: ['LII', 'SLE', 'SEE', 'EII'], aspectTexts: ['ЧС', 'БИ', 'ЧИ', 'БС'] },
+      ],
+      functionIds: [[1, 4], [5, 8], [3, 2], [6, 7]],
+    },
+  ]) {
+    for (const theme of ['dark', 'light']) {
+      await page.goto(`/?mode=tetrachotomy&traits=${traits}&theme=${theme}`);
+      const selector = page.locator('[data-tetrachotomy-class-select]');
+      await expect(selector).toBeVisible();
+      await expect(selector.locator('option')).toHaveCount(4);
+      const options = await selector.locator('option').evaluateAll(elements => elements.map(element => (
+        (element as HTMLOptionElement).value
+      )));
+      expect(options).toHaveLength(4);
+      for (const option of options) {
+        await selector.selectOption(option);
+        await expect(page.locator('[data-tetrachotomy-detail]')).toHaveAttribute('data-selected-class-key', option);
+        const previewTypeIds = await page.locator('[data-model-preview-type-id]').evaluateAll(elements => (
+          elements.map(element => element.getAttribute('data-model-preview-type-id')).sort()
+        ));
+        const group = groups.find(candidate => JSON.stringify([...candidate.typeIds].sort()) === JSON.stringify(previewTypeIds));
+        expect(group, `${id}:${previewTypeIds.join(',')}`).toBeDefined();
+        const rows = page.locator('[data-tetrachotomy-aspect-function-row]');
+        await expect(rows).toHaveCount(4);
+        for (const [index, aspectText] of group!.aspectTexts.entries()) {
+          await expect(rows.nth(index)).toHaveAttribute('data-tetrachotomy-aspect-function-row', aspectText);
+          await expect(rows.nth(index).locator('[data-source-function-chip]')).toHaveText(functionIds[index].map(String));
+          await expect(rows.nth(index).locator('[data-source-row-direction]')).toBeVisible();
+        }
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+      }
+    }
+  }
+  expect(errors).toEqual([]);
+});
+
+test('renders the approved tetra-28 correction for every tetrad', async ({ page }) => {
+  const errors = collectPageErrors(page);
+  const groups = [
+    { typeIds: ['ILE', 'SEI', 'SLE', 'IEI'], aspectTexts: ['ЧЛ БЭ', 'БЛ ЧЭ', 'ЧИ БС ЧС БИ'], functionIds: [[4, 8], [2, 6], [1, 3, 5, 7]] },
+    { typeIds: ['ESE', 'LII', 'EIE', 'LSI'], aspectTexts: ['БЛ ЧЭ', 'ЧЛ БЭ', 'ЧИ БС ЧС БИ'], functionIds: [[1, 5], [3, 7], [2, 4, 6, 8]] },
+    { typeIds: ['LIE', 'ESI', 'LSE', 'EII'], aspectTexts: ['ЧЛ БЭ', 'БЛ ЧЭ', 'ЧИ БС ЧС БИ'], functionIds: [[1, 5], [3, 7], [2, 4, 6, 8]] },
+    { typeIds: ['SEE', 'ILI', 'IEE', 'SLI'], aspectTexts: ['БЛ ЧЭ', 'ЧЛ БЭ', 'ЧИ БС ЧС БИ'], functionIds: [[4, 8], [2, 6], [1, 3, 5, 7]] },
+  ];
+  for (const theme of ['dark', 'light']) {
+    await page.goto(`/?mode=tetrachotomy&traits=subjectivism,nalness&theme=${theme}`);
+    const selector = page.locator('[data-tetrachotomy-class-select]');
+    await expect(selector).toBeVisible();
+    await expect(selector.locator('option')).toHaveCount(4);
+    const options = await selector.locator('option').evaluateAll(elements => elements.map(element => (element as HTMLOptionElement).value));
+    for (const option of options) {
+      await selector.selectOption(option);
+      await expect(page.locator('[data-tetrachotomy-detail]')).toHaveAttribute('data-selected-class-key', option);
+      const typeIds = await page.locator('[data-model-preview-type-id]').evaluateAll(elements => elements.map(element => element.getAttribute('data-model-preview-type-id')).sort());
+      const group = groups.find(candidate => JSON.stringify([...candidate.typeIds].sort()) === JSON.stringify(typeIds));
+      expect(group).toBeDefined();
+      const rows = page.locator('[data-tetrachotomy-aspect-function-row]');
+      await expect(rows).toHaveCount(3);
+      for (const [index, aspectText] of group!.aspectTexts.entries()) {
+        await expect(rows.nth(index)).toHaveAttribute('data-tetrachotomy-aspect-function-row', aspectText);
+        await expect(rows.nth(index).locator('[data-source-function-chip]')).toHaveText(group!.functionIds[index].map(String));
+      }
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    }
+  }
+  expect(errors).toEqual([]);
+});
+
 test('adapts the invariant to its own width with compact tiles and grouped row arrows', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 1000 });
   await page.goto('/?mode=tetrachotomy&traits=judicious,nalness&theme=dark');

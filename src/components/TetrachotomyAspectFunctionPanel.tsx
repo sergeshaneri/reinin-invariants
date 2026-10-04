@@ -153,14 +153,6 @@ export const TetrachotomyAspectFunctionPanel: React.FC<Props> = ({
             </div>
           ) : null}
         </div>
-        <div className="tetra-panel-source glass-muted shrink-0 rounded-2xl px-3 py-2 text-right">
-          <div className="eyebrow">
-            Источник
-          </div>
-          <div className="mt-1 text-sm font-bold text-[var(--color-app-fg)]">
-            {sourceFormula?.sourceTableNumber ?? '—'}
-          </div>
-        </div>
       </div>
 
       {sourceBlock ? (

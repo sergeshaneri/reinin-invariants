@@ -11,9 +11,9 @@ export * from './octochotomies';
 // Тривиальный столбец «Сущ» (все +) опущен — он не различает группы.
 export type AspectFeatureKey =
   | 'isExtra'        // Верт         : + = Экстравертный   / − = Интровертный
-  | 'isDeltaValued'  // дт/бт        : + = Дельта-ценный   / − = Бета-ценный
+  | 'isDeltaValued'  // дт/бт        : + = Дельта         / − = Бета
   | 'isAbstract'     // отвл/вовл    : + = Отвлечённый     / − = Вовлечённый
-  | 'isAlphaValued'  // аф/гм        : + = Альфа-ценный    / − = Гамма-ценный
+  | 'isAlphaValued'  // аф/гм        : + = Альфа          / − = Гамма
   | 'isImplicit'     // -яв/яв       : + = Неявный         / − = Явный
   | 'isIrrational'   // Наль         : + = Иррациональный  / − = Рациональный
   | 'isStatic';      // Таль         : + = Статичный       / − = Динамичный
@@ -27,7 +27,7 @@ export type Aspect = {
 // Биты из матрицы H₃ (8×8), без тривиального столбца «Сущ».
 // Строки ↓ — аспекты; столбцы → — Признаки Аспектов в порядке матрицы.
 export const ASPECTS: Aspect[] = [
-  // id    name  fullName                       extra  δ-цен  отвл   α-цен  неявн  иррац  стат
+  // id    name  fullName                       extra  δ/β    отвл   α/γ    неявн  иррац  стат
   { id: 'Ne', name: 'ЧИ', fullName: 'Интуиция возможностей', isExtra: true,  isDeltaValued: true,  isAbstract: true,  isAlphaValued: true,  isImplicit: true,  isIrrational: true,  isStatic: true  },
   { id: 'Si', name: 'БС', fullName: 'Сенсорика ощущений',    isExtra: false, isDeltaValued: true,  isAbstract: false, isAlphaValued: true,  isImplicit: false, isIrrational: true,  isStatic: false },
   { id: 'Fe', name: 'ЧЭ', fullName: 'Этика эмоций',           isExtra: true,  isDeltaValued: false, isAbstract: false, isAlphaValued: true,  isImplicit: true,  isIrrational: false, isStatic: false },
@@ -58,9 +58,9 @@ export interface AspectFeature {
 
 export const ASPECT_FEATURES: AspectFeature[] = [
   { key: 'isExtra',       title: 'Экстравертный / Интровертный',  posSingular: 'Экстравертный',   negSingular: 'Интровертный',  posPlural: 'Экстравертные',   negPlural: 'Интровертные',   categoryDative: 'экстраверсии/интроверсии' },
-  { key: 'isDeltaValued', title: 'Дельта-ценный / Бета-ценный',    posSingular: 'Дельта-ценный',   negSingular: 'Бета-ценный',   posPlural: 'Дельта-ценные',   negPlural: 'Бета-ценные',    categoryDative: 'дельта/бета-ценности' },
+  { key: 'isDeltaValued', title: 'Дельта / Бета',                  posSingular: 'Дельта',          negSingular: 'Бета',          posPlural: 'Дельта',          negPlural: 'Бета',           categoryDative: 'признаку «Дельта / Бета»' },
   { key: 'isAbstract',    title: 'Отвлечённый / Вовлечённый',      posSingular: 'Отвлечённый',     negSingular: 'Вовлечённый',   posPlural: 'Отвлечённые',     negPlural: 'Вовлечённые',    categoryDative: 'отвлечённости/вовлечённости' },
-  { key: 'isAlphaValued', title: 'Альфа-ценный / Гамма-ценный',    posSingular: 'Альфа-ценный',    negSingular: 'Гамма-ценный',  posPlural: 'Альфа-ценные',    negPlural: 'Гамма-ценные',   categoryDative: 'альфа/гамма-ценности' },
+  { key: 'isAlphaValued', title: 'Альфа / Гамма',                  posSingular: 'Альфа',           negSingular: 'Гамма',         posPlural: 'Альфа',           negPlural: 'Гамма',          categoryDative: 'признаку «Альфа / Гамма»' },
   { key: 'isImplicit',    title: 'Неявный / Явный',                posSingular: 'Неявный',         negSingular: 'Явный',         posPlural: 'Неявные',         negPlural: 'Явные',          categoryDative: 'неявности/явности' },
   { key: 'isIrrational',  title: 'Иррациональный / Рациональный',  posSingular: 'Иррациональный',  negSingular: 'Рациональный',  posPlural: 'Иррациональные',  negPlural: 'Рациональные',   categoryDative: 'иррациональности/рациональности' },
   { key: 'isStatic',      title: 'Статичный / Динамичный',         posSingular: 'Статичный',       negSingular: 'Динамичный',    posPlural: 'Статичные',       negPlural: 'Динамичные',     categoryDative: 'статике/динамике' },
@@ -176,7 +176,7 @@ export interface SocionicFunction {
   isVerbal: boolean;      // Вб/Лб:   + = вербальная      / − = лаборная
   isInert: boolean;       // Ин/Кт:   + = инертная        / − = контактная
   isAcceptant: boolean;   // Наль:    + = иррациональная  / − = рациональная
-  isMental: boolean;      // Таль:    + = статичная       / − = динамичная
+  isMental: boolean;      // Таль:    + = ментальная      / − = витальная
 }
 
 export const FUNCTIONS: SocionicFunction[] = [
@@ -220,7 +220,7 @@ export const FUNCTION_FEATURES: FunctionFeature[] = [
   { key: 'isVerbal',     title: 'Вербальная / Лаборная',           posSingular: 'Вербальная',      negSingular: 'Лаборная',      posPlural: 'Вербальные',      negPlural: 'Лаборные',       categoryDative: 'вербальности/лаборности' },
   { key: 'isInert',      title: 'Инертная / Контактная',           posSingular: 'Инертная',        negSingular: 'Контактная',    posPlural: 'Инертные',        negPlural: 'Контактные',     categoryDative: 'инертности/контактности' },
   { key: 'isAcceptant',  title: 'Иррациональная / Рациональная',   posSingular: 'Иррациональная',  negSingular: 'Рациональная',  posPlural: 'Иррациональные',  negPlural: 'Рациональные',   categoryDative: 'иррациональности/рациональности' },
-  { key: 'isMental',     title: 'Статичная / Динамичная',           posSingular: 'Статичная',       negSingular: 'Динамичная',    posPlural: 'Статичные',       negPlural: 'Динамичные',     categoryDative: 'статике/динамике' },
+  { key: 'isMental',     title: 'Ментальная / Витальная',          posSingular: 'Ментальная',      negSingular: 'Витальная',     posPlural: 'Ментальные',      negPlural: 'Витальные',      categoryDative: 'ментальности/витальности' },
 ];
 
 export interface DerivedFunctionFeature {

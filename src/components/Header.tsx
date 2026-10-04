@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronRight, Play, FileText, Youtube } from 'lucide-react';
 
-export const Header: React.FC = () => {
+export const Header: React.FC<{ isReferencePage?: boolean; navigationSearch?: string }> = ({ isReferencePage = false, navigationSearch = '' }) => {
   const [showMaterials, setShowMaterials] = useState(false);
+  const navigationParams = new URLSearchParams(navigationSearch);
+  if (isReferencePage) navigationParams.delete('page');
+  else navigationParams.set('page', 'reference');
 
   return (
     <header className="relative max-w-7xl mx-auto pt-6 pb-6 px-4 md:px-6">
@@ -12,12 +15,20 @@ export const Header: React.FC = () => {
           <h1 className="text-2xl font-semibold leading-tight tracking-normal text-[var(--color-app-fg)] md:text-3xl">
             Инварианты <span className="text-[var(--color-shell-accent)]">Признаков Рейнина</span>
           </h1>
-          <details className="mt-3 text-sm text-[var(--color-shell-muted)]">
-            <summary className="cursor-pointer">О приложении</summary>
-            <p className="mt-3 max-w-[60ch] leading-relaxed">
-            Визуализация связи Признаков Рейнина и Модели А. У каждого Признака Рейнина есть что-то неизменное: <em className="not-italic font-medium text-[var(--color-app-fg)]">инвариант</em>. Это приложение показывает инварианты Признаков Рейнина в модели А через Признаки Аспектов и Признаки Функций (какие аспекты должны быть в каких функциях?).
-            </p>
-          </details>
+          <div className="mt-3 flex items-start gap-4 text-sm">
+            <details className="min-w-0 text-[var(--color-shell-muted)]">
+              <summary className="cursor-pointer">О приложении</summary>
+              <p className="mt-3 max-w-[60ch] leading-relaxed">
+              Визуализация связи Признаков Рейнина и Модели А. У каждого Признака Рейнина есть что-то неизменное: <em className="not-italic font-medium text-[var(--color-app-fg)]">инвариант</em>. Это приложение показывает инварианты Признаков Рейнина в модели А через Признаки Аспектов и Признаки Функций (какие аспекты должны быть в каких функциях?).
+              </p>
+            </details>
+            <a
+              href={`?${navigationParams.toString()}`}
+              className="shrink-0 text-[var(--color-app-fg)] underline underline-offset-4"
+            >
+              {isReferencePage ? 'К диаграммам' : 'Справка'}
+            </a>
+          </div>
         </div>
 
         <div className="md:col-span-5">

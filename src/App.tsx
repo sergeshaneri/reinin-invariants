@@ -15,6 +15,7 @@ import { selectDichotomyTypesPanelView, selectPartitionExplorerView, selectTetra
 import { DIAGRAMS, DEFAULT_DIAGRAM_ID } from './diagrams/registry';
 import { HelpModal } from './components/HelpModal';
 import { Header } from './components/Header';
+import { ReferencePage } from './components/ReferencePage';
 import { ModeSelector } from './components/ModeSelector';
 import { AspectDisplayToggle } from './components/AspectDisplayToggle';
 import { ThemeToggle } from './components/ThemeToggle';
@@ -43,6 +44,7 @@ import {
 // Чтение начального стейта из URL: ?trait=democracy&pole=1&view=2
 const App: React.FC = () => {
   const initial = useRef(readInitialAppState()).current;
+  const isReferencePage = new URLSearchParams(window.location.search).get('page') === 'reference';
   const [mode, setMode] = useState(initial.mode);
   const [theme, setTheme] = useState<ThemeMode>(initial.theme);
   const [selectedTraitIndex, setSelectedTraitIndex] = useState(initial.traitIdx);
@@ -143,10 +145,11 @@ const App: React.FC = () => {
       typeId: selectedTypeId,
       partition,
     });
+    if (isReferencePage) params.set('page', 'reference');
     const newSearch = params.toString();
-    const newUrl = `${window.location.pathname}${newSearch ? '?' + newSearch : ''}`;
+    const newUrl = `${window.location.pathname}${newSearch ? '?' + newSearch : ''}${window.location.hash}`;
     window.history.replaceState(null, '', newUrl);
-  }, [mode, theme, selectedTraitIndex, selectedPoleIndex, activeViewIndex, selectedTypeId, partition]);
+  }, [mode, theme, selectedTraitIndex, selectedPoleIndex, activeViewIndex, selectedTypeId, partition, isReferencePage]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -166,6 +169,10 @@ const App: React.FC = () => {
 
   const Diagram = DIAGRAMS[currentTrait.diagramId ?? DEFAULT_DIAGRAM_ID];
   const activeCell = resolveActiveCell(hoveredCell, pinnedCell);
+  const navigationSearch = serializeAppUrlState({
+    mode, theme, traitIdx: selectedTraitIndex, poleIdx: selectedPoleIndex,
+    viewIdx: activeViewIndex, typeId: selectedTypeId, partition,
+  }).toString();
 
   return (
     <div
@@ -178,9 +185,9 @@ const App: React.FC = () => {
       <div className="ambient-field fixed inset-0 pointer-events-none overflow-hidden motion-reduce:hidden" />
       <div className="grain motion-reduce:hidden" />
 
-      <Header />
+      <Header isReferencePage={isReferencePage} navigationSearch={navigationSearch} />
 
-      <main className="relative max-w-7xl mx-auto px-4 md:px-6 pb-16 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+      {isReferencePage ? <ReferencePage /> : <main className="relative max-w-7xl mx-auto px-4 md:px-6 pb-16 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
         <ModeSelector mode={mode} onSelectMode={handleSelectMode} />
 
         <div className="order-2 lg:order-none lg:col-span-4" data-full-catalog>
@@ -328,7 +335,7 @@ const App: React.FC = () => {
             <ThemeToggle theme={theme} onSelectTheme={setTheme} />
           </div>
         </details>
-      </main>
+      </main>}
 
       <Footer />
     </div>

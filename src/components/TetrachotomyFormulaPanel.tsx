@@ -159,9 +159,6 @@ export const TetrachotomyFormulaPanel: React.FC<Props> = ({
             {sourceFormula.formulaText}
           </h2>
           <div className="mt-2 flex flex-wrap gap-2 text-[11px] font-semibold text-[var(--color-shell-muted)]">
-            <span className="rounded-full border border-[var(--color-shell-border)] bg-[var(--color-shell-control)] px-2.5 py-1">
-              Таблица {sourceFormula.sourceTableNumber}
-            </span>
             {sourceFormula.relationText ? (
               <span className="rounded-full border border-[var(--color-shell-border)] bg-[var(--color-shell-control)] px-2.5 py-1">
                 {sourceFormula.relationText}

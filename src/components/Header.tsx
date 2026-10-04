@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, ChevronRight, Play, FileText, Youtube } from 'lucide-react';
+import { ChevronRight, Play, FileText, Youtube } from 'lucide-react';
 
 export const Header: React.FC = () => {
   const [showMaterials, setShowMaterials] = useState(false);
@@ -9,14 +9,6 @@ export const Header: React.FC = () => {
     <header className="relative max-w-7xl mx-auto pt-6 pb-6 px-4 md:px-6">
       <div className="grid md:grid-cols-12 gap-4 md:gap-8 items-end">
         <div className="md:col-span-7">
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-3 inline-flex items-center gap-2.5 rounded-full border border-[var(--color-shell-border)] bg-[var(--color-shell-control)] px-3 py-1.5 shadow-sm"
-          >
-            <Sparkles className="h-3.5 w-3.5 text-[var(--color-shell-accent)]" strokeWidth={2} />
-            <span className="eyebrow">Соционика &nbsp;·&nbsp; Алгебра</span>
-          </motion.div>
           <h1 className="text-2xl font-semibold leading-tight tracking-normal text-[var(--color-app-fg)] md:text-3xl">
             Инварианты <span className="text-[var(--color-shell-accent)]">Признаков Рейнина</span>
           </h1>

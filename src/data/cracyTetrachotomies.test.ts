@@ -70,7 +70,7 @@ const setKey = (ids: readonly (string | number)[]): string => [...ids].sort().jo
 
   it('matches every registered source-block group to the computed partition classes', () => {
     const formulas = TETRACHOTOMY_FORMULAS.filter(formula => formula.sourceBlocks);
-    expect(formulas).toHaveLength(20);
+    expect(formulas).toHaveLength(32);
     formulas.forEach(formula => {
       expect(formula.sourceBlocks!.map(block => setKey(block.typeIds)).sort(), formula.id).toEqual(
         getComputedTetrachotomyClassTypeSets(formula).map(setKey).sort(),

@@ -17,6 +17,28 @@ Use this file to convert repeated agent mistakes into concrete harness changes.
 
 ## Active Entries
 
+### 2026-10-04 - Lower Model A Previews Lost Overlapping Invariants
+
+- Task: Inspect transferred tetrachotomy invariants and their rendering on the four models below each selected tetrad.
+- What happened: The main source diagram preserved both function memberships, but the lower preview selector still used `rows.findIndex` on function position alone. All twelve order-dependent formulas collapsed to two source colors; 768 of 1536 participating cells selected the wrong aspect dyad and were muted. A browser audit reproduced this across all 35 formulas / 140 tetrads. The lower renderer also receives only the first basis pole's first view: the process cycle disappears for 10/17, and 05/26/27 show only one constituent condition despite a three-pole heading.
+- Expected behavior: A model cell's color must follow its actual aspect's valid source row; every participating aspect retains its intended contrast. Complete block, equivalence and cycle conditions must be available on the four models, or the panel must explicitly identify the partial projection.
+- Root cause: The multi-membership fix covered the main diagram but not `selectTypeModelPreviewsForSourceRows`; lower-model semantics were not included in the previous browser assertions.
+- Proposed harness change: Add a lower-model regression for every formula and tetrad, comparing each rendered aspect/function pair to its source dyad, requiring all four dyad colors and full participating contrast for the twelve order-dependent formulas. Assert process-condition availability independently of basis ordering and exercise every constituent view for unbound formulas.
+- Change type: test | check
+- Acceptance test: 35 formulas / 140 tetrads / 560 models have correct aspect placements and selected invariant memberships; no participating order-dependent aspect is incorrectly muted; 10/17/30/34 expose process conditions and 05/26/27 expose all constituent conditions.
+- Status: proposed; inspection only, application code unchanged. Evidence: scratch/tetrachotomy-inspection/model-audit.json, browser-audit.json and desktop/mobile screenshots.
+
+### 2026-10-04 - Overlapping Source Rows and Duplicate Sibling Keys
+
+- Task: Add the twelve author-defined order-dependent `(2×4)×4` tetrachotomies.
+- What happened: A single function-to-row map would overwrite one of two valid memberships. The first browser run also exposed duplicated source panels after tetrad changes because source and order siblings shared the same React key. Mobile focus assertions exposed pointer-hover events overriding keyboard focus during scrolling. A notation registry initially attached the positivism formula labels to the wrong IDs.
+- Expected behavior: Preserve all row memberships and exact formula labels; render one source panel and one order panel after every tetrad switch; preserve the active keyboard target.
+- Root cause: Applying a disjoint-row representation to overlapping function tetrads, reusing an identical sibling key, merging focus and hover into one state, and validating order-trait membership without checking all three displayed traits.
+- Proposed harness change: Keep the exact-label registry regression and the full four-tetrad order-dependent browser matrix, including shared-function memberships and focused-aspect/function highlighting. Use distinct key namespaces and separate focus/hover state.
+- Change type: test | rule
+- Acceptance test: `orderDependentTetrachotomies.test.ts` matches all three displayed traits to each source formula; `order-dependent.spec.ts` passes all twelve formulas on desktop/mobile in both themes, with four rows per panel, two memberships per function, and focus highlighting all four eligible functions or both dyads.
+- Status: resolved; 24 order-dependent browser tests pass.
+
 ### 2026-10-02 - Literal Source Equality Did Not Validate Aspect Placements
 
 - Task: T4A.2, finish simple tetrachotomy source-row transfer after author confirmation of two group corrections.
@@ -35,6 +57,7 @@ Use this file to convert repeated agent mistakes into concrete harness changes.
 - Expected behavior: Preserve the source aspect-feature terms, defined through quadra values. Their explanation belongs in separately reviewed theory-introduction materials, not in the invariant card.
 - Root cause: Familiar quadra names were interpreted without checking the carrier of the displayed property.
 - Proposed harness change: For theory-bearing labels, identify the carrier (aspect, function, type) before grouping or rewriting; preserve author definitions and test the confirmed rendering.
+- Function-terminology follow-up: the shared function registry exposed `isMental` as «Статичная / Динамичная», and the new reference page repeated that convention. Corrected the functional poles to «Ментальная / Витальная» while preserving aspect statics/dynamics and all Boolean assignments. `src/data/functionTerminology.test.tsx` now checks labels, tooltips, equivalence text and reference sections; browser regressions verify both carriers separately in both themes and device projects.
 - Change type: rule | test
 - Acceptance test: `separates source features without reclassifying quadra-value aspect terms` and the source-row browser scenario preserve the aspect labels alongside other aspect properties. E10.1 defers definitions to author-approved introductory content.
 - Status: accepted
@@ -59,6 +82,7 @@ Use this file to convert repeated agent mistakes into concrete harness changes.
 - Proposed harness change: Keep route-specific `toBeInViewport()` assertions for dichotomy and source tetrachotomy, check mobile catalog placement, and review desktop/mobile snapshots with optional views collapsed.
 - Change type: test | workflow
 - Acceptance test: `prioritizes diagrams and keeps supporting views optional` passes in both Chromium projects and compact selections preserve URL state.
+- Reference-navigation follow-up: a separate header row shifted existing mobile snapshots by 50 px. Keeping the reference link alongside the existing introduction summary restored the unchanged app/type snapshots in both browser projects. Check existing primary-view screenshots after adding global navigation; do not regenerate baselines merely to accept an avoidable header-height increase.
 - Status: accepted
 
 ### 2026-10-02 - Dependency Audit Blocks UI Release Gate

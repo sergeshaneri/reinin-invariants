@@ -9,6 +9,8 @@ import { PartitionCompositionView } from './PartitionCompositionView';
 import { PartitionTypesPanel } from './PartitionTypesPanel';
 import { TetrachotomyAspectFunctionPanel } from './TetrachotomyAspectFunctionPanel';
 import { TetrachotomyCracyPanel } from './TetrachotomyCracyPanel';
+import { TetrachotomyOrderPanel } from './TetrachotomyOrderPanel';
+import { TetrachotomyDichotomyPanel } from './TetrachotomyDichotomyPanel';
 import { TetrachotomyFormulaPanel } from './TetrachotomyFormulaPanel';
 import { TypePatternCard } from './TypePatternCard';
 
@@ -136,14 +138,19 @@ export const TetrachotomyView: React.FC<Props> = ({
         </select>
       </label>
 
-      <TetrachotomyAspectFunctionPanel
-        key={`${view.sourceFormula?.id ?? 'structural'}:${selectedClassKey}`}
-        view={view}
-        aspectDisplayMode={aspectDisplayMode}
-        baseView={activeView}
-      />
+      {view.sourceFormula && !view.sourceFormula.sourceBlocks?.length ? (
+        <TetrachotomyDichotomyPanel view={view} />
+      ) : (
+        <TetrachotomyAspectFunctionPanel
+          key={`${view.sourceFormula?.id ?? 'structural'}:${selectedClassKey}`}
+          view={view}
+          aspectDisplayMode={aspectDisplayMode}
+          baseView={activeView}
+        />
+      )}
 
       <TetrachotomyCracyPanel view={view} aspectDisplayMode={aspectDisplayMode} />
+      <TetrachotomyOrderPanel key={`order:${view.sourceFormula?.id}:${selectedClassKey}`} view={view} aspectDisplayMode={aspectDisplayMode} />
 
       {activeView ? (
         <PartitionTypesPanel

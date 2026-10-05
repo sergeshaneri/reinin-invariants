@@ -6,6 +6,8 @@ import type {
   PartitionExplorerViewModel,
 } from '../data/selectors';
 import type { SocionicTypeId } from '../data/types';
+import { getOrderDependentTetrachotomy } from '../data/orderDependentTetrachotomies';
+import { getSourceCellRows, getSourceCellHighlight } from '../diagrams/tetrachotomySourceInteraction';
 import { AspectGlyph, type AspectDisplayMode } from './AspectGlyph';
 
 type SourceFormulaViewModel = NonNullable<PartitionExplorerViewModel['sourceFormula']>;
@@ -48,8 +50,8 @@ const MAPPING_BG = [
 const INACTIVE = 'map-tone-inactive';
 
 type ActiveSourceCell =
-  | { kind: 'aspect'; id: string; rowIndex: number }
-  | { kind: 'function'; id: number; rowIndex: number }
+  | { kind: 'aspect'; id: string; rowIndices: readonly number[] }
+  | { kind: 'function'; id: number; rowIndices: readonly number[] }
   | null;
 
 type Highlight = 'full' | 'dim' | 'unused';
@@ -80,37 +82,22 @@ export const TetrachotomyAspectFunctionPanel: React.FC<Props> = ({
   baseView,
 }) => {
   const { selectedClass, sourceFormula } = view;
-  const [activeCell, setActiveCell] = useState<ActiveSourceCell>(null);
+  const [hoveredCell, setHoveredCell] = useState<ActiveSourceCell>(null);
+  const [focusedCell, setFocusedCell] = useState<ActiveSourceCell>(null);
+  const activeCell = focusedCell ?? hoveredCell;
+  const orderFamily = getOrderDependentTetrachotomy(sourceFormula?.id);
 
   const sourceBlock = sourceFormula
     ? findSelectedSourceBlock(sourceFormula, selectedClass)
     : null;
 
-  const { aspectToRow, functionToRow } = useMemo(() => {
-    const aspects = new Map<string, number>();
-    const functions = new Map<number, number>();
+  const { aspects: aspectToRows, functions: functionToRows } = useMemo(() => (
+    getSourceCellRows(sourceBlock?.rows ?? [])
+  ), [sourceBlock]);
 
-    sourceBlock?.rows.forEach((row, rowIndex) => {
-      row.aspectIds.forEach(aspectId => aspects.set(aspectId, rowIndex));
-      row.functionIds.forEach(functionId => functions.set(functionId, rowIndex));
-    });
-
-    return {
-      aspectToRow: aspects,
-      functionToRow: functions,
-    };
-  }, [sourceBlock]);
-
-  const getHighlight = (rowIndex: number | undefined): Highlight => {
-    if (rowIndex === undefined) {
-      return 'unused';
-    }
-
-    if (activeCell && activeCell.rowIndex !== rowIndex) {
-      return 'dim';
-    }
-
-    return 'full';
+  const getHighlight = (rowIndices: readonly number[]): Highlight => {
+    if (rowIndices.length === 0) return 'unused';
+    return getSourceCellHighlight(rowIndices, activeCell?.rowIndices ?? null) === 'dim' ? 'dim' : 'full';
   };
 
   const styleFor = (toneIndex: number | undefined, highlight: Highlight): string => {
@@ -130,6 +117,7 @@ export const TetrachotomyAspectFunctionPanel: React.FC<Props> = ({
       data-tetrachotomy-model-a-slot
       data-tetrachotomy-aspect-function-panel={sourceFormula?.id ?? 'structural'}
       data-source-block-status={sourceBlock?.status ?? 'missing'}
+      data-order-dependent-family={orderFamily?.orderTraitId}
     >
       <div className="tetra-panel-header flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="tetra-panel-title min-w-0">
@@ -138,8 +126,15 @@ export const TetrachotomyAspectFunctionPanel: React.FC<Props> = ({
             Отображение аспектов в функции
           </div>
           <h2 className="tetra-panel-heading mt-2 text-lg font-bold leading-tight text-[var(--color-app-fg)]">
-            Общий инвариант выбранной тетрады в модели А
+            {orderFamily ? 'Порядкозависимые (2×4)×4' : 'Общий инвариант выбранной тетрады в модели А'}
           </h2>
+          {orderFamily ? (
+            <div className="mt-2 space-y-1 text-sm leading-relaxed text-[var(--color-shell-muted)]" data-order-dependent-class>
+              <p>{orderFamily.notation}{orderFamily.name ? ` — ${orderFamily.name}` : ''}</p>
+              <p>Признаки функций: {orderFamily.featureProducts.join('; ')}.</p>
+              <p>8 аспектов; четыре диады распределяются в четыре блока из четырёх функций.</p>
+            </div>
+          ) : null}
           {sourceBlock && sourceBlock.labels.length > 0 ? (
             <div className="tetra-panel-labels mt-2 flex flex-wrap gap-2 text-[11px] font-semibold text-[var(--color-shell-muted)]">
               {sourceBlock.labels.map(label => (
@@ -159,7 +154,7 @@ export const TetrachotomyAspectFunctionPanel: React.FC<Props> = ({
         <div
           className="mt-5"
           data-tetrachotomy-source-block={sortedTypeKey(sourceBlock.typeIds)}
-          onMouseLeave={() => setActiveCell(null)}
+          onMouseLeave={() => setHoveredCell(null)}
         >
           <div className="tetra-invariant-map">
             <div>
@@ -170,8 +165,9 @@ export const TetrachotomyAspectFunctionPanel: React.FC<Props> = ({
               </div>
               <div className="tetra-aspect-grid grid grid-cols-4 gap-2">
                 {ASPECTS.map(aspect => {
-                  const rowIndex = aspectToRow.get(aspect.id);
-                  const highlight = getHighlight(rowIndex);
+                  const rowIndices = aspectToRows.get(aspect.id) ?? [];
+                  const rowIndex = rowIndices[0];
+                  const highlight = getHighlight(rowIndices);
                   const baseIndex = baseView?.mappings.findIndex(mapping => mapping.aspects.includes(aspect.id)) ?? -1;
                   // A partial base view leaves the complementary aspects outside its mappings.
                   // Give that unused group a separate muted tone, never a source-row index.
@@ -184,15 +180,16 @@ export const TetrachotomyAspectFunctionPanel: React.FC<Props> = ({
                       title={`${aspect.name}: ${aspect.fullName}`}
                       aria-label={`${aspect.fullName}. ${sourceBlock.rows[rowIndex ?? -1]?.aspectFeaturesText ?? 'не входит в source-разбор'}`}
                       onMouseEnter={() => {
-                        setActiveCell(rowIndex === undefined ? null : { kind: 'aspect', id: aspect.id, rowIndex });
+                        setHoveredCell(rowIndex === undefined ? null : { kind: 'aspect', id: aspect.id, rowIndices });
                       }}
                       onFocus={() => {
-                        setActiveCell(rowIndex === undefined ? null : { kind: 'aspect', id: aspect.id, rowIndex });
+                        setFocusedCell(rowIndex === undefined ? null : { kind: 'aspect', id: aspect.id, rowIndices });
                       }}
-                      onBlur={() => setActiveCell(null)}
+                      onBlur={() => setFocusedCell(null)}
                       className={`tetra-aspect-tile relative flex cursor-pointer items-center justify-center rounded-xl border-2 transition-[opacity,transform,background-color,border-color] duration-200 ${styleFor(toneIndex, highlight)}`}
                       data-tetrachotomy-source-aspect={aspect.name}
                       data-source-row-index={rowIndex ?? ''}
+                      data-source-row-indices={rowIndices.join(',')}
                     >
                       <span className="flex flex-col items-center gap-1.5">
                         <AspectGlyph
@@ -222,31 +219,40 @@ export const TetrachotomyAspectFunctionPanel: React.FC<Props> = ({
               </div>
               <div className="tetra-function-grid grid grid-cols-2 gap-2">
                 {MODEL_A_LAYOUT.map(functionId => {
-                  const rowIndex = functionToRow.get(functionId);
+                  const rowIndices = functionToRows.get(functionId) ?? [];
+                  const rowIndex = rowIndices[0];
                   const functionName = getFunctionName(functionId);
-                  const highlight = getHighlight(rowIndex);
+                  const highlight = getHighlight(rowIndices);
                   const baseIndex = baseView?.mappings.findIndex(mapping => mapping.functions.includes(functionId)) ?? -1;
-                  const toneIndex = rowIndex ?? (baseIndex >= 0 ? baseIndex : undefined);
+                  const toneIndex = rowIndices.find(index => activeCell?.rowIndices.includes(index))
+                    ?? rowIndex ?? (baseIndex >= 0 ? baseIndex : undefined);
+                  const features = rowIndices.map(index => sourceBlock.rows[index].functionFeaturesText).join('; ');
 
                   return (
                     <button
                       key={functionId}
                       type="button"
                       title={`${functionId}: ${functionName}`}
-                      aria-label={`${functionId} ${functionName}. ${sourceBlock.rows[rowIndex ?? -1]?.functionFeaturesText ?? 'не входит в source-разбор'}`}
+                      aria-label={`${functionId} ${functionName}. ${features || 'не входит в source-разбор'}`}
                       onMouseEnter={() => {
-                        setActiveCell(rowIndex === undefined ? null : { kind: 'function', id: functionId, rowIndex });
+                        setHoveredCell(rowIndex === undefined ? null : { kind: 'function', id: functionId, rowIndices });
                       }}
                       onFocus={() => {
-                        setActiveCell(rowIndex === undefined ? null : { kind: 'function', id: functionId, rowIndex });
+                        setFocusedCell(rowIndex === undefined ? null : { kind: 'function', id: functionId, rowIndices });
                       }}
-                      onBlur={() => setActiveCell(null)}
-                      className={`tetra-function-tile relative flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 transition-[opacity,transform,background-color,border-color] duration-200 ${styleFor(toneIndex, highlight)}`}
+                      onBlur={() => setFocusedCell(null)}
+                      className={`tetra-function-tile relative flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 transition-[opacity,transform,background-color,border-color] duration-200 ${rowIndices.length > 1 && !activeCell ? 'border-[var(--color-shell-border-strong)] bg-[var(--color-shell-control)] text-[var(--color-app-fg)] opacity-100 scale-100' : styleFor(toneIndex, highlight)}`}
                       data-tetrachotomy-source-function={functionId}
                       data-source-row-index={rowIndex ?? ''}
+                      data-source-row-indices={rowIndices.join(',')}
                     >
                       <span className="font-mono text-xl font-bold leading-none">{functionId}</span>
                       <span className="mt-1 text-[10px] font-medium leading-none opacity-80">{functionName}</span>
+                      {rowIndices.length > 1 ? (
+                        <span className="mt-2 flex gap-1" aria-hidden="true" data-source-membership-colors>
+                          {rowIndices.map(index => <span key={index} className={`h-1.5 w-5 rounded-full ${MAPPING_BG[index % MAPPING_BG.length]}`} />)}
+                        </span>
+                      ) : null}
                     </button>
                   );
                 })}
@@ -259,7 +265,9 @@ export const TetrachotomyAspectFunctionPanel: React.FC<Props> = ({
               className="mb-1 text-xs leading-relaxed text-[var(--color-shell-muted)]"
               data-tetrachotomy-invariant-explanation
             >
-              Каждая строка задаёт группу функций, в которую попадают указанные аспекты у всех типов выбранной тетрады.
+              {orderFamily
+                ? 'Каждая диада аспектов занимает две позиции внутри указанной четвёрки функций у каждого типа тетрады. Четвёрки функций пересекаются; строка задаёт включение образа диады в блок. Порядковое условие показано следующей диаграммой.'
+                : 'Каждая строка задаёт группу функций, в которую попадают указанные аспекты у всех типов выбранной тетрады.'}
             </p>
             {sourceBlock.rows.map((row, rowIndex) => (
               <div

@@ -27,6 +27,8 @@ describe('tetrachotomy cracy block formula', () => {
       expect(html.match(/data-cracy-function-block=/g)).toHaveLength(16);
       expect(html).toContain('Соответствие между блоками может различаться между типами; состав каждого блока сохраняется.');
       expect(html).toContain('data-aspect-glyph-mode="icon-symbol"');
+      expect(html).toContain('block-surface');
+      expect(html.match(/class="block-number"/g)).toHaveLength(32);
     }
   });
   it('does not add cracy to an unrelated formula', () => {

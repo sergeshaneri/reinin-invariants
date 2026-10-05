@@ -23,14 +23,15 @@ export const FormulaPanel: React.FC<Props> = ({ trait, view }) => {
       key={`${trait.id}-${view.title}`}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="glass-panel relative overflow-hidden rounded-[32px] p-8 md:p-10"
+      className={isBlock ? 'block-surface block-formula-panel' : 'glass-panel relative overflow-hidden rounded-[32px] p-8 md:p-10'}
+      data-block-formula={isBlock ? view.title : undefined}
     >
-      <h3 className="text-xl md:text-2xl font-semibold tracking-tight mb-7 flex items-center gap-3">
-        <span className="h-7 w-1 rounded-full bg-[var(--color-shell-accent)]" />
+      <h3 className={isBlock ? 'block-panel-title' : 'text-xl md:text-2xl font-semibold tracking-tight mb-7 flex items-center gap-3'}>
+        {!isBlock && <span className="h-7 w-1 rounded-full bg-[var(--color-shell-accent)]" />}
         {heading}
       </h3>
 
-      {isBlock ? <BlockView mappings={mappings} connector={connector} /> : <PairView mappings={mappings} connector={connector} />}
+      {isBlock ? <BlockView mappings={mappings} /> : <PairView mappings={mappings} connector={connector} />}
 
       {view.footnote && (
         <div className="mt-6 rounded-xl border border-[var(--color-shell-border)] bg-[var(--color-shell-accent-soft)] p-5">
@@ -77,57 +78,48 @@ const PairView: React.FC<{ mappings: View['mappings']; connector?: string }> = (
 );
 
 // Класс 3 (block permutation) — два столбца без жёсткой пары + явная пометка про биекцию.
-const BlockView: React.FC<{ mappings: View['mappings']; connector?: string }> = ({ mappings, connector }) => (
+const BlockView: React.FC<{ mappings: View['mappings'] }> = ({ mappings }) => (
   <div>
-    <div className="grid md:grid-cols-[1fr_auto_1fr] gap-5 md:gap-6 items-center">
-      <div className="space-y-2.5">
-        <p className="eyebrow mb-2">
-          Блоки аспектов
-        </p>
-        {mappings.map((m, idx) => (
-          <div key={idx} className="flex items-center gap-3 rounded-xl border border-[var(--color-shell-border)] bg-[var(--color-shell-surface-muted)] p-3">
-            <BlockIndex idx={idx} />
-            <div className="flex flex-col gap-1 min-w-0">
-              {m.aspectLabel && (
-                <span className="eyebrow">
-                  {m.aspectLabel}
-                </span>
-              )}
-              <AspectChips aspects={m.aspects} />
+    <div className="block-permutation">
+      <div className="min-w-0">
+        <p className="block-label">Блоки аспектов</p>
+        <div className="block-collection">
+          {mappings.map((mapping, index) => (
+            <div key={index} className="block-tile block-text-tile" data-formula-aspect-block={mapping.aspects.join(',')}>
+              {mapping.aspectLabel && <span className="block-tile-label">{mapping.aspectLabel}</span>}
+              <div className="block-members">
+                {mapping.aspects.map(aspectId => {
+                  const aspect = ASPECTS.find(candidate => candidate.id === aspectId);
+                  return <span key={aspectId} className="block-aspect-name" title={aspect?.fullName}>{aspect?.name}</span>;
+                })}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="flex md:flex-col items-center justify-center gap-2 py-2 md:py-0">
-        <div className="flex items-center gap-2 rounded-xl border border-[var(--color-shell-border-strong)] bg-[var(--color-shell-accent-soft)] px-3 py-2 text-[var(--color-shell-accent)]">
-          <Shuffle className="w-4 h-4" strokeWidth={2} />
-          <span className="text-[11px] font-semibold tracking-wide whitespace-nowrap">перестановка блоками</span>
+          ))}
         </div>
       </div>
 
-      <div className="space-y-2.5">
-        <p className="eyebrow mb-2">
-          Блоки функций
-        </p>
-        {mappings.map((m, idx) => (
-          <div key={idx} className="flex items-center gap-3 rounded-xl border border-[var(--color-shell-border)] bg-[var(--color-shell-surface-muted)] p-3">
-            <BlockIndex idx={idx} />
-            <div className="flex flex-col gap-1 min-w-0">
-              {m.functionLabel && (
-                <span className="eyebrow">
-                  {m.functionLabel}
-                </span>
-              )}
-              <FunctionChips functions={m.functions} connector={connector} />
+      <div className="block-permutation-note">
+        <Shuffle className="h-6 w-6 shrink-0" strokeWidth={1.5} aria-hidden="true" />
+        <span>Перестановка целых блоков</span>
+      </div>
+
+      <div className="min-w-0">
+        <p className="block-label">Блоки функций</p>
+        <div className="block-collection">
+          {mappings.map((mapping, index) => (
+            <div key={index} className="block-tile block-text-tile" data-formula-function-block={mapping.functions.join(',')}>
+              {mapping.functionLabel && <span className="block-tile-label">{mapping.functionLabel}</span>}
+              <div className="block-members">
+                {mapping.functions.map(functionId => <span key={functionId} className="block-number">{functionId}</span>)}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
 
-    <p className="mt-5 text-[12px] leading-relaxed text-[var(--color-shell-muted)]">
-      4 блока аспектов переставляются в 4 блока функций без точной привязки друг к другу. Инвариант: лишь то, что блоки остаются нераздельными.
+    <p className="block-explanation">
+      Каждый блок аспектов целиком занимает один из блоков функций. Соответствие между блоками может различаться между типами; состав каждого блока сохраняется.
     </p>
   </div>
 );

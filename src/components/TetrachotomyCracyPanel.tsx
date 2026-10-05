@@ -26,7 +26,7 @@ export const TetrachotomyCracyPanel = ({ view, aspectDisplayMode }: Props) => {
   const pole = trait.poles[commonPole.poleIndex];
 
   return (
-    <section className="glass-panel rounded-[28px] p-5" data-tetrachotomy-cracy-panel={formula.id} data-cracy-pole={commonPole.poleIndex}>
+    <section className="glass-panel block-surface rounded-[28px] p-5" data-tetrachotomy-cracy-panel={formula.id} data-cracy-pole={commonPole.poleIndex}>
       <div className="eyebrow">Блочная формула кратии</div>
       <h2 className="mt-2 text-lg font-medium text-[var(--color-app-fg)]">{pole.name}</h2>
       <div className="mt-4 flex flex-wrap gap-2">
@@ -54,14 +54,14 @@ export const TetrachotomyCracyPanel = ({ view, aspectDisplayMode }: Props) => {
       </p>
       <div className="mt-5 grid gap-4">
         {pole.views.map((blockView, conditionIndex) => (
-          <section key={blockView.title} className="rounded-2xl border border-[var(--color-shell-border)] p-4" data-cracy-block-condition={conditionIndex}>
-            <h3 className="text-sm font-medium text-[var(--color-app-fg)]">{blockView.title}</h3>
-            <div className="mt-3 grid gap-4 sm:grid-cols-2">
+          <section key={blockView.title} className="block-condition rounded-2xl p-4 sm:p-5" data-cracy-block-condition={conditionIndex}>
+            <h3 className="block-condition-title">{blockView.title}</h3>
+            <div className="block-columns mt-4">
               <div className="min-w-0">
-                <div className="eyebrow mb-3">Блоки аспектов</div>
+                <div className="block-label">Блоки аспектов</div>
                 <div className="grid grid-cols-2 gap-2">
                   {blockView.mappings.map((mapping, index) => (
-                    <div key={index} className="flex flex-wrap justify-center gap-3 rounded-xl border border-[var(--color-shell-border)] p-3" data-cracy-aspect-block={mapping.aspects.join(',')}>
+                    <div key={index} className="block-tile flex flex-wrap items-center justify-center gap-4 rounded-xl p-3" data-cracy-aspect-block={mapping.aspects.join(',')}>
                       {mapping.aspects.map(aspectId => (
                         <AspectGlyph key={aspectId} aspectId={aspectId} label={ASPECTS.find(aspect => aspect.id === aspectId)!.name} mode={aspectDisplayMode === 'symbol' ? 'symbol' : 'icon-symbol'} size="sm" />
                       ))}
@@ -70,11 +70,11 @@ export const TetrachotomyCracyPanel = ({ view, aspectDisplayMode }: Props) => {
                 </div>
               </div>
               <div className="min-w-0">
-                <div className="eyebrow mb-3">Блоки функций модели А</div>
+                <div className="block-label">Блоки функций модели А</div>
                 <div className="grid grid-cols-2 gap-2">
                   {blockView.mappings.map((mapping, index) => (
-                    <div key={index} className="flex flex-wrap items-center justify-center gap-2 rounded-xl border border-[var(--color-shell-border)] p-3" data-cracy-function-block={mapping.functions.join(',')}>
-                      {mapping.functions.map(functionId => <span key={functionId} className="rounded-md border border-[var(--color-shell-border)] px-2 py-1 font-mono text-sm">{functionId}</span>)}
+                    <div key={index} className="block-tile flex flex-wrap items-center justify-center gap-6 rounded-xl p-3" data-cracy-function-block={mapping.functions.join(',')}>
+                      {mapping.functions.map(functionId => <span key={functionId} className="block-number">{functionId}</span>)}
                     </div>
                   ))}
                 </div>

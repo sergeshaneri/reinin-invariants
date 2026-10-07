@@ -6,6 +6,23 @@ import { ASPECTS, ASPECT_FEATURES, FUNCTIONS, FUNCTION_FEATURES, SOCIONIC_TYPES 
 const count = (html: string, attribute: string) => (html.match(new RegExp(`${attribute}=`, 'g')) ?? []).length;
 
 describe('reference page', () => {
+  it('provides three annotated Hadamard matrices with complete cells and source links', () => {
+    const html = renderToString(<ReferencePage />);
+    expect(html).toContain('href="#hadamard"');
+    expect(html).toContain('Аспектон · H₃');
+    expect(html).toContain('Функцион · H₃');
+    expect(html).toContain('Социон · H₄');
+    expect(count(html, 'data-hadamard-matrix')).toBe(3);
+    expect(count(html, 'data-hadamard-cell')).toBe(384);
+    expect(count(html, 'data-hadamard-annotation')).toBe(3);
+    expect(html).toContain('HₙHₙᵀ = 2ⁿI');
+    expect(html).toContain('1 ↦ +1, 0 ↦ −1');
+    expect(html).toContain('1, 5, 6, 2, 8, 4, 3, 7');
+    expect(html).toContain('Таблицы отношений');
+    expect(html).toContain('1SM3S8J3uU4Uqd5t5WAqc3jKy54w2C98CyeKA_kg2Jwk');
+    expect(html).toContain('1RotOTDvP-DR-OT9kK3X3MbO84092jWIZuFuxf1yNdPU');
+    expect(html).toContain('18f_5bWegApKeBQexZacnCYfoDx_g3dqlgeCNxNlqbwc');
+  });
   it('explains the two aspect dichotomies and provides complete base tables', () => {
     const html = renderToString(<ReferencePage />);
     expect(html).toContain('две дихотомии информационных аспектов');

@@ -1,9 +1,11 @@
 import React from 'react';
 import { ASPECTS, ASPECT_FEATURES, FUNCTIONS, FUNCTION_FEATURES, SOCIONIC_TYPES } from '../data/socionics';
 import { AspectGlyph } from './AspectGlyph';
+import { HadamardTheory } from './HadamardTheory';
 
 const sections = [
   ['terminology', 'Терминология'],
+  ['hadamard', 'Матрицы Адамара'],
   ['quadras', 'Аспекты и квадры'],
   ['aspects', 'Аспекты и их признаки'],
   ['functions', 'Функции и их признаки'],
@@ -53,6 +55,10 @@ export const ReferencePage: React.FC = () => (
         <p className="text-[var(--color-shell-muted)]">Пример: аспекты Альфы занимают вербальные функции у типов Альфы и лаборные функции у типов Гаммы.</p>
         <p>Цвета на диаграммах различают группы внутри выбранного отображения. Состав группы указан в легенде. В прямом соответствии общий цвет связывает группу аспектов с заданной группой функций. В блочном инварианте группы сохраняют состав, а соответствие между блоками может различаться у разных типов.</p>
       </div>
+    </Section>
+
+    <Section id="hadamard" title="Матрицы Адамара">
+      <HadamardTheory />
     </Section>
 
     <Section id="quadras" title="Аспекты и квадры">

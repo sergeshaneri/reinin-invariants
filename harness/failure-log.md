@@ -17,6 +17,17 @@ Use this file to convert repeated agent mistakes into concrete harness changes.
 
 ## Active Entries
 
+### 2026-10-07 - Focused E2E Arguments Ignored by Wrapper
+
+- Task: Validate the Hadamard reference-page addition with focused browser tests.
+- What happened: Passing spec paths and worker flags to `scripts/e2e-dev.mjs` launched the entire browser suite instead. Running it alongside unified validation overloaded the browser and unit-test workloads; the intended focused command timed out.
+- Expected behavior: A focused command runs only its named specs and uses its requested worker limit; unified validation runs separately.
+- Root cause: The wrapper spawns Playwright with only `test` and does not forward its own CLI arguments. The wrapper was invoked before inspecting its argument handling.
+- Proposed harness change: Read wrapper argument forwarding before using it for focused checks. Use the Playwright CLI directly for named specs, verify or launch the configured dev server, and run CPU-heavy unified validation separately.
+- Change type: workflow
+- Acceptance test: `node.exe node_modules/playwright/cli.js test tests/e2e/hadamard.spec.ts tests/e2e/reference.spec.ts --workers=2` reports exactly 12 selected cases, not the full suite.
+- Status: accepted as a workflow rule; the direct focused command passed all 12 cases. Full-suite failures remain separate and are not resolved by this rule.
+
 ### 2026-10-04 - Lower Model A Previews Lost Overlapping Invariants
 
 - Task: Inspect transferred tetrachotomy invariants and their rendering on the four models below each selected tetrad.

@@ -1370,3 +1370,11 @@ Continue only at confirmed boundaries: separately review T4A.3a theoretical diag
 - Aggregate `npm run validate` remains blocked at `npm audit`: 7 vulnerabilities (1 low, 3 moderate, 3 high). Dependency manifests/lockfile were not changed. No commit or push.
 - Independent read-only review `deleg_cab00069` passed with no security or logic findings. It compared every DOCX package member and paragraph against Git `70acb99`, confirming only the four approved left sides changed; functional data, groups, other formulas and rendering-significant formatting are preserved. ZIP member contents are preserved outside `word/document.xml`; ZIP container flags/attributes were normalized, so the rebuilt ZIP itself is not byte-identical.
 - Non-blocking review suggestion: strengthen the browser regression with explicit distinct-tetrad coverage and aspect-feature text assertions. Existing Model A, literal row/feature equality, exact classification tests and the four focused browser tests pass.
+
+### 2026-10-09 - Carrier pattern atlases: checkpoint before UI backlog
+
+- Added carrier pattern atlases, three original images, seven function-position dichotomies, anchor navigation and desktop/mobile screenshots. Domain matrices unchanged.
+- TypeScript passed; focused ReferencePage/Hadamard unit tests: 8 passed; patterns/hadamard/reference browser tests: 16 passed, two workers, no snapshot updates.
+- Unified validation launched through the Node npm CLI after the Bash npm launcher timed out. TypeScript, 198 unit tests, production build, dist/preview/render/dev smoke and dependency audit passed (zero vulnerabilities). The full browser suite reported failures and exceeded 180 seconds; aggregate validation is not green.
+- Independent review was cancelled by the runtime after inactivity; no approval is claimed. Added-line security scan and diff whitespace checks passed.
+- Checkpoint includes previously staged pattern changes and the existing X2.13 backlog entry. Concurrent octochotomy/source-panel edits remain outside the checkpoint.

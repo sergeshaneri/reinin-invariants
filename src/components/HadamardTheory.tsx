@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { HADAMARD_MATRICES, HADAMARD_SOURCES, type HadamardMatrix } from '../data/hadamard';
+import { HadamardPatterns } from './HadamardPatterns';
 
 const annotations: Record<HadamardMatrix['id'], string[]> = {
   aspecton: [
@@ -62,8 +63,12 @@ export const HadamardTheory = () => {
         <option value="signs">Знаки + / −</option><option value="binary">Биты 1 / 0</option>
       </select>
     </label>
+    <nav aria-label="Паттерны носителей" className="flex flex-wrap gap-2">
+      {HADAMARD_MATRICES.map(matrix => <a key={matrix.id} href={`#patterns-${matrix.id}`} className="shell-control rounded-lg border border-[var(--color-shell-border)] px-3 py-2 text-sm">{matrix.title.split(' · ')[0]}</a>)}
+    </nav>
     {HADAMARD_MATRICES.map(matrix => <article key={matrix.id} id={`hadamard-${matrix.id}`} className="min-w-0 space-y-4 scroll-mt-6">
       <h3 className="text-lg font-medium">{matrix.title} · {matrix.rows.length} × {matrix.columns.length}</h3>
+      <HadamardPatterns matrix={matrix} binary={binary} />
       <div className="max-w-4xl space-y-3 leading-relaxed" data-hadamard-annotation={matrix.id}>{annotations[matrix.id].map(text => <p key={text}>{text}</p>)}</div>
       <MatrixTable matrix={matrix} binary={binary} />
       <details className="rounded-xl border border-[var(--color-shell-border)] p-3">

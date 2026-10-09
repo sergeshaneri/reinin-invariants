@@ -17,6 +17,17 @@ Use this file to convert repeated agent mistakes into concrete harness changes.
 
 ## Active Entries
 
+### 2026-10-08 - Focused Browser Checks Trusted an Expired Dev Process
+
+- Task: Add the three carrier pattern atlases and validate their source images.
+- What happened: All 16 focused browser cases failed with connection refused because external-server mode was selected before establishing a live server on port 3002.
+- Expected behavior: Require a successful bounded HTTP probe immediately before selecting external-server mode; confirm the edited UI through browser assertions.
+- Root cause: The dev process remembered from the preceding session was no longer running; an earlier compound command's output was not used as a fail-closed readiness gate.
+- Proposed harness change: Chain a bounded `curl.exe --max-time 5 --fail` probe and the external-server Playwright command with `&&`. If server startup tooling times out, probe again before starting a duplicate process.
+- Change type: workflow
+- Acceptance test: The probe fails before Playwright starts when the port is closed; with the verified current dev server, all 16 focused cases pass.
+- Status: accepted as a workflow rule; focused cases passed after readiness verification.
+
 ### 2026-10-07 - Focused E2E Arguments Ignored by Wrapper
 
 - Task: Validate the Hadamard reference-page addition with focused browser tests.

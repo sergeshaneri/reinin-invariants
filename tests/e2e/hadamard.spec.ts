@@ -34,7 +34,7 @@ for (const theme of ['dark', 'light']) {
     await expect(relationships.locator('[data-aspect-relation]')).toHaveCount(64);
     await expect(relationships.locator('[data-aspect-relation="Ne:Si"]')).toHaveText('ДУ');
     await expect(relationships.locator('[data-aspect-relation="Ni:Ni"]')).toHaveText('ТЖ');
-    await page.locator('#hadamard-functionon summary').click();
+    await page.getByText('Полюса столбцов · Функцион · H₃', { exact: true }).click();
     await expect(page.locator('#hadamard-functionon')).toContainText('Ментальная');
     await expect(page.locator('#hadamard-functionon')).toContainText('Витальная');
     const sourceNote = page.locator('[data-hadamard-source-note]');

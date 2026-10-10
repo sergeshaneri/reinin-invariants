@@ -17,6 +17,54 @@ Use this file to convert repeated agent mistakes into concrete harness changes.
 
 ## Active Entries
 
+### 2026-10-10 - Type ARP Keyboard Focus Cleared By Mouseleave
+
+- Task: Complete browser acceptance of type-first ARP explorer.
+- What happened: A focused explanation row or Model A cell lost linked highlighting when the pointer left it, although DOM focus remained. A new desktop/mobile browser regression reproduced the failure before the fix.
+- Root cause: Pointer hover and keyboard focus wrote to the same state variable.
+- Proposed harness change: Keep focused and hovered group states independent; test focus → pointer leave → linked highlight remains → blur clears it, for both model and explanation renderers.
+- Change type: test
+- Acceptance test: `type-arp.spec.ts` mixed-focus regression failed on both projects before correction and passed after; final focused suite passed 28 cases.
+- Status: accepted; separate focus callbacks preserve the old optional callback contract.
+
+- Validation recurrence in this pass: standard validate stopped on bulk metadata/model-preview 5000ms timeouts; full unit suite passed 713 tests with two workers. Keep the existing proposed per-formula split rather than claiming a unified pass.
+- General E2E follow-up: complete suite exceeded the tool's 420s execution limit, with confirmed screenshot baseline differences in app/type routes. Review exact visual-contract changes before updating baselines; use bounded per-spec output logs for subsequent triage, not automatic snapshot replacement.
+
+### 2026-10-09 - Formula Renderer Branch Omitted
+
+- Task: Remove block indices and synchronize aspect display modes in algebraic formulas (X2.13).
+- What happened: The first fix and its tests covered `BlockView` only. The user's screenshot showed `PairView`, which still rendered circular indices and forced abbreviations; the task was reported complete with this branch unchanged.
+- Expected behavior: Every formula renderer uses the selected aspect mode and omits block indices while retaining function numbers and mapping order.
+- Root cause: The acceptance scope was narrowed to `isBlockPermutation` without matching the screenshot's fixed-pair renderer.
+- Proposed harness change: Enumerate both `FormulaPanel` branches before closing X2.13; test all non-permutation views in all three modes, alongside existing permutation tests, and exercise the fixed-pair UI in both themes on desktop/mobile.
+- Change type: test
+- Acceptance test: New unit and browser tests fail on the two circular indices before the fix and pass after it; function sequences match the source mappings.
+- Status: accepted; `FormulaPanel.test.tsx` and `ui-backlog.spec.ts` include the omitted branch. Render smoke checks accessible aspect tiles and pictograms rather than requiring visible abbreviations in pictogram mode.
+- Recurrence, 2026-10-10: the main order/cracy diagrams respected display settings, but their condition cards and transferred source rows still coerced icon to icon-symbol. These three branches now pass the mode unchanged; order/sibling component regressions and eight focused browser cases cover the previously omitted renderers. Include condition-card and source-row glyphs in display-mode acceptance scope, not only the diagram's buttons.
+
+### 2026-10-09 - Independent Review Runtime Stalls
+
+- Task: Preserve the pattern-atlas checkpoint and independently review UI backlog fixes X2.10–X2.13.
+- What happened: Two delegated reviewers were cancelled after eight minutes without progress. The second reviewer was limited to a single 28019-character diff artifact and no test execution; reducing the review scope did not restore a result.
+- Expected behavior: A reviewed commit requires an actual verdict. Runtime cancellation must not be treated as approval or cause repeated heavy validation solely to wait for a reviewer.
+- Root cause: Runtime reported inactivity; the underlying cause is unknown. No code-review verdict was returned.
+- Proposed harness change: After repeated reviewer runtime cancellations, retain the review artifact and verification evidence, report the blocker, and leave the feature changes uncommitted rather than launching another identical reviewer. An explicitly requested initial-state checkpoint may be preserved without a `[verified]` claim.
+- Change type: workflow
+- Acceptance test: Simulated reviewer cancellation produces no independent-approval claim and no reviewed-feature commit; completed focused test results remain separately reported.
+- Status: proposed; original checkpoint `bfa3b0c` is committed, UI fixes remain local.
+
+### 2026-10-09 - Bulk Source Metadata Test Exceeds Shared Timeout
+
+- Task: Transfer quasi-identity dimensionality rows and run unified validation.
+- What happened: `npm run validate` stopped at the existing `TetrachotomySourceMetadata.test.tsx` test: its 5000 ms limit was exceeded in the full suite. A single-worker full-suite rerun also exceeded the limit. All other 197 tests passed; the metadata test passed in isolation with a 30000 ms diagnostic limit (1.55 s test duration).
+- Expected behavior: Validation should preserve coverage of all formulas and tetrads while giving failures a bounded, attributable scope.
+- Root cause: One synchronous test renders the complete tetrachotomy catalog; its aggregate duration is sensitive to workload and machine load.
+- Proposed harness change: Parameterize the metadata test by formula, retaining every tetrad assertion, rather than putting all formula renders under one 5000 ms budget. Do not update visual baselines or application semantics to address a test-duration failure.
+- Change type: test
+- Acceptance test: The unchanged metadata checks cover every formula and tetrad and complete in `npm run validate`; individual failures identify the source formula.
+- Status: proposed; existing test and its timeout remain unchanged.
+- Recurrence, 2026-10-10: final order-panel validation stopped at the same bulk metadata test (5010 ms against a 5000 ms limit; 237 other tests passed). The identical full suite passed all 238 tests with two workers. This is isolated evidence, not an aggregate pass; keep the proposed per-formula parameterization rather than changing the UI or weakening metadata assertions. Log: `C:/Users/user/AppData/Local/hermes/cache/scratch/reinin-order-presentation-final-validate.log`.
+
 ### 2026-10-08 - Focused Browser Checks Trusted an Expired Dev Process
 
 - Task: Add the three carrier pattern atlases and validate their source images.
@@ -48,7 +96,7 @@ Use this file to convert repeated agent mistakes into concrete harness changes.
 - Proposed harness change: Add a lower-model regression for every formula and tetrad, comparing each rendered aspect/function pair to its source dyad, requiring all four dyad colors and full participating contrast for the twelve order-dependent formulas. Assert process-condition availability independently of basis ordering and exercise every constituent view for unbound formulas.
 - Change type: test | check
 - Acceptance test: 35 formulas / 140 tetrads / 560 models have correct aspect placements and selected invariant memberships; no participating order-dependent aspect is incorrectly muted; 10/17/30/34 expose process conditions and 05/26/27 expose all constituent conditions.
-- Status: proposed; inspection only, application code unchanged. Evidence: scratch/tetrachotomy-inspection/model-audit.json, browser-audit.json and desktop/mobile screenshots.
+- Status: partially resolved on 2026-10-09. The selector now prefers the complete aspect/function pair, retaining intentional secondary partners. `selectors.test.ts` checks all 12 order-dependent formulas / 48 tetrads / 192 models / 1536 cells; `model-previews.spec.ts` passes on desktop/mobile in both themes and compares actual colors and contrast to the main source diagram. Process previews derive their cycle from the selected class's common process pole, independent of basis ordering; component tests cover reversed basis and all three aspect modes. Remaining: lower-model availability of all equivalence/constituent conditions, including 05/26/27. Current evidence: `artifacts/model-previews/report.md` and screenshots. Original inspection evidence: scratch/tetrachotomy-inspection/model-audit.json, browser-audit.json and desktop/mobile screenshots.
 
 ### 2026-10-04 - Overlapping Source Rows and Duplicate Sibling Keys
 
@@ -387,3 +435,12 @@ Use this file to convert repeated agent mistakes into concrete harness changes.
 - Evidence: Failure trace records successful but slow requests to `fonts.googleapis.com` and `fonts.gstatic.com`; some requests take longer than the screenshot assertion's 5000 ms timeout.
 - Proposed harness change: Provide deterministic local or test-cached copies of the same font assets; retain actual font rendering and pixel comparisons rather than disabling font waits or silently switching to fallback fonts.
 - Status: proposed, not implemented in this width-only fix. Reduced worker counts mitigate load but do not remove the external-font dependency.
+
+### 2026-10-09 - Playwright Trace HTML Triggered Dev Reloads
+
+- Task: Reproduce and fix lower Model A preview colors in the running local app.
+- What happened: A custom Playwright output directory under unignored `artifacts/model-previews/before` contained trace-resource HTML. Vite reloaded the tested app while assertions were running, producing `Execution context was destroyed`. Moving the same HTML out during a later aggregate run also generated reload events; that cleanup must not occur during browser validation.
+- Evidence: Vite process log records `page reload artifacts/model-previews/before/.playwright-artifacts-0/traces/resources/*.html` on creation and removal. The generated evidence was moved to Hermes scratch with hashes verified for all 19 files. Reproduction and final target runs used scratch output; the genuine source-color failure was observed before the fix, and all four final target cases passed afterward.
+- Proposed harness change: Put live browser output/traces outside the Vite-watched root; clean any previously watched HTML before tests start; copy final PNGs into durable artifacts after completion. Do not weaken DOM/color assertions to compensate for reloads.
+- Change type: workflow
+- Status: applied to focused runs and recorded in `local-web-preview`; broader aggregate browser failures remain unresolved.

@@ -36,8 +36,8 @@ export const TetrachotomyOrderPanel = ({ view, aspectDisplayMode }: Props) => {
       <h2 className="mt-2 text-lg font-medium text-[var(--color-app-fg)]">{pole.name}</h2>
       <p className="mt-3 text-sm leading-relaxed text-[var(--color-shell-muted)]" data-order-invariant-explanation>
         {isCycle
-          ? pole.description
-          : 'Оба условия эквивалентности сохраняются. Диада аспектов целиком занимает одну из указанных пар функций; соответствие между блоками может различаться между типами.'}
+          ? 'Процесс и Результат различаются порядком макроаспектов при обходе тактов модели А.'
+          : 'В каждой из двух эквивалентностей диада аспектов целиком занимает одну из пар функций. У разных типов соответствие диад и пар может различаться.'}
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
         {pole.views.map((condition, index) => (
@@ -51,6 +51,7 @@ export const TetrachotomyOrderPanel = ({ view, aspectDisplayMode }: Props) => {
       <div className="mt-4" data-order-ordinary-diagram={viewIndex}>
         <AspectFunctionDiagram key={`${trait.id}:${commonPole.poleIndex}:${viewIndex}`}
           trait={trait} pole={pole} view={ordinaryView} activeCell={resolveActiveCell(hoveredCell, pinnedCell)}
+          aspectDisplayMode={aspectDisplayMode}
           onAspectHover={id => setHoveredCell(id ? { kind: 'aspect', id } : null)}
           onFunctionHover={id => setHoveredCell(id !== null ? { kind: 'function', id } : null)}
           onAspectClick={id => setPinnedCell(previous => togglePinnedCell(previous, { kind: 'aspect', id }))}
@@ -61,32 +62,50 @@ export const TetrachotomyOrderPanel = ({ view, aspectDisplayMode }: Props) => {
         {pole.views.map((condition, conditionIndex) => (
           <section key={conditionIndex} className="block-condition rounded-2xl p-4 sm:p-5" data-order-condition={conditionIndex}>
             <h3 className="block-condition-title">{condition.title || 'Циклический порядок'}</h3>
-            {isCycle ? <p className="mt-2 text-sm leading-relaxed text-[var(--color-shell-muted)]">{condition.description}</p> : null}
-            <div className="block-columns mt-4">
+            {isCycle ? <div className="order-cycle-description">
+              <p className="block-label">Циклический порядок макроаспектов</p>
+              <p className="order-cycle-sequence" data-order-cycle>
+                {condition.mappings.map((mapping, index) => <span key={index} className="order-cycle-step">
+                  <span>{mapping.aspectLabel}</span><span aria-hidden="true">→</span>
+                </span>)}
+                <span>{condition.mappings[0].aspectLabel}</span>
+              </p>
+            </div> : null}
+            <div className="block-columns order-condition-blocks">
               <div className="min-w-0">
-                <div className="block-label">Диада аспектов</div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="block-label">{isCycle ? 'Макроаспекты' : 'Диады аспектов'}</div>
+                <div className="block-collection order-block-collection">
                   {condition.mappings.map((mapping, index) => (
-                    <div key={index} className="block-tile flex flex-wrap items-center justify-center gap-3 rounded-xl p-3" data-order-aspect-block={mapping.aspects.join(',')}>
-                      {mapping.aspects.map(id => <AspectGlyph key={id} aspectId={id} label={ASPECTS.find(aspect => aspect.id === id)!.name}
-                        mode={aspectDisplayMode === 'symbol' ? 'symbol' : 'icon-symbol'} size="sm" />)}
+                    <div key={index} className="block-tile block-text-tile" data-order-aspect-block={mapping.aspects.join(',')}>
+                      {mapping.aspectLabel ? <span className="block-tile-label">{mapping.aspectLabel}</span> : null}
+                      <div className="block-members">
+                        {mapping.aspects.map(id => {
+                          const aspect = ASPECTS.find(candidate => candidate.id === id)!;
+                          return <span key={id} title={aspect.fullName} aria-label={`${aspect.fullName} (${aspect.name})`}>
+                            <AspectGlyph aspectId={id} label={aspect.name} mode={aspectDisplayMode} size="sm" />
+                          </span>;
+                        })}
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
               <div className="min-w-0">
-                <div className="block-label">Пары функций модели А</div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="block-label">{isCycle ? 'Такты модели А' : 'Пары функций модели А'}</div>
+                <div className="block-collection order-block-collection">
                   {condition.mappings.map((mapping, index) => (
-                    <div key={index} className="block-tile flex flex-col items-center justify-center gap-2 rounded-xl p-3" data-order-function-block={mapping.functions.join(',')}>
+                    <div key={index} className="block-tile block-text-tile" data-order-function-block={mapping.functions.join(',')}>
                       {mapping.functionLabel ? <span className="block-tile-label">{mapping.functionLabel}</span> : null}
-                      <span className="flex items-center gap-6">{mapping.functions.map(id => <span key={id} className="block-number">{id}</span>)}</span>
+                      <span className="block-members">{mapping.functions.map(id => <span key={id} className="block-number">{id}</span>)}</span>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
-            {condition.footnote ? <p className="mt-4 text-xs leading-relaxed text-[var(--color-shell-muted)]">{condition.footnote}</p> : null}
+            {isCycle ? <div className="order-condition-explanation" data-order-cycle-explanation>
+              <p>Каждый макроаспект занимает один такт целиком. У разных типов макроаспекты находятся в разных тактах.</p>
+              <p>Обход тактов в модели А происходит по пунктирной стрелке. Первый такт — функции 3 и 5.</p>
+            </div> : condition.footnote ? <p className="mt-4 text-xs leading-relaxed text-[var(--color-shell-muted)]">{condition.footnote}</p> : null}
           </section>
         ))}
       </div>

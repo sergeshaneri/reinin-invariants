@@ -42,6 +42,7 @@ export const TetrachotomyCracyPanel = ({ view, aspectDisplayMode }: Props) => {
         <AspectFunctionDiagram
           key={`${commonPole.poleIndex}:${viewIndex}`}
           trait={trait} pole={pole} view={pole.views[viewIndex]} activeCell={activeCell}
+          aspectDisplayMode={aspectDisplayMode}
           onAspectHover={id => setActiveCell(id ? { kind: 'aspect', id } : null)}
           onFunctionHover={id => setActiveCell(id !== null ? { kind: 'function', id } : null)}
           onAspectClick={id => setActiveCell({ kind: 'aspect', id })}
@@ -62,9 +63,12 @@ export const TetrachotomyCracyPanel = ({ view, aspectDisplayMode }: Props) => {
                 <div className="grid grid-cols-2 gap-2">
                   {blockView.mappings.map((mapping, index) => (
                     <div key={index} className="block-tile flex flex-wrap items-center justify-center gap-4 rounded-xl p-3" data-cracy-aspect-block={mapping.aspects.join(',')}>
-                      {mapping.aspects.map(aspectId => (
-                        <AspectGlyph key={aspectId} aspectId={aspectId} label={ASPECTS.find(aspect => aspect.id === aspectId)!.name} mode={aspectDisplayMode === 'symbol' ? 'symbol' : 'icon-symbol'} size="sm" />
-                      ))}
+                      {mapping.aspects.map(aspectId => {
+                        const aspect = ASPECTS.find(candidate => candidate.id === aspectId)!;
+                        return <span key={aspectId} title={aspect.fullName} aria-label={`${aspect.fullName} (${aspect.name})`}>
+                          <AspectGlyph aspectId={aspectId} label={aspect.name} mode={aspectDisplayMode} size="sm" />
+                        </span>;
+                      })}
                     </div>
                   ))}
                 </div>

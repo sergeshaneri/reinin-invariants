@@ -2,6 +2,7 @@ import React from 'react';
 import { ChevronDown, Layers3 } from 'lucide-react';
 import { REININ_TRAITS, type ReininTraitId, type View } from '../data/socionics';
 import { TRAIT_TYPE_MEMBERSHIPS_BY_TRAIT_ID, type PoleIndex } from '../data/memberships';
+import { getOrderDependentTetrachotomy } from '../data/orderDependentTetrachotomies';
 import { selectPartitionTypesPanelView, type PartitionExplorerViewModel, type PartitionViewModel } from '../data/selectors';
 import type { SocionicTypeId } from '../data/types';
 import type { AspectDisplayMode } from './AspectGlyph';
@@ -100,6 +101,13 @@ export const TetrachotomyView: React.FC<Props> = ({
     view.sourceFormula?.targetTrait.id,
     view.selectedClass,
   );
+  const orderFamily = getOrderDependentTetrachotomy(view.sourceFormula?.id);
+  const processPole = orderFamily?.orderTraitId === 'process'
+    ? getCommonTargetPole('process', view.selectedClass)
+    : null;
+  const previewView = processPole
+    ? REININ_TRAITS.find(trait => trait.id === 'process')?.poles[processPole.poleIndex]?.views[0] ?? activeView
+    : activeView;
 
   if (!partition.ok || partition.kind !== 'tetrachotomy') {
     return (
@@ -139,7 +147,7 @@ export const TetrachotomyView: React.FC<Props> = ({
       </label>
 
       {view.sourceFormula && !view.sourceFormula.sourceBlocks?.length ? (
-        <TetrachotomyDichotomyPanel view={view} />
+        <TetrachotomyDichotomyPanel view={view} aspectDisplayMode={aspectDisplayMode} />
       ) : (
         <TetrachotomyAspectFunctionPanel
           key={`${view.sourceFormula?.id ?? 'structural'}:${selectedClassKey}`}
@@ -152,10 +160,10 @@ export const TetrachotomyView: React.FC<Props> = ({
       <TetrachotomyCracyPanel view={view} aspectDisplayMode={aspectDisplayMode} />
       <TetrachotomyOrderPanel key={`order:${view.sourceFormula?.id}:${selectedClassKey}`} view={view} aspectDisplayMode={aspectDisplayMode} />
 
-      {activeView ? (
+      {previewView ? (
         <PartitionTypesPanel
           view={typesPanelView}
-          activeView={activeView}
+          activeView={previewView}
           aspectDisplayMode={aspectDisplayMode}
           sourceBlock={sourceBlock}
           extraPoles={sourceTargetPole ? [sourceTargetPole] : []}

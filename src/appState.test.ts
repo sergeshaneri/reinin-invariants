@@ -1,11 +1,13 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   getDefaultTraitPoleIndex,
   parseAppUrlState,
+  readInitialAppState,
   serializeAppUrlState,
   type AppUrlState,
+  type TypeArpState,
 } from './appState';
-import { REININ_TRAITS } from './data/socionics';
+import { REININ_TRAITS, SOCIONIC_TYPE_ORDER, TRAIT_TYPE_MEMBERSHIPS_BY_TRAIT_ID } from './data/socionics';
 
 const traitIndex = (traitId: string) => REININ_TRAITS.findIndex(trait => trait.id === traitId);
 const defaultDichotomyPartition = {
@@ -25,6 +27,170 @@ const defaultOctochotomyPartition = {
 } as const;
 
 describe('app URL state', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('opens the requested logic ARP but resets its unavailable second view', () => {
+    const state = parseAppUrlState('?mode=type&type=ILE&arp=logic&arpView=1');
+    expect(state.typeArp).toEqual({ isOpen: true, traitId: 'logic', viewIndex: 0 });
+    expect(serializeAppUrlState(state).toString()).toBe('mode=type&type=ILE&arp=logic');
+  });
+
+  it('omits closed analysis from URLs without losing its in-memory settings', () => {
+    const typeArp: TypeArpState = { isOpen: false, traitId: 'democracy', viewIndex: 2 };
+    const state: AppUrlState = { ...parseAppUrlState('?mode=type&type=LSI'), typeArp };
+    const params = serializeAppUrlState(state);
+    expect(params.toString()).toBe('mode=type&type=LSI');
+    expect(parseAppUrlState(params)).toEqual(parseAppUrlState('?mode=type&type=LSI'));
+    expect(state.typeArp).toEqual(typeArp);
+    expect(parseAppUrlState(params)).not.toHaveProperty('typeArp');
+  });
+
+  it.each(['', 'missing', 'Logic', ' logic '])('omits an unknown or empty arp ID: %j', arp => {
+    const params = new URLSearchParams({ mode: 'type', type: 'ILE', arp, arpView: '1' });
+    const state = parseAppUrlState(params);
+    expect(state).not.toHaveProperty('typeArp');
+    expect(serializeAppUrlState(state).toString()).toBe('mode=type&type=ILE');
+  });
+
+  it('defensively omits unknown ARP IDs during serialization', () => {
+    const state = parseAppUrlState('?mode=type');
+    state.typeArp = { isOpen: true, traitId: 'missing' as TypeArpState['traitId'], viewIndex: 1 };
+    expect(serializeAppUrlState(state).toString()).toBe('mode=type&type=ILE');
+  });
+
+  it.each([
+    '', '-1', '-0', '1.5', '1.0', 'NaN', 'Infinity', '-Infinity', '1foo', '1e0',
+    '0x1', '+1', ' 1 ', '1\n', '1\r', '1/2', '99999', '9007199254740993', '9'.repeat(400),
+  ])('resets malformed or unavailable arpView %j to the first view', arpView => {
+    const params = new URLSearchParams({ mode: 'type', type: 'ILE', arp: 'democracy', arpView });
+    const state = parseAppUrlState(params);
+    expect(state.typeArp).toEqual({ isOpen: true, traitId: 'democracy', viewIndex: 0 });
+    expect(serializeAppUrlState(state).has('arpView')).toBe(false);
+  });
+
+  it.each([NaN, Infinity, -Infinity, -1, 1.5, 99999, Number.MAX_SAFE_INTEGER + 1])(
+    'normalizes invalid in-memory indices during serialization: %s', viewIndex => {
+      const state = parseAppUrlState('?mode=type&arp=democracy');
+      state.typeArp = { isOpen: true, traitId: 'democracy', viewIndex };
+      expect(serializeAppUrlState(state).toString()).toBe('mode=type&type=ILE&arp=democracy');
+    },
+  );
+
+  it.each([null, '0', '00'])('omits the first view parameter: %j', arpView => {
+    const params = new URLSearchParams({ mode: 'type', arp: 'democracy' });
+    if (arpView !== null) params.set('arpView', arpView);
+    const state = parseAppUrlState(params);
+    expect(state.typeArp?.viewIndex).toBe(0);
+    expect(serializeAppUrlState(state).has('arpView')).toBe(false);
+  });
+
+  it('normalizes all registered type/trait views using type membership, not manual pole', () => {
+    for (const typeId of SOCIONIC_TYPE_ORDER) {
+      for (const trait of REININ_TRAITS) {
+        const pole = TRAIT_TYPE_MEMBERSHIPS_BY_TRAIT_ID[trait.id].poles
+          .find(candidate => candidate.typeIds.includes(typeId))!;
+        const views = trait.poles[pole.poleIndex].views;
+        for (let viewIndex = 0; viewIndex <= views.length; viewIndex += 1) {
+          const params = new URLSearchParams({
+            mode: 'type', type: typeId, arp: trait.id, arpView: String(viewIndex),
+            trait: 'vertness', pole: String(1 - pole.poleIndex), view: '99',
+          });
+          const state = parseAppUrlState(params);
+          expect(state.typeArp).toEqual({
+            isOpen: true, traitId: trait.id, viewIndex: viewIndex < views.length ? viewIndex : 0,
+          });
+          const serialized = serializeAppUrlState(state);
+          expect(serialized.has('pole')).toBe(false);
+          expect(serialized.has('trait')).toBe(false);
+          expect(serialized.has('view')).toBe(false);
+          expect(parseAppUrlState(serialized).typeArp).toEqual(state.typeArp);
+        }
+      }
+    }
+  });
+
+  it('recalculates available views when a state is serialized with a different type', () => {
+    const state = parseAppUrlState('?mode=type&type=ILE&arp=democracy&arpView=2');
+    state.typeId = 'LSI';
+    const params = serializeAppUrlState(state);
+    expect(params.get('type')).toBe('LSI');
+    expect(params.get('arp')).toBe('democracy');
+    expect(parseAppUrlState(params).typeArp).toEqual(state.typeArp);
+    expect(params.has('pole')).toBe(false);
+  });
+
+  it('applies the existing unknown-type fallback before normalizing ARP views', () => {
+    expect(parseAppUrlState('?mode=type&type=UNKNOWN&arp=democracy&arpView=1')).toMatchObject({
+      typeId: 'ILE', typeArp: { isOpen: true, traitId: 'democracy', viewIndex: 1 },
+    });
+  });
+
+  it.each(['trait', 'tetrachotomy', 'octochotomy', 'unknown'])('ignores ARP parameters outside type mode: %s', mode => {
+    const legacy = parseAppUrlState(`?mode=${mode}&trait=democracy&pole=1&view=2&theme=dark`);
+    expect(parseAppUrlState(`?mode=${mode}&trait=democracy&pole=1&view=2&theme=dark&arp=logic&arpView=1`))
+      .toEqual(legacy);
+    expect(serializeAppUrlState({
+      ...legacy, typeArp: { isOpen: true, traitId: 'logic', viewIndex: 0 },
+    }).toString()).toBe(serializeAppUrlState(legacy).toString());
+  });
+
+  it('preserves theme and open ARP when URL state is reused for navigation links', () => {
+    const state = parseAppUrlState('?mode=type&type=LSI&arp=democracy&arpView=2&theme=dark');
+    const params = serializeAppUrlState({ ...state });
+    params.set('page', 'reference');
+    expect(parseAppUrlState(params)).toEqual(state);
+    expect(params.get('theme')).toBe('dark');
+  });
+
+  it('serializes a transition to the general ARP without leaking type analysis parameters', () => {
+    const state = parseAppUrlState('?mode=type&type=LSI&arp=democracy&arpView=2&theme=dark');
+    const params = serializeAppUrlState({
+      ...state, mode: 'trait', traitIdx: traitIndex('democracy'), poleIdx: 1, viewIdx: 2,
+    });
+    expect(params.toString()).toBe('theme=dark&trait=democracy&pole=1&view=2');
+    expect(parseAppUrlState(params)).not.toHaveProperty('typeArp');
+  });
+
+  it('keeps SSR defaults and legacy type URLs closed', () => {
+    vi.stubGlobal('window', undefined);
+    expect(readInitialAppState()).toEqual(parseAppUrlState(''));
+    expect(readInitialAppState()).not.toHaveProperty('typeArp');
+    expect(parseAppUrlState('?mode=type&type=ILE&arpView=1')).not.toHaveProperty('typeArp');
+  });
+
+  it('reads open ARP from the browser URL with stored theme and explicit theme precedence', () => {
+    vi.stubGlobal('window', {
+      location: { search: '?mode=type&type=ILE&arp=democracy&arpView=1' },
+      localStorage: { getItem: () => 'dark' },
+    });
+    expect(readInitialAppState()).toMatchObject({
+      theme: 'dark', typeArp: { isOpen: true, traitId: 'democracy', viewIndex: 1 },
+    });
+    expect(parseAppUrlState('?mode=type&arp=logic&theme=light').theme).toBe('light');
+  });
+
+  it('keeps type ARP parsing safe when browser theme storage is unavailable', () => {
+    vi.stubGlobal('window', { localStorage: { getItem: () => { throw new Error('blocked'); } } });
+    expect(parseAppUrlState('?mode=type&arp=logic')).toMatchObject({
+      theme: 'light', typeArp: { isOpen: true, traitId: 'logic', viewIndex: 0 },
+    });
+  });
+
+  it('round-trips an open type ARP independently from general trait state', () => {
+    const state = parseAppUrlState('?mode=type&type=ILE&arp=democracy&arpView=1');
+
+    expect(state).toMatchObject({
+      mode: 'type',
+      typeId: 'ILE',
+      traitIdx: 0,
+      poleIdx: 0,
+      viewIdx: 0,
+      typeArp: { isOpen: true, traitId: 'democracy', viewIndex: 1 },
+    });
+    expect(serializeAppUrlState(state).toString()).toBe('mode=type&type=ILE&arp=democracy&arpView=1');
+    expect(parseAppUrlState(serializeAppUrlState(state))).toEqual(state);
+  });
+
   it('uses the ILE pole as the default dichotomy detail pole', () => {
     expect(REININ_TRAITS.map(trait => [trait.id, getDefaultTraitPoleIndex(trait.id)])).toEqual(
       REININ_TRAITS.map(trait => [trait.id, 0]),

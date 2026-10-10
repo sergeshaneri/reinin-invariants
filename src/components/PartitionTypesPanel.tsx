@@ -15,11 +15,13 @@ const KIND_LABELS = {
   octochotomy: 'Октохотомия',
 } as const;
 
-interface Props {
+export interface PartitionTypesPanelProps {
   view: PartitionTypesPanelViewModel;
   activeView: View;
   aspectDisplayMode: AspectDisplayMode;
   sourceBlock?: SourceFormulaBlock | null;
+  selectedTypeId?: SocionicTypeId;
+  onSelectType?: (typeId: SocionicTypeId) => void;
   extraPoles?: readonly {
     traitId: string;
     poleIndex: number;
@@ -27,11 +29,13 @@ interface Props {
   }[];
 }
 
-export const PartitionTypesPanel: React.FC<Props> = ({
+export const PartitionTypesPanel: React.FC<PartitionTypesPanelProps> = ({
   view,
   activeView,
   aspectDisplayMode,
   sourceBlock,
+  selectedTypeId,
+  onSelectType,
   extraPoles = [],
 }) => {
   const displayPoles = [
@@ -91,6 +95,8 @@ export const PartitionTypesPanel: React.FC<Props> = ({
       view={activeView}
       aspectDisplayMode={aspectDisplayMode}
       sourceBlock={sourceBlock}
+      selectedTypeId={selectedTypeId}
+      onSelectType={onSelectType}
     />
   </section>
   );

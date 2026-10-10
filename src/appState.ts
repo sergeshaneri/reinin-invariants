@@ -17,6 +17,12 @@ export interface PartitionExplorerState {
   selectedClassKey: string;
 }
 
+export interface TypeArpState {
+  isOpen: boolean;
+  traitId: ReininTraitId;
+  viewIndex: number;
+}
+
 export interface AppUrlState {
   mode: AppMode;
   theme: ThemeMode;
@@ -25,6 +31,7 @@ export interface AppUrlState {
   viewIdx: number;
   typeId: SocionicTypeId;
   partition: PartitionExplorerState;
+  typeArp?: TypeArpState;
 }
 
 const DEFAULT_MODE: AppMode = 'trait';
@@ -202,6 +209,39 @@ const parsePartitionState = (
   };
 };
 
+const normalizeTypeArpViewIndex = (
+  typeId: SocionicTypeId,
+  traitId: ReininTraitId,
+  viewIndex: number,
+): number => {
+  const trait = REININ_TRAITS.find(candidate => candidate.id === traitId);
+  const membership = TRAIT_TYPE_MEMBERSHIPS_BY_TRAIT_ID[traitId];
+  const pole = membership?.poles.find(candidate => candidate.typeIds.includes(typeId));
+  const viewCount = pole ? trait?.poles[pole.poleIndex]?.views.length ?? 0 : 0;
+
+  // Unavailable views reset to the first, rather than selecting a different last view.
+  return Number.isSafeInteger(viewIndex) && viewIndex >= 0 && viewIndex < viewCount
+    ? viewIndex
+    : 0;
+};
+
+const parseTypeArpState = (
+  params: URLSearchParams,
+  mode: AppMode,
+  typeId: SocionicTypeId,
+): TypeArpState | undefined => {
+  const traitId = params.get('arp') as ReininTraitId | null;
+  if (mode !== 'type' || !traitId || !REININ_TRAIT_IDS.has(traitId)) {
+    return undefined;
+  }
+
+  const rawIndex = params.get('arpView');
+  // Only whole nonnegative decimal indices: no parseInt prefixes or coercion syntax.
+  const viewIndex = rawIndex !== null && /^\d+$/.test(rawIndex) ? Number(rawIndex) : 0;
+
+  return { isOpen: true, traitId, viewIndex: normalizeTypeArpViewIndex(typeId, traitId, viewIndex) };
+};
+
 export const parseAppUrlState = (search: string | URLSearchParams): AppUrlState => {
   const params = typeof search === 'string' ? new URLSearchParams(search) : search;
   const mode = parseMode(params.get('mode'));
@@ -214,6 +254,8 @@ export const parseAppUrlState = (search: string | URLSearchParams): AppUrlState 
   const parsedPoleIdx = parseOptionalIndex(params.get('pole')) ?? defaultPoleIdx;
   const poleIdx = clamp(parsedPoleIdx, 0, trait.poles.length - 1);
   const viewIdx = clamp(parseIndex(params.get('view')), 0, trait.poles[poleIdx].views.length - 1);
+  const typeId = parseTypeId(params.get('type'));
+  const typeArp = parseTypeArpState(params, mode, typeId);
 
   return {
     mode,
@@ -221,8 +263,9 @@ export const parseAppUrlState = (search: string | URLSearchParams): AppUrlState 
     traitIdx,
     poleIdx,
     viewIdx,
-    typeId: parseTypeId(params.get('type')),
+    typeId,
     partition: parsePartitionState(params, mode),
+    ...(typeArp ? { typeArp } : {}),
   };
 };
 
@@ -243,6 +286,12 @@ export const serializeAppUrlState = (state: AppUrlState): URLSearchParams => {
 
   if (state.mode === 'type') {
     params.set('type', state.typeId);
+    if (state.typeArp?.isOpen && REININ_TRAIT_IDS.has(state.typeArp.traitId)) {
+      const { traitId, viewIndex } = state.typeArp;
+      const normalizedViewIndex = normalizeTypeArpViewIndex(state.typeId, traitId, viewIndex);
+      params.set('arp', traitId);
+      if (normalizedViewIndex !== 0) params.set('arpView', String(normalizedViewIndex));
+    }
     return params;
   }
 

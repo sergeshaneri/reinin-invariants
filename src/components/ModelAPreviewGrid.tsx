@@ -5,15 +5,18 @@ import { selectTypeModelPreviews, selectTypeModelPreviewsForSourceRows } from '.
 import type { PartitionExplorerViewModel } from '../data/selectors';
 import type { SocionicTypeId } from '../data/types';
 import { AspectGlyph, type AspectDisplayMode } from './AspectGlyph';
+import { CyclePointers } from '../decorators/ProcessCycle';
 
 type SourceFormulaViewModel = NonNullable<PartitionExplorerViewModel['sourceFormula']>;
 type SourceFormulaBlock = NonNullable<SourceFormulaViewModel['sourceBlocks']>[number];
 
-interface Props {
+export interface ModelAPreviewGridProps {
   typeIds: readonly SocionicTypeId[];
   view: View;
   aspectDisplayMode: AspectDisplayMode;
   sourceBlock?: SourceFormulaBlock | null;
+  selectedTypeId?: SocionicTypeId;
+  onSelectType?: (typeId: SocionicTypeId) => void;
 }
 
 const getTypeCode = (aliases: readonly string[], fallback: string): string => aliases[0] ?? fallback;
@@ -39,11 +42,13 @@ const getFunctionGroupIndex = (view: View, functionId: number): number | null =>
   return index >= 0 ? index : null;
 };
 
-export const ModelAPreviewGrid: React.FC<Props> = ({
+export const ModelAPreviewGrid: React.FC<ModelAPreviewGridProps> = ({
   typeIds,
   view,
   aspectDisplayMode,
   sourceBlock,
+  selectedTypeId,
+  onSelectType,
 }) => {
   const previews = sourceBlock
     ? selectTypeModelPreviewsForSourceRows(typeIds, sourceBlock.rows)
@@ -64,14 +69,18 @@ export const ModelAPreviewGrid: React.FC<Props> = ({
           return (
             <article
               key={preview.type.id}
-              className="rounded-2xl border border-[var(--color-shell-border)] bg-[var(--color-shell-surface-muted)] p-3"
+              className="relative rounded-2xl border border-[var(--color-shell-border)] bg-[var(--color-shell-surface-muted)] p-3"
               data-model-preview-type-id={preview.type.id}
+              data-model-preview-selected={selectedTypeId === preview.type.id ? 'true' : undefined}
             >
+              {onSelectType ? <button type="button" className="absolute inset-0 z-20 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-shell-accent)]"
+                aria-label={`Выбрать тип ${typeCode}: ${preview.type.name}${selectedTypeId === preview.type.id ? '. Выбранный тип' : ''}`}
+                aria-pressed={selectedTypeId === preview.type.id} onClick={() => onSelectType(preview.type.id)} /> : null}
               <div className="relative">
                 {showProcessCycle ? <MiniProcessCycle /> : null}
                 <div className="grid grid-cols-2 border border-[var(--color-app-fg)] bg-[var(--color-shell-control)]">
                   {preview.assignments.map((assignment, assignmentIndex) => {
-                    const fallbackFunctionGroupIndex = assignment.highlightGroupIndex === null
+                    const fallbackFunctionGroupIndex = selectedTypeId === undefined && !onSelectType && assignment.highlightGroupIndex === null
                       ? getFunctionGroupIndex(view, assignment.functionId)
                       : null;
                     const toneIndex = assignment.highlightGroupIndex ?? fallbackFunctionGroupIndex;
@@ -109,6 +118,7 @@ export const ModelAPreviewGrid: React.FC<Props> = ({
                 </div>
               </div>
               <div className="mt-2 text-center">
+                {selectedTypeId === preview.type.id ? <div className="mb-1 text-[10px] font-bold text-[var(--color-shell-accent)]">Выбранный тип</div> : null}
                 <div className="text-[11px] font-black leading-tight text-[var(--color-app-fg)]">
                   {typeCode}
                 </div>
@@ -130,20 +140,7 @@ const MiniProcessCycle: React.FC = () => (
     aria-hidden="true"
   >
     <MiniCycleRing direction="cw" className="absolute inset-x-0 -top-1 h-[calc((100%-0.75rem)/2+0.5rem)]" />
-    <svg
-      className="absolute -right-0.5 -top-1.5 h-3 w-3"
-      viewBox="0 0 12 12"
-    >
-      <polygon points="1,0 11,6 1,12" fill="currentColor" />
-    </svg>
-
     <MiniCycleRing direction="ccw" className="absolute inset-x-0 -bottom-1 h-[calc((100%-0.75rem)/2+0.5rem)]" />
-    <svg
-      className="absolute -left-0.5 top-[calc(50%+0.1rem)] h-3 w-3"
-      viewBox="0 0 12 12"
-    >
-      <polygon points="11,0 1,6 11,12" fill="currentColor" />
-    </svg>
   </div>
 );
 
@@ -167,5 +164,6 @@ const MiniCycleRing: React.FC<{ direction: 'cw' | 'ccw'; className: string }> = 
         className={`marching-ants-${direction}`}
       />
     </svg>
+    <CyclePointers direction={direction} />
   </div>
 );

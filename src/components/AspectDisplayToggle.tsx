@@ -19,13 +19,13 @@ const OPTIONS: readonly {
 ];
 
 export const AspectDisplayToggle: React.FC<Props> = ({ mode, onSelectMode }) => (
-  <section>
-    <div className="shell-panel flex flex-col gap-3 rounded-2xl border px-4 py-3 shadow-sm backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between">
+  <section className="min-w-0">
+    <div className="shell-panel flex flex-col gap-3 rounded-2xl border px-4 py-3 shadow-sm backdrop-blur-sm">
       <h2 className="shell-heading text-[11px] font-semibold uppercase tracking-[0.18em]">
         Аспекты
       </h2>
       <div
-        className="shell-control grid grid-cols-3 gap-1 rounded-xl p-1"
+        className="shell-control flex flex-wrap gap-1 rounded-xl p-1"
         role="tablist"
         aria-label="Отображение аспектов"
       >
@@ -40,7 +40,7 @@ export const AspectDisplayToggle: React.FC<Props> = ({ mode, onSelectMode }) => 
               aria-selected={isActive}
               title={title}
               onClick={() => onSelectMode(id)}
-              className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-3 py-2 text-[12px] font-semibold leading-tight transition-colors ${
+              className={`inline-flex min-h-10 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-[12px] font-semibold leading-tight transition-colors ${
                 isActive
                   ? 'shell-tab-active shadow-sm'
                   : 'shell-tab'

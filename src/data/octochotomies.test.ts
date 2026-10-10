@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { buildPartition } from './partitions';
 import { REININ_TRAITS } from './socionics';
 import {
@@ -8,7 +9,7 @@ import {
   type OctochotomyFormulaRecord,
   type VerifiedOctochotomyClasses,
 } from './octochotomies';
-import { SOCIONIC_TYPE_ORDER } from './types';
+import { SOCIONIC_TYPE_ORDER, SOCIONIC_TYPES_BY_ID } from './types';
 
 const STATUS_VALUES = ['draft', 'incomplete', 'verified'] as const;
 const VERIFIED_FORMULA_IDS = [
@@ -21,6 +22,42 @@ const sortedSetKey = (typeIds: readonly string[]): string => (
 );
 
 describe('octochotomy source draft formulas', () => {
+  it('preserves all dimensionality row text from the eight source pair sections', () => {
+    const lines = readFileSync(new URL('../../harness/theory/Октохотомии.md', import.meta.url), 'utf8').split(/\r?\n/u);
+    const formula = getOctochotomyFormulaById('octo-08-quasi-identity')!;
+    for (const sourceClass of formula.classes!) {
+      const sourceRows = lines.slice(sourceClass.sourceLine!, sourceClass.sourceLine! + 6)
+        .filter(line => line.includes('мерность'));
+      expect(sourceRows).toHaveLength(4);
+      expect(sourceClass.sourceBlock!.rows.map(row => (
+        `\\[**${row.aspectText}** | ${row.aspectFeaturesText}\\] → (${row.functionBlockLabel} | **${row.functionIds.join(' ')}** | ${row.functionFeaturesText})`
+      ))).toEqual(sourceRows.map(line => line.trim()));
+    }
+  });
+
+  it('transfers all quasi-identity dyads into their exact dimensionality blocks', () => {
+    const formula = getOctochotomyFormulaById('octo-08-quasi-identity');
+    expect(formula?.classes).toHaveLength(8);
+    formula?.classes?.forEach(sourceClass => {
+      const block = sourceClass.sourceBlock;
+      expect(block).toBeDefined();
+      expect(block?.typeIds).toEqual(sourceClass.typeIds);
+      expect(block?.rows.map(row => row.functionIds)).toEqual([[1, 8], [2, 7], [3, 6], [4, 5]]);
+      expect(block?.rows.map(row => row.functionBlockLabel)).toEqual(['мерность 4', 'мерность 3', 'мерность 2', 'мерность 1']);
+      expect(new Set(block?.rows.flatMap(row => row.aspectIds)).size).toBe(8);
+      block?.rows.forEach(row => {
+        expect(row.aspectIds).toHaveLength(2);
+        sourceClass.typeIds.forEach(typeId => {
+          const images = SOCIONIC_TYPES_BY_ID[typeId].modelA
+            .filter(assignment => row.aspectIds.includes(assignment.aspectId))
+            .map(assignment => assignment.functionId).sort();
+          expect(images).toEqual([...row.functionIds].sort());
+        });
+      });
+    });
+    expect(formula?.classes?.[0].sourceBlock?.rows[0].aspectIds).toEqual(['Ne', 'Te']);
+  });
+
   it('keeps the expected status matrix stable', () => {
     const formulasByStatus = {
       draft: OCTOCHOTOMY_FORMULAS.filter(formula => formula.status === 'draft'),

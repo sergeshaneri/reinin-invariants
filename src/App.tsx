@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { REININ_TRAITS, SOCIONIC_TYPES, TraitClass, type PoleIndex } from './data/socionics';
+import { REININ_TRAITS, SOCIONIC_TYPES, TraitClass, type PoleIndex, type SocionicTypeId } from './data/socionics';
 import {
   getDefaultPartitionState,
   getDefaultTraitPoleIndex,
@@ -9,6 +9,8 @@ import {
   type AppMode,
   type PartitionExplorerState,
   type ThemeMode,
+  type TypeArpState,
+  type AppUrlState,
   getThemeStorageKey,
 } from './appState';
 import { selectDichotomyTypesPanelView, selectPartitionExplorerView, selectTetrachotomyCatalog, selectOctochotomyCatalog } from './data/selectors';
@@ -33,7 +35,8 @@ import { PoleSelector } from './components/PoleSelector';
 import { ViewSelector } from './components/ViewSelector';
 import { FormulaPanel } from './components/FormulaPanel';
 import { Footer } from './components/Footer';
-import { TypeModelDiagram } from './diagrams/TypeModelDiagram';
+import { TypeArpExplorer } from './components/TypeArpExplorer';
+import { openGeneralTypeArp, transitionTypeArp, type TypeArpAction } from './typeArpState';
 import {
   clearActiveCell,
   resolveActiveCell,
@@ -51,6 +54,7 @@ const App: React.FC = () => {
   const [selectedPoleIndex, setSelectedPoleIndex] = useState(initial.poleIdx);
   const [activeViewIndex, setActiveViewIndex] = useState(initial.viewIdx);
   const [selectedTypeId, setSelectedTypeId] = useState(initial.typeId);
+  const [typeArp, setTypeArp] = useState<TypeArpState | undefined>(initial.typeArp);
   const [partition, setPartition] = useState<PartitionExplorerState>(initial.partition);
   const [aspectDisplayMode, setAspectDisplayMode] = useState<AspectDisplayMode>('icon');
   const [hoveredCell, setHoveredCell] = useState<ActiveCell>(null);
@@ -60,6 +64,10 @@ const App: React.FC = () => {
   const currentTrait = REININ_TRAITS[selectedTraitIndex];
   const currentPole = currentTrait.poles[selectedPoleIndex];
   const currentView = currentPole.views[activeViewIndex] ?? currentPole.views[0];
+  const urlState: AppUrlState = {
+    mode, theme, traitIdx: selectedTraitIndex, poleIdx: selectedPoleIndex,
+    viewIdx: activeViewIndex, typeId: selectedTypeId, partition, typeArp,
+  };
   const isPartitionMode = mode === 'tetrachotomy' || mode === 'octochotomy';
   const partitionView = selectPartitionExplorerView(partition.traitIds, partition.selectedClassKey);
   const compactCatalog = useMemo(() => (
@@ -83,7 +91,7 @@ const App: React.FC = () => {
   const handleCompactSelect = (value: string) => {
     if (mode === 'type') {
       const type = SOCIONIC_TYPES.find(candidate => candidate.id === value);
-      if (type) setSelectedTypeId(type.id);
+      if (type) handleSelectType(type.id);
     } else if (compactCatalog) {
       const entry = compactCatalog.entries.find(candidate => candidate.key === value);
       if (entry) handleSelectPartitionTraits(entry.traitIds);
@@ -108,6 +116,23 @@ const App: React.FC = () => {
     setActiveViewIndex(0);
   };
 
+  const handleSelectType = (typeId: SocionicTypeId) => {
+    setSelectedTypeId(typeId);
+    setTypeArp(current => transitionTypeArp(current, typeId, { kind: 'type' }));
+  };
+
+  const handleTypeArpAction = (action: TypeArpAction) => {
+    setTypeArp(current => transitionTypeArp(current, selectedTypeId, action));
+  };
+
+  const handleOpenGeneralTypeArp = () => {
+    const target = openGeneralTypeArp(urlState);
+    setSelectedTraitIndex(target.traitIdx);
+    setSelectedPoleIndex(target.poleIdx);
+    setActiveViewIndex(target.viewIdx);
+    handleSelectMode(target.mode);
+  };
+
   const handleSelectPartitionTraits = (traitIds: PartitionExplorerState['traitIds']) => {
     setPartition(current => ({
       ...current,
@@ -116,17 +141,9 @@ const App: React.FC = () => {
     }));
   };
 
-  // При смене признака — сбрасываем view (но не на самой первой загрузке).
-  // При смене полюса того же признака — индекс сохраняем, чтобы удобно сравнивать одну и ту же view на разных полюсах.
-  const previousTraitIndex = useRef(selectedTraitIndex);
-  useEffect(() => {
-    if (previousTraitIndex.current === selectedTraitIndex) {
-      return;
-    }
-
-    previousTraitIndex.current = selectedTraitIndex;
-    setActiveViewIndex(0);
-  }, [selectedTraitIndex]);
+  // Trait selection resets its view in handleSelectTrait. Do not reset in an
+  // effect: the type→general transition deliberately supplies a nonzero view.
+  // Pole changes of the same trait still preserve their view index.
 
   // Защита: если у нового полюса views меньше, чем текущий activeViewIndex — clamp.
   useEffect(() => {
@@ -136,20 +153,12 @@ const App: React.FC = () => {
 
   // Синхронизация состояния → URL (replace, без захламления истории).
   useEffect(() => {
-    const params = serializeAppUrlState({
-      mode,
-      theme,
-      traitIdx: selectedTraitIndex,
-      poleIdx: selectedPoleIndex,
-      viewIdx: activeViewIndex,
-      typeId: selectedTypeId,
-      partition,
-    });
+    const params = serializeAppUrlState(urlState);
     if (isReferencePage) params.set('page', 'reference');
     const newSearch = params.toString();
     const newUrl = `${window.location.pathname}${newSearch ? '?' + newSearch : ''}${window.location.hash}`;
     window.history.replaceState(null, '', newUrl);
-  }, [mode, theme, selectedTraitIndex, selectedPoleIndex, activeViewIndex, selectedTypeId, partition, isReferencePage]);
+  }, [mode, theme, selectedTraitIndex, selectedPoleIndex, activeViewIndex, selectedTypeId, partition, typeArp, isReferencePage]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -169,10 +178,7 @@ const App: React.FC = () => {
 
   const Diagram = DIAGRAMS[currentTrait.diagramId ?? DEFAULT_DIAGRAM_ID];
   const activeCell = resolveActiveCell(hoveredCell, pinnedCell);
-  const navigationSearch = serializeAppUrlState({
-    mode, theme, traitIdx: selectedTraitIndex, poleIdx: selectedPoleIndex,
-    viewIdx: activeViewIndex, typeId: selectedTypeId, partition,
-  }).toString();
+  const navigationSearch = serializeAppUrlState(urlState).toString();
 
   return (
     <div
@@ -194,7 +200,7 @@ const App: React.FC = () => {
           {mode === 'type' ? (
             <TypeSelector
               selectedTypeId={selectedTypeId}
-              onSelectType={setSelectedTypeId}
+              onSelectType={handleSelectType}
             />
           ) : isPartitionMode ? (
             <PartitionChooser
@@ -227,9 +233,14 @@ const App: React.FC = () => {
             </select>
           </label>
           {mode === 'type' ? (
-            <TypeModelDiagram
+            <TypeArpExplorer
               typeId={selectedTypeId}
               aspectDisplayMode={aspectDisplayMode}
+              state={typeArp}
+              fallbackTraitId={currentTrait.id}
+              onAction={handleTypeArpAction}
+              onSelectType={handleSelectType}
+              onOpenGeneral={handleOpenGeneralTypeArp}
             />
           ) : mode === 'tetrachotomy' ? (
             <TetrachotomyView
@@ -287,6 +298,7 @@ const App: React.FC = () => {
                   trait={currentTrait}
                   pole={currentPole}
                   view={currentView}
+                  aspectDisplayMode={aspectDisplayMode}
                   activeCell={activeCell}
                   onAspectHover={(id) => setHoveredCell(id === null ? null : { kind: 'aspect', id })}
                   onFunctionHover={(id) => setHoveredCell(id === null ? null : { kind: 'function', id })}
@@ -301,7 +313,7 @@ const App: React.FC = () => {
                 aspectDisplayMode={aspectDisplayMode}
               />
 
-              <FormulaPanel trait={currentTrait} view={currentView} />
+              <FormulaPanel trait={currentTrait} view={currentView} aspectDisplayMode={aspectDisplayMode} />
 
               <details className="glass-panel rounded-[28px]" data-dichotomy-extra-materials>
                 <summary className="cursor-pointer px-5 py-4 text-sm text-[var(--color-app-fg)]">
@@ -327,7 +339,7 @@ const App: React.FC = () => {
           <summary className="cursor-pointer px-5 py-4 text-sm text-[var(--color-app-fg)]">
             Оформление и обозначения
           </summary>
-          <div className="grid gap-4 border-t border-[var(--color-shell-border)] p-4 sm:grid-cols-2">
+          <div className="display-settings-controls grid gap-4 border-t border-[var(--color-shell-border)] p-4">
             <AspectDisplayToggle
               mode={aspectDisplayMode}
               onSelectMode={setAspectDisplayMode}

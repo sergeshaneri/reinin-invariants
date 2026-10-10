@@ -17,6 +17,7 @@ import {
   selectTypeTraitExample,
 } from './selectors';
 import { getTetrachotomyFormulaById } from './tetrachotomies';
+import { ORDER_DEPENDENT_TETRACHOTOMIES } from './orderDependentTetrachotomies';
 
 describe('domain selectors', () => {
   it('selects a type model in Model A layout order', () => {
@@ -350,6 +351,40 @@ describe('domain selectors', () => {
       expect.objectContaining({ functionId: 7, aspectId: 'Ni', highlightGroupIndex: 1, highlightIntensity: 'primary' }),
       expect.objectContaining({ functionId: 8, aspectId: 'Te', highlightGroupIndex: 0, highlightIntensity: 'secondary' }),
     ]);
+  });
+
+  it('colors overlapping source memberships by the actual aspect/function pair in every order-dependent tetrad', () => {
+    expect(ORDER_DEPENDENT_TETRACHOTOMIES).toHaveLength(12);
+    let checkedModels = 0;
+    let checkedCells = 0;
+    for (const configuration of ORDER_DEPENDENT_TETRACHOTOMIES) {
+      const formula = getTetrachotomyFormulaById(configuration.formulaId)!;
+      expect(formula.sourceBlocks, configuration.formulaId).toHaveLength(4);
+      for (const block of formula.sourceBlocks!) {
+        const previews = selectTypeModelPreviewsForSourceRows(block.typeIds, block.rows);
+        expect(previews).toHaveLength(4);
+        for (const preview of previews) {
+          checkedModels += 1;
+          expect(preview.assignments).toHaveLength(8);
+          for (const assignment of preview.assignments) {
+            checkedCells += 1;
+            const rowIndex = block.rows.findIndex(row => (
+              row.functionIds.includes(assignment.functionId)
+              && row.aspectIds.includes(assignment.aspectId)
+            ));
+            expect(rowIndex, `${formula.id}/${preview.type.id}/${assignment.functionId}`).toBeGreaterThanOrEqual(0);
+            expect(assignment, `${formula.id}/${preview.type.id}/${assignment.functionId}`).toMatchObject({
+              isHighlighted: true,
+              highlightGroupIndex: rowIndex,
+              highlightIntensity: 'primary',
+            });
+          }
+          expect(new Set(preview.assignments.map(assignment => assignment.highlightGroupIndex)).size).toBe(4);
+        }
+      }
+    }
+    expect(checkedModels).toBe(192);
+    expect(checkedCells).toBe(1536);
   });
 
   it('highlights compact model previews by aspect block for block-permutation views', () => {

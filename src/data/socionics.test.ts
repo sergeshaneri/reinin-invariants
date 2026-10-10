@@ -74,6 +74,19 @@ describe('socionics data', () => {
     expect(new Set(MODEL_A_LAYOUT)).toEqual(functionIds);
   });
 
+  it('names all four process tacts and keeps functions 3 and 5 in the first tact', () => {
+    const trait = REININ_TRAITS.find(candidate => candidate.id === 'process')!;
+    for (const pole of trait.poles) {
+      const view = pole.views[0];
+      expect(view.mappings.map(mapping => [mapping.functionLabel, mapping.functions])).toEqual([
+        ['3-й такт', [1, 7]], ['4-й такт', [2, 8]], ['1-й такт', [3, 5]], ['2-й такт', [4, 6]],
+      ]);
+      expect(view.footnote).toContain('Обход тактов в модели А происходит по пунктирной стрелке.');
+      expect(view.footnote).toContain('Первый такт — функции 3 и 5.');
+      expect(JSON.stringify(trait)).not.toMatch(/полу(?:такт)/iu);
+    }
+  });
+
   it('defines the canonical 16 socionic types in stable order', () => {
     expect(SOCIONIC_TYPES).toHaveLength(16);
     expect(SOCIONIC_TYPE_ORDER).toHaveLength(16);

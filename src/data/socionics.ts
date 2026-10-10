@@ -166,7 +166,7 @@ export function formatBlockEquivalenceDescription(mappings: Mapping[]): string |
 
 // Признаки Функций — 7 бинарных столбцов матрицы H₃ (без тривиального «Сущ»):
 // Верт, Оц/Сит, Сл/слаб, Вб/Лб, Ин/Кт, Наль, Таль.
-// Имена полей сохранены прежние (isAcceptant ≡ Наль, isMental ≡ Таль) — это синонимы.
+// На функциях Наль разделяет акцептные/продуктивные позиции, Таль — ментальные/витальные.
 export interface SocionicFunction {
   id: number;
   name: string;
@@ -175,7 +175,7 @@ export interface SocionicFunction {
   isStrong: boolean;      // Сл/слаб: + = сильная         / − = слабая
   isVerbal: boolean;      // Вб/Лб:   + = вербальная      / − = лаборная
   isInert: boolean;       // Ин/Кт:   + = инертная        / − = контактная
-  isAcceptant: boolean;   // Наль:    + = иррациональная  / − = рациональная
+  isAcceptant: boolean;   // Наль:    + = акцептная       / − = продуктивная
   isMental: boolean;      // Таль:    + = ментальная      / − = витальная
 }
 
@@ -219,7 +219,7 @@ export const FUNCTION_FEATURES: FunctionFeature[] = [
   { key: 'isStrong',     title: 'Сильная / Слабая',                posSingular: 'Сильная',         negSingular: 'Слабая',        posPlural: 'Сильные',         negPlural: 'Слабые',         categoryDative: 'силе/слабости' },
   { key: 'isVerbal',     title: 'Вербальная / Лаборная',           posSingular: 'Вербальная',      negSingular: 'Лаборная',      posPlural: 'Вербальные',      negPlural: 'Лаборные',       categoryDative: 'вербальности/лаборности' },
   { key: 'isInert',      title: 'Инертная / Контактная',           posSingular: 'Инертная',        negSingular: 'Контактная',    posPlural: 'Инертные',        negPlural: 'Контактные',     categoryDative: 'инертности/контактности' },
-  { key: 'isAcceptant',  title: 'Иррациональная / Рациональная',   posSingular: 'Иррациональная',  negSingular: 'Рациональная',  posPlural: 'Иррациональные',  negPlural: 'Рациональные',   categoryDative: 'иррациональности/рациональности' },
+  { key: 'isAcceptant',  title: 'Акцептная / Продуктивная',         posSingular: 'Акцептная',       negSingular: 'Продуктивная',  posPlural: 'Акцептные',       negPlural: 'Продуктивные',   categoryDative: 'акцептности/продуктивности' },
   { key: 'isMental',     title: 'Ментальная / Витальная',          posSingular: 'Ментальная',      negSingular: 'Витальная',     posPlural: 'Ментальные',      negPlural: 'Витальные',      categoryDative: 'ментальности/витальности' },
 ];
 
@@ -262,7 +262,7 @@ export interface Mapping {
   functions: number[];
   /** Лейбл на блоке аспектов (например, макроаспект «Интуиция»). */
   aspectLabel?: string;
-  /** Лейбл на блоке функций (например, «3 полутакт»). */
+  /** Лейбл на блоке функций (например, «3-й такт»). */
   functionLabel?: string;
 }
 
@@ -843,12 +843,12 @@ export const REININ_TRAITS: ReininTrait[] = [
             description: 'Циклический порядок макроаспектов: Интуиция → Логика → Сенсорика → Этика → ⟲.',
             decoratorIds: ['process-cycle'],
             connector: '~',
-            footnote: 'Циклический порядок обхода полутактов задан стрелками на функциях. Блоки переставляются как у любого блочного инварианта, но индуцированный цикл на макроаспектах различает полюса: Процесс — Интуиция→Логика→Сенсорика→Этика, Результат — Интуиция→Этика→Сенсорика→Логика.',
+            footnote: 'Каждый макроаспект занимает один такт целиком. У разных типов макроаспекты находятся в разных тактах. Обход тактов в модели А происходит по пунктирной стрелке. Первый такт — функции 3 и 5.',
             mappings: [
-              { aspects: ['Ne', 'Ni'], aspectLabel: 'Интуиция',  functions: [1, 7], functionLabel: '3 полутакт' },
-              { aspects: ['Te', 'Ti'], aspectLabel: 'Логика',    functions: [2, 8], functionLabel: '4 полутакт' },
-              { aspects: ['Se', 'Si'], aspectLabel: 'Сенсорика', functions: [3, 5], functionLabel: '1 полутакт' },
-              { aspects: ['Fe', 'Fi'], aspectLabel: 'Этика',     functions: [4, 6], functionLabel: '2 полутакт' },
+              { aspects: ['Ne', 'Ni'], aspectLabel: 'Интуиция',  functions: [1, 7], functionLabel: '3-й такт' },
+              { aspects: ['Te', 'Ti'], aspectLabel: 'Логика',    functions: [2, 8], functionLabel: '4-й такт' },
+              { aspects: ['Se', 'Si'], aspectLabel: 'Сенсорика', functions: [3, 5], functionLabel: '1-й такт' },
+              { aspects: ['Fe', 'Fi'], aspectLabel: 'Этика',     functions: [4, 6], functionLabel: '2-й такт' },
             ],
           },
         ],
@@ -863,12 +863,12 @@ export const REININ_TRAITS: ReininTrait[] = [
             description: 'Циклический порядок макроаспектов: Интуиция → Этика → Сенсорика → Логика → ⟲.',
             decoratorIds: ['process-cycle'],
             connector: '~',
-            footnote: 'Циклический порядок обхода полутактов задан стрелками на функциях. Блоки переставляются как у любого блочного инварианта, но индуцированный цикл на макроаспектах различает полюса: Процесс — Интуиция→Логика→Сенсорика→Этика, Результат — Интуиция→Этика→Сенсорика→Логика.',
+            footnote: 'Каждый макроаспект занимает один такт целиком. У разных типов макроаспекты находятся в разных тактах. Обход тактов в модели А происходит по пунктирной стрелке. Первый такт — функции 3 и 5.',
             mappings: [
-              { aspects: ['Ne', 'Ni'], aspectLabel: 'Интуиция',  functions: [1, 7], functionLabel: '3 полутакт' },
-              { aspects: ['Fe', 'Fi'], aspectLabel: 'Этика',     functions: [2, 8], functionLabel: '4 полутакт' },
-              { aspects: ['Se', 'Si'], aspectLabel: 'Сенсорика', functions: [3, 5], functionLabel: '1 полутакт' },
-              { aspects: ['Te', 'Ti'], aspectLabel: 'Логика',    functions: [4, 6], functionLabel: '2 полутакт' },
+              { aspects: ['Ne', 'Ni'], aspectLabel: 'Интуиция',  functions: [1, 7], functionLabel: '3-й такт' },
+              { aspects: ['Fe', 'Fi'], aspectLabel: 'Этика',     functions: [2, 8], functionLabel: '4-й такт' },
+              { aspects: ['Se', 'Si'], aspectLabel: 'Сенсорика', functions: [3, 5], functionLabel: '1-й такт' },
+              { aspects: ['Te', 'Ti'], aspectLabel: 'Логика',    functions: [4, 6], functionLabel: '2-й такт' },
             ],
           },
         ],

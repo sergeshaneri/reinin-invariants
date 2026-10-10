@@ -5,6 +5,8 @@ import { selectPartitionTypesPanelView, type PartitionExplorerViewModel } from '
 import type { AspectDisplayMode } from './AspectGlyph';
 import { PartitionCompositionView } from './PartitionCompositionView';
 import { PartitionTypesPanel } from './PartitionTypesPanel';
+import { getVerifiedOctochotomyFormulas } from '../data/octochotomies';
+import { TetrachotomyAspectFunctionPanel } from './TetrachotomyAspectFunctionPanel';
 
 const CLASS_TONES = [
   'map-tone-0 text-[var(--color-map-fg)]',
@@ -57,6 +59,52 @@ export const OctochotomyView: React.FC<Props> = ({
     partition.traitIds,
     selectedClassKey,
   );
+  // Match the whole partition, allowing alternative bases for the same eight pairs.
+  const sourceFormula = getVerifiedOctochotomyFormulas().find(formula => (
+    formula.classes.every(sourceClass => partition.classes.some(candidate => (
+      candidate.types.length === sourceClass.typeIds.length
+      && sourceClass.typeIds.every(id => candidate.types.some(type => type.id === id))
+    )))
+  ));
+  const sourceBlock = sourceFormula?.classes.find(sourceClass => (
+    sourceClass.typeIds.every(id => view.selectedClass?.types.some(type => type.id === id))
+  ))?.sourceBlock;
+
+  if (sourceBlock) {
+    return (
+      <section className="space-y-5 md:space-y-6" data-octochotomy-detail data-selected-class-key={selectedClassKey ?? ''}>
+        <label className="shell-panel flex flex-col gap-2 rounded-2xl border p-3">
+          <span className="eyebrow">Пара типов · квазитождественная октохотомия</span>
+          <select
+            className="shell-control min-h-10 w-full rounded-xl border border-[var(--color-shell-border)] px-3 py-2 text-sm text-[var(--color-app-fg)]"
+            data-octochotomy-class-select
+            value={selectedClassKey ?? ''}
+            onChange={event => onSelectClass(event.target.value)}
+          >
+            {partition.classes.map(group => (
+              <option key={group.key} value={group.key}>
+                {group.types.map(type => getTypeCode(type.aliases, type.id)).join(' · ')}
+              </option>
+            ))}
+          </select>
+        </label>
+        <TetrachotomyAspectFunctionPanel
+          key={`${sourceFormula.id}:${selectedClassKey}`}
+          view={view}
+          aspectDisplayMode={aspectDisplayMode}
+          baseView={activeView}
+          sourceBlockOverride={sourceBlock}
+        />
+        <PartitionTypesPanel view={typesPanelView} activeView={activeView} aspectDisplayMode={aspectDisplayMode} sourceBlock={sourceBlock} />
+        <details className="glass-panel rounded-[28px] p-5" data-octochotomy-extra-materials>
+          <summary className="eyebrow cursor-pointer">Доп материалы · состав октохотомии</summary>
+          <div className="mt-5">
+            <PartitionCompositionView view={view} onSelectClass={onSelectClass} />
+          </div>
+        </details>
+      </section>
+    );
+  }
 
   return (
     <section

@@ -8,7 +8,7 @@ import type { DecoratorComponent } from './types';
 //  • SVG БЕЗ viewBox → юниты = CSS пиксели → углы скруглены идеально круглыми.
 //  • Контур выходит за пределы сетки функций через -inset-3/-inset-4 родителя.
 //  • Marching ants через CSS keyframes; пауза по document.hidden / reduced-motion.
-//  • Указатели направления — отдельные SVG-треугольники в углах.
+//  • Указатели направления — по одному SVG-треугольнику в середине каждой стороны.
 
 const STROKE = '#7c3aed';     // violet-600
 const STROKE_WIDTH = 3;
@@ -36,19 +36,28 @@ const Ring: React.FC<{ direction: 'cw' | 'ccw'; paused: boolean }> = ({ directio
   );
 };
 
-const Pointer: React.FC<{ direction: 'right' | 'left'; side: 'right' | 'left' }> = ({ direction, side }) => {
-  const points = direction === 'right' ? '0,0 12,6 0,12' : '12,0 0,6 12,12';
-  const sideClass = side === 'right' ? 'right-7' : 'left-7';
-  return (
-    <svg
-      className={`absolute ${sideClass} -top-[7px] w-3 h-3 block`}
-      viewBox="0 0 12 12"
-      aria-hidden="true"
-    >
-      <polygon points={points} fill={STROKE} />
-    </svg>
-  );
-};
+export const CyclePointers: React.FC<{ direction: 'cw' | 'ccw' }> = ({ direction }) => (
+  <>
+    {([
+      { side: 'top', left: '50%', top: '0%', angle: 0 },
+      { side: 'right', left: '100%', top: '50%', angle: 90 },
+      { side: 'bottom', left: '50%', top: '100%', angle: 180 },
+      { side: 'left', left: '0%', top: '50%', angle: 270 },
+    ] as const).map(({ side, left, top, angle }) => (
+      <svg
+        key={side}
+        className="absolute w-3 h-3 block"
+        style={{ left, top, transform: `translate(-50%, -50%) rotate(${angle + (direction === 'ccw' ? 180 : 0)}deg)` }}
+        viewBox="0 0 12 12"
+        aria-hidden="true"
+        data-cycle-pointer-side={side}
+        data-cycle-pointer-direction={direction}
+      >
+        <polygon points="0,0 12,6 0,12" fill={STROKE} />
+      </svg>
+    ))}
+  </>
+);
 
 const ProcessCycleImpl: DecoratorComponent = () => {
   const reduceMotion = useReducedMotion();
@@ -72,13 +81,13 @@ const ProcessCycleImpl: DecoratorComponent = () => {
       {/* Ментальное кольцо: верхняя половина, направление по часовой */}
       <div className="absolute inset-x-0 top-0 h-[calc(50%-8px)] md:h-[calc(50%-12px)]">
         <Ring direction="cw" paused={pausedFlag} />
-        <Pointer direction="right" side="right" />
+        <CyclePointers direction="cw" />
       </div>
 
       {/* Витальное кольцо: нижняя половина, направление против часовой */}
       <div className="absolute inset-x-0 bottom-0 h-[calc(50%-8px)] md:h-[calc(50%-12px)]">
         <Ring direction="ccw" paused={pausedFlag} />
-        <Pointer direction="left" side="left" />
+        <CyclePointers direction="ccw" />
       </div>
     </div>
   );

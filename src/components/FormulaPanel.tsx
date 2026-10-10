@@ -2,13 +2,15 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { ArrowRight, Shuffle } from 'lucide-react';
 import { ASPECTS, ReininTrait, View } from '../data/socionics';
+import { AspectGlyph, type AspectDisplayMode } from './AspectGlyph';
 
 interface Props {
   trait: ReininTrait;
   view: View;
+  aspectDisplayMode?: AspectDisplayMode;
 }
 
-export const FormulaPanel: React.FC<Props> = ({ trait, view }) => {
+export const FormulaPanel: React.FC<Props> = ({ trait, view, aspectDisplayMode = 'symbol' }) => {
   const mappings = view.mappings;
   const isBlock = view.isBlockPermutation === true;
   const connector = view.connector;
@@ -31,7 +33,7 @@ export const FormulaPanel: React.FC<Props> = ({ trait, view }) => {
         {heading}
       </h3>
 
-      {isBlock ? <BlockView mappings={mappings} /> : <PairView mappings={mappings} connector={connector} />}
+      {isBlock ? <BlockView mappings={mappings} aspectDisplayMode={aspectDisplayMode} /> : <PairView mappings={mappings} connector={connector} aspectDisplayMode={aspectDisplayMode} />}
 
       {view.footnote && (
         <div className="mt-6 rounded-xl border border-[var(--color-shell-border)] bg-[var(--color-shell-accent-soft)] p-5">
@@ -46,7 +48,7 @@ export const FormulaPanel: React.FC<Props> = ({ trait, view }) => {
 };
 
 // Классы 1, 2 — формат "блок аспектов → блок функций" (жёсткая пара).
-const PairView: React.FC<{ mappings: View['mappings']; connector?: string }> = ({ mappings, connector }) => (
+const PairView: React.FC<{ mappings: View['mappings']; connector?: string; aspectDisplayMode: AspectDisplayMode }> = ({ mappings, connector, aspectDisplayMode }) => (
   <div className="grid gap-3">
     {mappings.map((m, idx) => (
       <div key={idx} className="group flex flex-wrap items-center gap-4 rounded-2xl border border-[var(--color-shell-border)] bg-[var(--color-shell-surface-muted)] p-5 transition-colors hover:border-[var(--color-shell-border-strong)] md:gap-6">
@@ -56,10 +58,7 @@ const PairView: React.FC<{ mappings: View['mappings']; connector?: string }> = (
               {m.aspectLabel}
             </span>
           )}
-          <div className="flex items-center gap-3">
-            <BlockIndex idx={idx} />
-            <AspectChips aspects={m.aspects} />
-          </div>
+          <AspectChips aspects={m.aspects} aspectDisplayMode={aspectDisplayMode} />
         </div>
 
         <ArrowRight className="w-4 h-4 text-[var(--color-shell-subtle)]" strokeWidth={2} />
@@ -78,7 +77,7 @@ const PairView: React.FC<{ mappings: View['mappings']; connector?: string }> = (
 );
 
 // Класс 3 (block permutation) — два столбца без жёсткой пары + явная пометка про биекцию.
-const BlockView: React.FC<{ mappings: View['mappings'] }> = ({ mappings }) => (
+const BlockView: React.FC<{ mappings: View['mappings']; aspectDisplayMode: AspectDisplayMode }> = ({ mappings, aspectDisplayMode }) => (
   <div>
     <div className="block-permutation">
       <div className="min-w-0">
@@ -90,7 +89,9 @@ const BlockView: React.FC<{ mappings: View['mappings'] }> = ({ mappings }) => (
               <div className="block-members">
                 {mapping.aspects.map(aspectId => {
                   const aspect = ASPECTS.find(candidate => candidate.id === aspectId);
-                  return <span key={aspectId} className="block-aspect-name" title={aspect?.fullName}>{aspect?.name}</span>;
+                  return <span key={aspectId} className="block-aspect-name" title={aspect?.fullName} aria-label={`${aspect?.fullName} (${aspect?.name})`}>
+                    <AspectGlyph aspectId={aspectId} label={aspect?.name ?? aspectId} mode={aspectDisplayMode} size="sm" />
+                  </span>;
                 })}
               </div>
             </div>
@@ -124,13 +125,7 @@ const BlockView: React.FC<{ mappings: View['mappings'] }> = ({ mappings }) => (
   </div>
 );
 
-const BlockIndex: React.FC<{ idx: number }> = ({ idx }) => (
-  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[var(--color-shell-border-strong)] bg-[var(--color-shell-accent-soft)] font-mono text-[11px] font-semibold text-[var(--color-shell-accent)]">
-    {idx + 1}
-  </span>
-);
-
-const AspectChips: React.FC<{ aspects: View['mappings'][number]['aspects'] }> = ({ aspects }) => (
+const AspectChips: React.FC<{ aspects: View['mappings'][number]['aspects']; aspectDisplayMode: AspectDisplayMode }> = ({ aspects, aspectDisplayMode }) => (
   <div className="flex gap-1.5 flex-wrap">
     {aspects.map(aId => {
       const a = ASPECTS.find(asp => asp.id === aId);
@@ -138,9 +133,10 @@ const AspectChips: React.FC<{ aspects: View['mappings'][number]['aspects'] }> = 
         <span
           key={aId}
           title={a?.fullName}
-          className="rounded-lg border border-[var(--color-shell-border-strong)] bg-[var(--color-shell-control)] px-3 py-1.5 font-mono text-[13px] font-semibold text-[var(--color-shell-accent)]"
+          aria-label={`${a?.fullName} (${a?.name})`}
+          className="inline-flex items-center justify-center rounded-lg border border-[var(--color-shell-border-strong)] bg-[var(--color-shell-control)] px-3 py-1.5 font-mono text-[13px] font-semibold text-[var(--color-shell-accent)]"
         >
-          {a?.name}
+          <AspectGlyph aspectId={aId} label={a?.name ?? aId} mode={aspectDisplayMode} size="sm" />
         </span>
       );
     })}

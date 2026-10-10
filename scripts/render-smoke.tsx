@@ -81,8 +81,12 @@ for (const trait of REININ_TRAITS) {
   assert(defaultHtml.includes(trait.name), `trait "${trait.id}" is missing from navigation`);
 }
 
+const defaultButtons = defaultHtml.match(/<button\b[^>]*>[\s\S]*?<\/button>/g) ?? [];
 for (const aspect of ASPECTS) {
-  assert(defaultHtml.includes(`>${aspect.name}<`), `aspect "${aspect.id}" tile is missing`);
+  const tile = defaultButtons.find(button => button.includes(`aria-label="${aspect.fullName} (${aspect.name}).`));
+  assert(tile, `aspect "${aspect.id}" tile is missing`);
+  assert(tile?.includes('data-aspect-glyph-mode="icon"'), `aspect "${aspect.id}" pictogram is missing`);
+  assert(!tile?.includes(`>${aspect.name}<`), `aspect "${aspect.id}" abbreviation leaks into pictogram mode`);
 }
 
 for (const fn of FUNCTIONS) {

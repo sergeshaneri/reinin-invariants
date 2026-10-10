@@ -9,7 +9,7 @@ import {
 } from '../data/socionics';
 import type { DiagramComponent } from './types';
 import { DECORATORS } from '../decorators/registry';
-import { AspectIcon } from '../components/AspectIcon';
+import { AspectGlyph } from '../components/AspectGlyph';
 
 const MAPPING_BG = [
   'map-tone-0',
@@ -32,7 +32,7 @@ type Highlight = 'full' | 'dim' | 'hidden';
 const PULSE_INTERVAL_MS = 1800;
 
 export const AspectFunctionDiagram: DiagramComponent = ({
-  trait, pole, view,
+  trait, pole, view, aspectDisplayMode,
   activeCell,
   onAspectHover,
   onFunctionHover,
@@ -184,10 +184,7 @@ export const AspectFunctionDiagram: DiagramComponent = ({
                     ${activeAspect === aspect.id ? 'ring-4 ring-[var(--color-shell-accent-soft)] z-10' : ''}
                   `}
                 >
-                  <span className="flex flex-col items-center gap-1.5">
-                    <AspectIcon aspectId={aspect.id} size="sm" />
-                    <span className="text-sm font-bold leading-none">{aspect.name}</span>
-                  </span>
+                  <AspectGlyph aspectId={aspect.id} label={aspect.name} mode={aspectDisplayMode} size="sm" />
                 </motion.button>
               );
             })}

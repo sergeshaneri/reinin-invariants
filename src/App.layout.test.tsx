@@ -30,6 +30,31 @@ const expectBefore = (html: string, first: string, second: string) => {
 };
 
 describe('diagram-first layout', () => {
+  it('keeps old type URLs neutral with the analysis disclosure', () => {
+    const html = renderWithSearch('?mode=type&type=EII');
+    expect(html).toContain('Посмотреть АРП на примере этого типа');
+    expect(html).toContain('aria-controls="type-arp-analysis"');
+    expect(html).not.toContain('data-type-arp-explanation');
+    expect(html.match(/id="type-model-title"/g)).toHaveLength(1);
+  });
+
+  it('opens URL analysis and preserves it in the reference navigation link', () => {
+    const html = renderWithSearch('?mode=type&type=EII&arp=democracy&arpView=2&theme=dark');
+    expect(html).toContain('data-type-arp-explanation');
+    expect(html).toContain('Скрыть АРП');
+    expect(html).toContain('href="?mode=type&amp;theme=dark&amp;type=EII&amp;arp=democracy&amp;arpView=2&amp;page=reference"');
+    expect(html.match(/id="type-model-title"/g)).toHaveLength(1);
+  });
+
+  it('normalizes reference return URLs without reopening unknown analysis', () => {
+    const open = renderWithSearch('?page=reference&mode=type&type=ILE&arp=democracy&arpView=999');
+    expect(open).toContain('href="?mode=type&amp;type=ILE&amp;arp=democracy"');
+    expect(open).not.toContain('arpView=999');
+    const unknown = renderWithSearch('?mode=type&type=ILE&arp=unknown');
+    expect(unknown).not.toContain('data-type-arp-explanation');
+    expect(unknown).toContain('href="?mode=type&amp;type=ILE&amp;page=reference"');
+  });
+
   it('puts the dichotomy diagram before collapsed optional materials', () => {
     const html = renderWithSearch('');
     expectBefore(html, 'data-primary-diagram="dichotomy"', 'data-dichotomy-extra-materials');
@@ -77,13 +102,14 @@ describe('diagram-first layout', () => {
     });
   });
 
-  it('labels each source aspect below its pictogram and shows the row direction on mobile', () => {
+  it('keeps source rows in the default pictogram-only mode and preserves their direction', () => {
     const html = renderWithSearch('?mode=tetrachotomy&traits=judicious,nalness');
     const firstRow = html.split('data-tetrachotomy-aspect-function-row="ЧИ БС"')[1]
       ?.split('data-tetrachotomy-aspect-function-row=')[0];
     expect(firstRow).toBeDefined();
-    expect(firstRow).toMatch(/data-aspect-glyph-mode="icon-symbol"[^]*?>ЧИ<\/span>/);
-    expect(firstRow).toMatch(/data-aspect-glyph-mode="icon-symbol"[^]*?>БС<\/span>/);
+    expect(firstRow?.match(/data-aspect-glyph-mode="icon"/g)).toHaveLength(2);
+    expect(firstRow).not.toContain('data-aspect-glyph-mode="icon-symbol"');
+    expect(firstRow).not.toMatch(/>ЧИ<\/span>|>БС<\/span>/);
     expect(firstRow).toContain('data-source-row-direction');
     expect(firstRow).toContain('source-row-arrow');
     expect(firstRow).toContain('data-source-function-chip="1"');

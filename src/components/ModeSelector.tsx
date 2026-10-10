@@ -1,5 +1,5 @@
 import React from 'react';
-import { Boxes, GitBranch, Grid2X2, SplitSquareHorizontal } from 'lucide-react';
+import { Box, Grid2X2, SplitSquareHorizontal, UserRound } from 'lucide-react';
 import type { AppMode } from '../appState';
 
 interface ModeOption {
@@ -17,12 +17,6 @@ const MODE_OPTIONS: ModeOption[] = [
     icon: SplitSquareHorizontal,
   },
   {
-    id: 'type',
-    label: 'Тип',
-    description: 'Модель А одного ТИМа',
-    icon: Boxes,
-  },
-  {
     id: 'tetrachotomy',
     label: 'Тетрахотомия',
     description: 'Два признака, четыре класса',
@@ -32,7 +26,13 @@ const MODE_OPTIONS: ModeOption[] = [
     id: 'octochotomy',
     label: 'Октохотомия',
     description: 'Три признака, восемь классов',
-    icon: GitBranch,
+    icon: Box,
+  },
+  {
+    id: 'type',
+    label: 'Тип',
+    description: 'Модель А одного ТИМа',
+    icon: UserRound,
   },
 ];
 

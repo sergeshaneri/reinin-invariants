@@ -2,12 +2,14 @@ import { REININ_TRAITS } from '../data/socionics';
 import { TRAIT_TYPE_MEMBERSHIPS_BY_TRAIT_ID } from '../data/memberships';
 import type { PartitionExplorerViewModel } from '../data/selectors';
 import { FormulaPanel } from './FormulaPanel';
+import type { AspectDisplayMode } from './AspectGlyph';
 
 interface Props {
   view: PartitionExplorerViewModel;
+  aspectDisplayMode?: AspectDisplayMode;
 }
 
-export const TetrachotomyDichotomyPanel = ({ view }: Props) => {
+export const TetrachotomyDichotomyPanel = ({ view, aspectDisplayMode = 'symbol' }: Props) => {
   const formula = view.sourceFormula;
   const selected = view.selectedClass;
   if (!formula || formula.sourceBlocks?.length || !selected) return null;
@@ -39,7 +41,7 @@ export const TetrachotomyDichotomyPanel = ({ view }: Props) => {
             {pole.views.map((dichotomyView, index) => (
               <div key={index} className="space-y-2" data-dichotomy-view={index}>
                 {dichotomyView.title ? <h4 className="px-2 text-sm font-medium text-[var(--color-shell-muted)]">{dichotomyView.title}</h4> : null}
-                <FormulaPanel trait={trait} view={dichotomyView} />
+                <FormulaPanel trait={trait} view={dichotomyView} aspectDisplayMode={aspectDisplayMode} />
               </div>
             ))}
           </section>

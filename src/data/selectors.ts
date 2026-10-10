@@ -521,7 +521,12 @@ export function selectTypeModelPreviewsForSourceRows(
     return {
       type: model.type,
       assignments: model.assignments.map(assignment => {
-        const highlightGroupIndex = rows.findIndex(row => (
+        const matchingRowIndex = rows.findIndex(row => (
+          row.functionIds.includes(assignment.functionId)
+          && row.aspectIds.includes(assignment.aspectId)
+        ));
+        // Shared functions can belong to several rows; use the actual aspect's row first.
+        const highlightGroupIndex = matchingRowIndex >= 0 ? matchingRowIndex : rows.findIndex(row => (
           row.functionIds.includes(assignment.functionId)
         ));
         const sourceRow = highlightGroupIndex >= 0 ? rows[highlightGroupIndex] : null;

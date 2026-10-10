@@ -1,5 +1,6 @@
 import type { ReininTraitId } from './socionics';
 import type { SocionicTypeId } from './types';
+import { QUASI_IDENTITY_DIMENSION_ROWS, type OctochotomySourceRow } from './octochotomyDimensions';
 
 export type OctochotomySourceStatus = 'draft' | 'incomplete' | 'verified';
 
@@ -12,6 +13,12 @@ export interface OctochotomyFormulaSource {
 export interface OctochotomyFormulaClass {
   typeIds: readonly [SocionicTypeId, SocionicTypeId];
   sourceLine?: number;
+  sourceBlock?: {
+    typeIds: readonly [SocionicTypeId, SocionicTypeId];
+    labels: readonly string[];
+    status: 'extracted';
+    rows: readonly OctochotomySourceRow[];
+  };
 }
 
 export type VerifiedOctochotomyClasses = readonly [
@@ -68,9 +75,18 @@ const pair = (
   firstTypeId: SocionicTypeId,
   secondTypeId: SocionicTypeId,
   sourceLine?: number,
+  rows?: readonly OctochotomySourceRow[],
 ): OctochotomyFormulaClass => ({
   typeIds: [firstTypeId, secondTypeId],
   sourceLine,
+  ...(rows ? {
+    sourceBlock: {
+      typeIds: [firstTypeId, secondTypeId] as const,
+      labels: ['Квазитождественная октохотомия'],
+      status: 'extracted' as const,
+      rows,
+    },
+  } : {}),
 });
 
 export const OCTOCHOTOMY_FORMULAS: readonly OctochotomyFormulaRecord[] = [
@@ -187,14 +203,14 @@ export const OCTOCHOTOMY_FORMULAS: readonly OctochotomyFormulaRecord[] = [
     basisTraitIds: ['positivism', 'yielding', 'logic'],
     status: 'verified',
     classes: [
-      pair('ILE', 'LIE', 1195),
-      pair('SEI', 'ESI', 1214),
-      pair('ESE', 'SEE', 1233),
-      pair('LII', 'ILI', 1252),
-      pair('EIE', 'IEE', 1271),
-      pair('LSI', 'SLI', 1290),
-      pair('SLE', 'LSE', 1309),
-      pair('IEI', 'EII', 1328),
+      pair('ILE', 'LIE', 1195, QUASI_IDENTITY_DIMENSION_ROWS[0]),
+      pair('SEI', 'ESI', 1214, QUASI_IDENTITY_DIMENSION_ROWS[1]),
+      pair('ESE', 'SEE', 1233, QUASI_IDENTITY_DIMENSION_ROWS[2]),
+      pair('LII', 'ILI', 1252, QUASI_IDENTITY_DIMENSION_ROWS[3]),
+      pair('EIE', 'IEE', 1271, QUASI_IDENTITY_DIMENSION_ROWS[4]),
+      pair('LSI', 'SLI', 1290, QUASI_IDENTITY_DIMENSION_ROWS[5]),
+      pair('SLE', 'LSE', 1309, QUASI_IDENTITY_DIMENSION_ROWS[6]),
+      pair('IEI', 'EII', 1328, QUASI_IDENTITY_DIMENSION_ROWS[7]),
     ],
     note: 'Verified by the right side of the source formula: +/- x Ус/Уп x Лг/Эт.',
   },

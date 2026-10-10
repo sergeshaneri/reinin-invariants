@@ -1,5 +1,6 @@
 import type { AspectId, ReininTrait, TraitPole, View } from '../data/socionics';
 import type { ActiveCell } from './interaction';
+import type { AspectDisplayMode } from '../components/AspectGlyph';
 
 // Контракт визуализатора признака. Любая диаграмма должна принимать этот объект
 // и рисовать что угодно — главное, чтобы взаимодействие с курсором аспекта/функции
@@ -8,6 +9,7 @@ export interface DiagramProps {
   trait: ReininTrait;
   pole: TraitPole;
   view: View;
+  aspectDisplayMode: AspectDisplayMode;
   activeCell: ActiveCell;
   onAspectHover: (id: AspectId | null) => void;
   onFunctionHover: (id: number | null) => void;

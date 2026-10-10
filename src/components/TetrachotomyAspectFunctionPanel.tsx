@@ -60,6 +60,7 @@ interface Props {
   view: PartitionExplorerViewModel;
   aspectDisplayMode: AspectDisplayMode;
   baseView: View | null;
+  sourceBlockOverride?: SourceFormulaBlock | null;
 }
 
 const SourceFeatures: React.FC<{ text: string; kind: 'aspect' | 'function' }> = ({ text, kind }) => (
@@ -80,6 +81,7 @@ export const TetrachotomyAspectFunctionPanel: React.FC<Props> = ({
   view,
   aspectDisplayMode,
   baseView,
+  sourceBlockOverride,
 }) => {
   const { selectedClass, sourceFormula } = view;
   const [hoveredCell, setHoveredCell] = useState<ActiveSourceCell>(null);
@@ -87,9 +89,10 @@ export const TetrachotomyAspectFunctionPanel: React.FC<Props> = ({
   const activeCell = focusedCell ?? hoveredCell;
   const orderFamily = getOrderDependentTetrachotomy(sourceFormula?.id);
 
-  const sourceBlock = sourceFormula
+  const sourceBlock = sourceBlockOverride ?? (sourceFormula
     ? findSelectedSourceBlock(sourceFormula, selectedClass)
-    : null;
+    : null);
+  const isOctochotomy = view.kind === 'octochotomy';
 
   const { aspects: aspectToRows, functions: functionToRows } = useMemo(() => (
     getSourceCellRows(sourceBlock?.rows ?? [])
@@ -117,6 +120,7 @@ export const TetrachotomyAspectFunctionPanel: React.FC<Props> = ({
       data-tetrachotomy-model-a-slot
       data-tetrachotomy-aspect-function-panel={sourceFormula?.id ?? 'structural'}
       data-source-block-status={sourceBlock?.status ?? 'missing'}
+      data-octochotomy-invariant={isOctochotomy ? 'quasi-identity' : undefined}
       data-order-dependent-family={orderFamily?.orderTraitId}
     >
       <div className="tetra-panel-header flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -126,11 +130,11 @@ export const TetrachotomyAspectFunctionPanel: React.FC<Props> = ({
             Отображение аспектов в функции
           </div>
           <h2 className="tetra-panel-heading mt-2 text-lg font-bold leading-tight text-[var(--color-app-fg)]">
-            {orderFamily ? 'Порядкозависимые (2×4)×4' : 'Общий инвариант выбранной тетрады в модели А'}
+            {isOctochotomy ? 'Общий инвариант выбранной пары в модели А' : orderFamily ? `${orderFamily.notation}${orderFamily.name ? ` — ${orderFamily.name}` : ''}` : 'Общий инвариант выбранной тетрады в модели А'}
           </h2>
           {orderFamily ? (
             <div className="mt-2 space-y-1 text-sm leading-relaxed text-[var(--color-shell-muted)]" data-order-dependent-class>
-              <p>{orderFamily.notation}{orderFamily.name ? ` — ${orderFamily.name}` : ''}</p>
+              <p>Порядкозависимые (2×4)×4</p>
               <p>Признаки функций: {orderFamily.featureProducts.join('; ')}.</p>
               <p>8 аспектов; четыре диады распределяются в четыре блока из четырёх функций.</p>
             </div>
@@ -265,7 +269,9 @@ export const TetrachotomyAspectFunctionPanel: React.FC<Props> = ({
               className="mb-1 text-xs leading-relaxed text-[var(--color-shell-muted)]"
               data-tetrachotomy-invariant-explanation
             >
-              {orderFamily
+              {isOctochotomy
+                ? 'Каждая диада аспектов отображается в один блок мерности у обоих типов выбранной пары: 4 — функции 1, 8; 3 — функции 2, 7; 2 — функции 3, 6; 1 — функции 4, 5. Позиции аспектов внутри блока могут различаться.'
+                : orderFamily
                 ? 'Каждая диада аспектов занимает две позиции внутри указанной четвёрки функций у каждого типа тетрады. Четвёрки функций пересекаются; строка задаёт включение образа диады в блок. Порядковое условие показано следующей диаграммой.'
                 : 'Каждая строка задаёт группу функций, в которую попадают указанные аспекты у всех типов выбранной тетрады.'}
             </p>
@@ -282,15 +288,12 @@ export const TetrachotomyAspectFunctionPanel: React.FC<Props> = ({
                 <div className="min-w-0">
                   <h3 className="source-row-heading eyebrow mb-2">Аспекты</h3>
                   <div className="mb-2 flex flex-wrap items-start gap-3">
-                    {row.aspectIds.map(aspectId => (
-                      <AspectGlyph
-                        key={aspectId}
-                        aspectId={aspectId}
-                        label={ASPECTS.find(aspect => aspect.id === aspectId)?.name ?? aspectId}
-                        mode={aspectDisplayMode === 'symbol' ? 'symbol' : 'icon-symbol'}
-                        size="sm"
-                      />
-                    ))}
+                    {row.aspectIds.map(aspectId => {
+                      const aspect = ASPECTS.find(candidate => candidate.id === aspectId)!;
+                      return <span key={aspectId} title={aspect.fullName} aria-label={`${aspect.fullName} (${aspect.name})`}>
+                        <AspectGlyph aspectId={aspectId} label={aspect.name} mode={aspectDisplayMode} size="sm" />
+                      </span>;
+                    })}
                   </div>
                   <SourceFeatures text={row.aspectFeaturesText} kind="aspect" />
                 </div>

@@ -130,6 +130,10 @@ select.shell-control option {
   color: var(--color-shell-active-fg);
 }
 
+.display-settings-controls {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+}
+
 .ambient-field {
   background:
     linear-gradient(115deg, transparent 0%, var(--color-app-vignette) 45%, transparent 72%),
@@ -210,6 +214,15 @@ select.shell-control option {
 .block-permutation-note { display: flex; align-items: center; justify-content: center; gap: 10px; color: var(--color-shell-accent); font-size: 13px; font-weight: 400; line-height: 1.5; text-align: center; }
 .block-explanation { margin: 20px 0 0; color: var(--color-shell-muted); font-size: 14px; font-weight: 400; line-height: 1.6; }
 
+.order-cycle-description { margin: 0 0 20px; }
+.order-cycle-description .block-label { margin-bottom: 8px; }
+.order-cycle-sequence { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 14px; line-height: 1.6; }
+.order-cycle-step { display: inline-flex; align-items: center; gap: 10px; }
+.order-cycle-step > :last-child { color: var(--color-shell-subtle); }
+.order-condition-blocks { margin-top: 20px; }
+.order-condition-blocks .block-tile { min-height: 112px; padding: 14px 8px; gap: 8px; }
+.order-condition-explanation { display: grid; gap: 8px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--color-shell-border); color: var(--color-shell-muted); font-size: 14px; line-height: 1.6; }
+
 @container block-layout (min-width: 540px) {
   .block-columns { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
 }
@@ -222,6 +235,7 @@ select.shell-control option {
 @container block-layout (max-width: 299px) {
   .block-tile, .block-members { gap: 10px; }
   .block-condition { padding: 14px; }
+  .order-block-collection { grid-template-columns: minmax(0, 1fr); }
 }
 
 .hairline {
@@ -402,6 +416,29 @@ select.shell-control option {
 :root[data-theme='dark'] .map-tone-5 { background: #72c6c5; border-color: color-mix(in oklab, #72c6c5 70%, black); }
 :root[data-theme='dark'] .map-tone-6 { background: #d492bd; border-color: color-mix(in oklab, #d492bd 70%, black); }
 :root[data-theme='dark'] .map-tone-7 { background: #a9c878; border-color: color-mix(in oklab, #a9c878 70%, black); }
+
+/* Scoped to the new explorer: keep registered group backgrounds, but use
+   dark ink on light tones so small model/explanation text remains legible. */
+[data-type-arp-explorer] .map-tone-0,
+[data-type-arp-explorer] .map-tone-2,
+[data-type-arp-explorer] .map-tone-3,
+:root[data-theme='dark'] [data-type-arp-explorer] [class*='map-tone-'] {
+  --color-map-fg: #0f0d09;
+}
+
+/* АРП: emphasis never changes the registered group color. */
+[data-type-model-function-id][data-arp-active='true'],
+[data-type-arp-explanation] [data-arp-active='true'],
+[data-model-preview-selected='true'] {
+  outline: 2px solid var(--color-shell-accent);
+  outline-offset: 2px;
+}
+
+[data-type-model-function-id][data-arp-group-index]:not([data-arp-group-index='']) .eyebrow,
+[data-type-model-function-id][data-arp-group-index]:not([data-arp-group-index='']) p,
+[data-type-model-function-id][data-arp-group-index]:not([data-arp-group-index='']) .eyebrow + div {
+  color: var(--color-map-fg);
+}
 
 .map-tone-inactive {
   background: var(--color-map-empty-bg);
